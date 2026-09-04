@@ -1,4 +1,4 @@
-# Analytical Physics — Lecture 1
+# Analytical Physics — Lecture 1-1: What Is Analytical Physics?
 
 This folder is a GitHub Pages-ready web package for the interactive Analytical Physics lecture.
 
