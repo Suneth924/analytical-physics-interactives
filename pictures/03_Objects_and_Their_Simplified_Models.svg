@@ -1,0 +1,235 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1000" viewBox="0 0 1200 1000" role="img" aria-labelledby="title desc">
+  <title id="title">What Is Analytical Physics?</title>
+  <desc id="desc">An educational panel explaining how physicists construct, analyze, and test simple mathematical models, with point-model examples for a baseball, car, satellite, Earth, and a planet orbiting the Sun.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#406080"/>
+    </marker>
+    <style>
+      .title { font-family: Arial, sans-serif; font-size: 34px; font-weight: 700; fill: #17324d; }
+      .subtitle { font-family: Arial, sans-serif; font-size: 18px; fill: #38556f; }
+      .section { font-family: Arial, sans-serif; font-size: 22px; font-weight: 700; fill: #17324d; }
+      .cardtitle { font-family: Arial, sans-serif; font-size: 19px; font-weight: 700; fill: #17324d; }
+      .body { font-family: Arial, sans-serif; font-size: 15px; fill: #273b4d; }
+      .small { font-family: Arial, sans-serif; font-size: 13px; fill: #40566a; }
+      .model { font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #8a3d00; }
+      .step { font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; fill: #17324d; text-anchor: middle; }
+      .stepnum { font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; fill: white; text-anchor: middle; }
+      .card { fill: #f8fbfd; stroke: #bfd0dd; stroke-width: 1.5; }
+      .point { fill: #e85d04; stroke: #963b00; stroke-width: 1.5; }
+      .guide { fill: none; stroke: #406080; stroke-width: 2; marker-end: url(#arrow); }
+      .thin { fill: none; stroke: #7791a7; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="1000" fill="#ffffff"/>
+
+  <!-- Header -->
+  <rect x="32" y="28" width="1136" height="92" rx="16" fill="#eaf4fb" stroke="#a9c8dc" stroke-width="1.5"/>
+  <text x="60" y="70" class="title">What Is Analytical Physics?</text>
+  <text x="60" y="99" class="subtitle">Build physical intuition, represent the essential features, then use simple mathematics to reason and predict.</text>
+
+  <!-- Core message -->
+  <rect x="50" y="138" width="1100" height="60" rx="12" fill="#fff6d8" stroke="#dfc66c" stroke-width="1.5"/>
+  <text x="75" y="164" class="cardtitle">Physics is not memorizing equations.</text>
+  <text x="75" y="187" class="body">It is deciding what matters, what can be ignored, and whether a chosen model answers the question reliably.</text>
+
+  <!-- Modeling workflow -->
+  <text x="50" y="235" class="section">From physical intuition to analysis</text>
+
+  <g>
+    <rect x="50" y="254" width="160" height="62" rx="10" fill="#edf7f2" stroke="#9bc6ae"/>
+    <circle cx="71" cy="272" r="12" fill="#2f7d59"/>
+    <text x="71" y="276" class="stepnum">1</text>
+    <text x="130" y="277" class="step">Observe</text>
+    <text x="130" y="298" class="small" text-anchor="middle">What is happening?</text>
+
+    <path d="M214 285 H232" class="guide"/>
+
+    <rect x="238" y="254" width="160" height="62" rx="10" fill="#edf7f2" stroke="#9bc6ae"/>
+    <circle cx="259" cy="272" r="12" fill="#2f7d59"/>
+    <text x="259" y="276" class="stepnum">2</text>
+    <text x="318" y="277" class="step">Identify quantities</text>
+    <text x="318" y="298" class="small" text-anchor="middle">Position? time? speed?</text>
+
+    <path d="M402 285 H420" class="guide"/>
+
+    <rect x="426" y="254" width="160" height="62" rx="10" fill="#edf7f2" stroke="#9bc6ae"/>
+    <circle cx="447" cy="272" r="12" fill="#2f7d59"/>
+    <text x="447" y="276" class="stepnum">3</text>
+    <text x="506" y="277" class="step">Make assumptions</text>
+    <text x="506" y="298" class="small" text-anchor="middle">What may be ignored?</text>
+
+    <path d="M590 285 H608" class="guide"/>
+
+    <rect x="614" y="254" width="160" height="62" rx="10" fill="#edf7f2" stroke="#9bc6ae"/>
+    <circle cx="635" cy="272" r="12" fill="#2f7d59"/>
+    <text x="635" y="276" class="stepnum">4</text>
+    <text x="694" y="277" class="step">Choose a model</text>
+    <text x="694" y="298" class="small" text-anchor="middle">Keep essential features</text>
+
+    <path d="M778 285 H796" class="guide"/>
+
+    <rect x="802" y="254" width="160" height="62" rx="10" fill="#edf7f2" stroke="#9bc6ae"/>
+    <circle cx="823" cy="272" r="12" fill="#2f7d59"/>
+    <text x="823" y="276" class="stepnum">5</text>
+    <text x="882" y="277" class="step">Analyze</text>
+    <text x="882" y="298" class="small" text-anchor="middle">Use words, diagrams, math</text>
+
+    <path d="M966 285 H984" class="guide"/>
+
+    <rect x="990" y="254" width="160" height="62" rx="10" fill="#edf7f2" stroke="#9bc6ae"/>
+    <circle cx="1011" cy="272" r="12" fill="#2f7d59"/>
+    <text x="1011" y="276" class="stepnum">6</text>
+    <text x="1070" y="277" class="step">Check validity</text>
+    <text x="1070" y="298" class="small" text-anchor="middle">Does the model fit?</text>
+  </g>
+
+  <text x="50" y="352" class="section">A useful simplification: the point model</text>
+  <text x="437" y="352" class="body">Represent an object's position by one point when its size and shape do not affect the question.</text>
+
+  <!-- Baseball card -->
+  <rect x="50" y="372" width="535" height="158" rx="14" class="card"/>
+  <text x="68" y="399" class="cardtitle">Baseball</text>
+
+  <circle cx="120" cy="448" r="36" fill="#f7f4e9" stroke="#697b89" stroke-width="2"/>
+  <path d="M94 424 C110 437,110 459,94 473" fill="none" stroke="#c94b43" stroke-width="2"/>
+  <path d="M146 424 C130 437,130 459,146 473" fill="none" stroke="#c94b43" stroke-width="2"/>
+  <path d="M98 431 l7 2 M96 440 l8 1 M96 450 l8 -1 M98 459 l7 -2" stroke="#c94b43" stroke-width="1.4"/>
+  <path d="M142 431 l-7 2 M144 440 l-8 1 M144 450 l-8 -1 M142 459 l-7 -2" stroke="#c94b43" stroke-width="1.4"/>
+  <text x="120" y="505" class="small" text-anchor="middle">physical object</text>
+
+  <path d="M170 448 H228" class="guide"/>
+  <circle cx="252" cy="448" r="7" class="point"/>
+  <text x="252" y="476" class="model" text-anchor="middle">point model</text>
+
+  <text x="292" y="425" class="body">
+    <tspan x="292" dy="0" font-weight="700">Question:</tspan>
+    <tspan> Where does the ball land?</tspan>
+    <tspan x="292" dy="23">Track its position; ignore seams and size.</tspan>
+    <tspan x="292" dy="23" fill="#2f6c50">Useful when flight distance ≫ ball diameter.</tspan>
+  </text>
+
+  <!-- Car card -->
+  <rect x="615" y="372" width="535" height="158" rx="14" class="card"/>
+  <text x="633" y="399" class="cardtitle">Car</text>
+
+  <path d="M648 458 L657 431 L705 431 L727 451 L738 455 L738 474 L643 474 L643 461 Z"
+        fill="#4f86c6" stroke="#294f78" stroke-width="2"/>
+  <path d="M663 435 L681 435 L681 451 L657 451 Z" fill="#dff0fa" stroke="#294f78"/>
+  <path d="M686 435 L702 435 L718 451 L686 451 Z" fill="#dff0fa" stroke="#294f78"/>
+  <circle cx="665" cy="474" r="10" fill="#30363b"/>
+  <circle cx="716" cy="474" r="10" fill="#30363b"/>
+  <circle cx="665" cy="474" r="4" fill="#bac4ca"/>
+  <circle cx="716" cy="474" r="4" fill="#bac4ca"/>
+  <text x="691" y="505" class="small" text-anchor="middle">physical object</text>
+
+  <path d="M752 448 H790" class="guide"/>
+  <circle cx="814" cy="448" r="7" class="point"/>
+  <text x="814" y="476" class="model" text-anchor="middle">point model</text>
+
+  <text x="852" y="425" class="body">
+    <tspan x="852" dy="0" font-weight="700">Question:</tspan>
+    <tspan> When does the car arrive?</tspan>
+    <tspan x="852" dy="23">Use distance and travel time: speed ≈ d ÷ t.</tspan>
+    <tspan x="852" dy="23" fill="#2f6c50">Useful when road length ≫ car length.</tspan>
+  </text>
+
+  <!-- Satellite card -->
+  <rect x="50" y="548" width="535" height="158" rx="14" class="card"/>
+  <text x="68" y="575" class="cardtitle">Satellite</text>
+
+  <rect x="102" y="615" width="38" height="28" rx="3" fill="#d7a94b" stroke="#6f572c" stroke-width="2"/>
+  <rect x="61" y="612" width="34" height="34" fill="#397bb3" stroke="#245476" stroke-width="2"/>
+  <line x1="67" y1="612" x2="67" y2="646" stroke="#a8d3ee"/>
+  <line x1="78" y1="612" x2="78" y2="646" stroke="#a8d3ee"/>
+  <line x1="89" y1="612" x2="89" y2="646" stroke="#a8d3ee"/>
+  <rect x="147" y="612" width="34" height="34" fill="#397bb3" stroke="#245476" stroke-width="2"/>
+  <line x1="153" y1="612" x2="153" y2="646" stroke="#a8d3ee"/>
+  <line x1="164" y1="612" x2="164" y2="646" stroke="#a8d3ee"/>
+  <line x1="175" y1="612" x2="175" y2="646" stroke="#a8d3ee"/>
+  <line x1="95" y1="629" x2="102" y2="629" stroke="#596b79" stroke-width="3"/>
+  <line x1="140" y1="629" x2="147" y2="629" stroke="#596b79" stroke-width="3"/>
+  <path d="M121 615 L121 600 L133 592" fill="none" stroke="#596b79" stroke-width="2"/>
+  <circle cx="134" cy="591" r="3" fill="#596b79"/>
+  <text x="121" y="681" class="small" text-anchor="middle">physical object</text>
+
+  <path d="M192 627 H228" class="guide"/>
+  <circle cx="252" cy="627" r="7" class="point"/>
+  <text x="252" y="655" class="model" text-anchor="middle">point model</text>
+
+  <text x="292" y="604" class="body">
+    <tspan x="292" dy="0" font-weight="700">Question:</tspan>
+    <tspan> What path does it follow?</tspan>
+    <tspan x="292" dy="23">Track one position; ignore panels and antenna.</tspan>
+    <tspan x="292" dy="23" fill="#2f6c50">Useful when orbit size ≫ satellite size.</tspan>
+  </text>
+
+  <!-- Earth card -->
+  <rect x="615" y="548" width="535" height="158" rx="14" class="card"/>
+  <text x="633" y="575" class="cardtitle">Earth</text>
+
+  <circle cx="690" cy="627" r="42" fill="#4a9bd5" stroke="#285e85" stroke-width="2"/>
+  <path d="M672 591 C680 601,675 610,689 613 C702 616,700 625,691 629 C685 633,688 643,680 648 C673 653,665 644,667 636 C669 627,659 622,655 612 C658 603,664 596,672 591 Z"
+        fill="#68ad61"/>
+  <path d="M713 609 C724 614,730 624,727 635 C719 636,714 632,710 625 C705 619,706 613,713 609 Z"
+        fill="#68ad61"/>
+  <text x="690" y="688" class="small" text-anchor="middle">physical object</text>
+
+  <path d="M744 627 H790" class="guide"/>
+  <circle cx="814" cy="627" r="7" class="point"/>
+  <text x="814" y="655" class="model" text-anchor="middle">point model</text>
+
+  <text x="852" y="604" class="body">
+    <tspan x="852" dy="0" font-weight="700">Question:</tspan>
+    <tspan> How does Earth move around the Sun?</tspan>
+    <tspan x="852" dy="23">Use Earth's center; ignore mountains and shape.</tspan>
+    <tspan x="852" dy="23" fill="#2f6c50">Useful when orbital distance ≫ Earth’s radius.</tspan>
+  </text>
+
+  <!-- Planet orbiting Sun card -->
+  <rect x="50" y="724" width="1100" height="172" rx="14" class="card"/>
+  <text x="68" y="751" class="cardtitle">A planet orbiting the Sun</text>
+
+  <!-- Physical scene -->
+  <ellipse cx="210" cy="814" rx="116" ry="55" class="thin" stroke-dasharray="5 4"/>
+  <circle cx="210" cy="814" r="31" fill="#f5b942" stroke="#d18717" stroke-width="2"/>
+  <g stroke="#d18717" stroke-width="2">
+    <line x1="210" y1="773" x2="210" y2="762"/>
+    <line x1="210" y1="855" x2="210" y2="866"/>
+    <line x1="169" y1="814" x2="158" y2="814"/>
+    <line x1="251" y1="814" x2="262" y2="814"/>
+    <line x1="181" y1="785" x2="173" y2="777"/>
+    <line x1="239" y1="843" x2="247" y2="851"/>
+    <line x1="239" y1="785" x2="247" y2="777"/>
+    <line x1="181" y1="843" x2="173" y2="851"/>
+  </g>
+  <circle cx="314" cy="789" r="14" fill="#9b72cf" stroke="#604287" stroke-width="2"/>
+  <path d="M289 772 Q307 764 324 775" fill="none" stroke="#406080" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="210" y="882" class="small" text-anchor="middle">physical system</text>
+
+  <path d="M349 814 H395" class="guide"/>
+
+  <!-- Point-mass orbit model -->
+  <ellipse cx="505" cy="814" rx="75" ry="38" class="thin"/>
+  <circle cx="505" cy="814" r="7" class="point"/>
+  <circle cx="570" cy="795" r="6" class="point"/>
+  <text x="505" y="846" class="small" text-anchor="middle">Sun point</text>
+  <text x="570" y="780" class="small" text-anchor="middle">planet point</text>
+  <text x="505" y="877" class="model" text-anchor="middle">point-mass orbit model</text>
+
+  <text x="635" y="780" class="body">
+    <tspan x="635" dy="0" font-weight="700">Question:</tspan>
+    <tspan> How does the orbital path change with speed or distance?</tspan>
+    <tspan x="635" dy="25">Keep: positions, separation, motion, and gravitational interaction.</tspan>
+    <tspan x="635" dy="25">Ignore: surface details when the bodies are tiny compared with their separation.</tspan>
+    <tspan x="635" dy="25" fill="#2f6c50">Check: predictions should agree with observations within the needed accuracy.</tspan>
+  </text>
+
+  <!-- Important clarification -->
+  <rect x="50" y="916" width="1100" height="58" rx="12" fill="#fff0e5" stroke="#e0a36e" stroke-width="1.5"/>
+  <circle cx="78" cy="945" r="7" class="point"/>
+  <text x="98" y="940" class="cardtitle">The point is a model—not a literal zero-size object.</text>
+  <text x="98" y="961" class="body">Use it only when size, shape, rotation, and internal structure are unimportant for the question being asked.</text>
+</svg>

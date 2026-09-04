@@ -1,0 +1,214 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">What Is Analytical Physics?</title>
+  <desc id="desc">An educational illustration showing physical systems across scales and a reasoning process for constructing, analyzing, and validating mathematical models.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#245b78"/>
+    </marker>
+    <marker id="smallArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#70818c"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="800" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="600" y="52" text-anchor="middle" font-family="sans-serif" font-size="38" font-weight="700" fill="#17384d">
+    What Is Analytical Physics?
+  </text>
+  <text x="600" y="82" text-anchor="middle" font-family="sans-serif" font-size="19" fill="#456371">
+    Turning physical intuition into a simple, testable mathematical model
+  </text>
+
+  <!-- Intuition-first banner -->
+  <rect x="50" y="103" width="1100" height="66" rx="14" fill="#eaf5f7" stroke="#7db6c2" stroke-width="2"/>
+  <circle cx="87" cy="136" r="22" fill="#ffffff" stroke="#2c7a89" stroke-width="2"/>
+  <text x="87" y="145" text-anchor="middle" font-family="sans-serif" font-size="28" font-weight="700" fill="#2c7a89">?</text>
+  <text x="122" y="130" font-family="sans-serif" font-size="19" font-weight="700" fill="#17384d">
+    Begin with the physical story:
+  </text>
+  <text x="122" y="153" font-family="sans-serif" font-size="17" fill="#345563">
+    What matters? What can be neglected? What behavior should we expect before writing an equation?
+  </text>
+
+  <!-- Scale card -->
+  <rect x="50" y="188" width="1100" height="315" rx="16" fill="#f8fafb" stroke="#c7d5dc" stroke-width="2"/>
+  <text x="75" y="220" font-family="sans-serif" font-size="22" font-weight="700" fill="#17384d">
+    One modeling strategy works across very different physical scales
+  </text>
+
+  <!-- Object labels -->
+  <text x="170" y="254" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#334f5d">
+    Elementary particle
+  </text>
+  <text x="170" y="273" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#5c707a">or quark</text>
+
+  <text x="430" y="254" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#334f5d">
+    Atomic nucleus
+  </text>
+  <text x="700" y="254" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#334f5d">
+    Atom
+  </text>
+  <text x="1000" y="254" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#334f5d">
+    Human-scale object
+  </text>
+
+  <!-- Stylized elementary particle / quark -->
+  <circle cx="170" cy="326" r="38" fill="none" stroke="#6a7d87" stroke-width="2" stroke-dasharray="5 5"/>
+  <circle cx="170" cy="326" r="15" fill="#7a4e9d"/>
+  <circle cx="164" cy="320" r="4" fill="#ffffff" opacity="0.65"/>
+  <text x="170" y="333" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="700" fill="#ffffff">q</text>
+
+  <!-- Atomic nucleus -->
+  <g stroke="#ffffff" stroke-width="2">
+    <circle cx="414" cy="314" r="17" fill="#d75a4a"/>
+    <circle cx="438" cy="314" r="17" fill="#4c83b6"/>
+    <circle cx="425" cy="334" r="17" fill="#d75a4a"/>
+    <circle cx="449" cy="334" r="17" fill="#4c83b6"/>
+    <circle cx="402" cy="336" r="17" fill="#4c83b6"/>
+  </g>
+
+  <!-- Atom -->
+  <g fill="none" stroke="#397f91" stroke-width="2">
+    <ellipse cx="700" cy="326" rx="71" ry="28"/>
+    <ellipse cx="700" cy="326" rx="71" ry="28" transform="rotate(60 700 326)"/>
+    <ellipse cx="700" cy="326" rx="71" ry="28" transform="rotate(-60 700 326)"/>
+  </g>
+  <circle cx="700" cy="326" r="15" fill="#d75a4a"/>
+  <circle cx="771" cy="326" r="6" fill="#245b78"/>
+  <circle cx="670" cy="264" r="6" fill="#245b78"/>
+  <circle cx="668" cy="386" r="6" fill="#245b78"/>
+
+  <!-- Human-scale pendulum -->
+  <g stroke="#334f5d" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M948 369 L974 283 L1026 283 L1052 369"/>
+    <line x1="962" y1="369" x2="1038" y2="369"/>
+    <line x1="1000" y1="284" x2="1024" y2="346"/>
+  </g>
+  <circle cx="1024" cy="348" r="17" fill="#e3a33b" stroke="#9b671b" stroke-width="2"/>
+
+  <!-- Increasing scale axis -->
+  <line x1="115" y1="411" x2="1082" y2="411" stroke="#245b78" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="600" y="399" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="700" fill="#245b78">
+    increasing characteristic size
+  </text>
+
+  <!-- Scale ticks -->
+  <g stroke="#245b78" stroke-width="2">
+    <line x1="170" y1="403" x2="170" y2="421"/>
+    <line x1="430" y1="403" x2="430" y2="421"/>
+    <line x1="700" y1="403" x2="700" y2="421"/>
+    <line x1="1000" y1="403" x2="1000" y2="421"/>
+  </g>
+
+  <g font-family="sans-serif" font-size="17" font-weight="700" fill="#17384d" text-anchor="middle">
+    <text x="170" y="445">
+      <tspan>≤ 10</tspan><tspan baseline-shift="super" font-size="12">−18</tspan><tspan baseline-shift="baseline"> m</tspan>
+    </text>
+    <text x="430" y="445">
+      <tspan>≈ 10</tspan><tspan baseline-shift="super" font-size="12">−15</tspan><tspan baseline-shift="baseline"> m</tspan>
+    </text>
+    <text x="700" y="445">
+      <tspan>≈ 10</tspan><tspan baseline-shift="super" font-size="12">−10</tspan><tspan baseline-shift="baseline"> m</tspan>
+    </text>
+    <text x="1000" y="445">
+      <tspan>≈ 10</tspan><tspan baseline-shift="super" font-size="12">0</tspan><tspan baseline-shift="baseline"> m</tspan>
+    </text>
+  </g>
+
+  <rect x="175" y="463" width="850" height="27" rx="13" fill="#fff4d8"/>
+  <text x="600" y="482" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#6f5921">
+    Schematic symbols only — shapes, colors, and spacing are not literal, and the drawings are not to scale.
+  </text>
+
+  <!-- Analytical reasoning section -->
+  <rect x="35" y="520" width="1130" height="258" rx="16" fill="#f4f7f8" stroke="#c7d5dc" stroke-width="2"/>
+  <text x="60" y="554" font-family="sans-serif" font-size="22" font-weight="700" fill="#17384d">
+    Analytical physics: an intuition-first reasoning path
+  </text>
+  <text x="1140" y="554" text-anchor="end" font-family="sans-serif" font-size="15" fill="#5c707a">
+    Equations are tools—not the starting point.
+  </text>
+
+  <!-- Connecting arrows -->
+  <g stroke="#70818c" stroke-width="2" fill="none" marker-end="url(#smallArrow)">
+    <line x1="212" y1="649" x2="228" y2="649"/>
+    <line x1="396" y1="649" x2="412" y2="649"/>
+    <line x1="580" y1="649" x2="596" y2="649"/>
+    <line x1="764" y1="649" x2="780" y2="649"/>
+    <line x1="948" y1="649" x2="964" y2="649"/>
+  </g>
+
+  <!-- Step 1 -->
+  <rect x="48" y="578" width="164" height="145" rx="13" fill="#ffffff" stroke="#6aa5b1" stroke-width="2"/>
+  <circle cx="73" cy="603" r="16" fill="#2c7a89"/>
+  <text x="73" y="609" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#ffffff">1</text>
+  <text x="96" y="609" font-family="sans-serif" font-size="17" font-weight="700" fill="#17384d">Observe</text>
+  <text x="62" y="639" font-family="sans-serif" font-size="14" fill="#425f6c">
+    <tspan x="62" dy="0">What happens?</tspan>
+    <tspan x="62" dy="21">Use words, sketches,</tspan>
+    <tspan x="62" dy="21">directions, and trends.</tspan>
+  </text>
+
+  <!-- Step 2 -->
+  <rect x="232" y="578" width="164" height="145" rx="13" fill="#ffffff" stroke="#6aa5b1" stroke-width="2"/>
+  <circle cx="257" cy="603" r="16" fill="#2c7a89"/>
+  <text x="257" y="609" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#ffffff">2</text>
+  <text x="280" y="609" font-family="sans-serif" font-size="17" font-weight="700" fill="#17384d">Quantities</text>
+  <text x="246" y="639" font-family="sans-serif" font-size="14" fill="#425f6c">
+    <tspan x="246" dy="0">Which lengths, times,</tspan>
+    <tspan x="246" dy="21">masses, or forces</tspan>
+    <tspan x="246" dy="21">actually matter?</tspan>
+  </text>
+
+  <!-- Step 3 -->
+  <rect x="416" y="578" width="164" height="145" rx="13" fill="#ffffff" stroke="#6aa5b1" stroke-width="2"/>
+  <circle cx="441" cy="603" r="16" fill="#2c7a89"/>
+  <text x="441" y="609" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#ffffff">3</text>
+  <text x="464" y="609" font-family="sans-serif" font-size="17" font-weight="700" fill="#17384d">Assume</text>
+  <text x="430" y="639" font-family="sans-serif" font-size="14" fill="#425f6c">
+    <tspan x="430" dy="0">Neglect small effects.</tspan>
+    <tspan x="430" dy="21">State what is fixed</tspan>
+    <tspan x="430" dy="21">or idealized.</tspan>
+  </text>
+
+  <!-- Step 4 -->
+  <rect x="600" y="578" width="164" height="145" rx="13" fill="#ffffff" stroke="#6aa5b1" stroke-width="2"/>
+  <circle cx="625" cy="603" r="16" fill="#2c7a89"/>
+  <text x="625" y="609" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#ffffff">4</text>
+  <text x="648" y="609" font-family="sans-serif" font-size="17" font-weight="700" fill="#17384d">Model</text>
+  <text x="614" y="639" font-family="sans-serif" font-size="14" fill="#425f6c">
+    <tspan x="614" dy="0">Choose the simplest</tspan>
+    <tspan x="614" dy="21">representation that</tspan>
+    <tspan x="614" dy="21">keeps the key physics.</tspan>
+  </text>
+
+  <!-- Step 5 -->
+  <rect x="784" y="578" width="164" height="145" rx="13" fill="#ffffff" stroke="#6aa5b1" stroke-width="2"/>
+  <circle cx="809" cy="603" r="16" fill="#2c7a89"/>
+  <text x="809" y="609" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#ffffff">5</text>
+  <text x="832" y="609" font-family="sans-serif" font-size="17" font-weight="700" fill="#17384d">Analyze</text>
+  <text x="798" y="639" font-family="sans-serif" font-size="14" fill="#425f6c">
+    <tspan x="798" dy="0">Reason and estimate;</tspan>
+    <tspan x="798" dy="21">then use simple math:</tspan>
+  </text>
+  <text x="866" y="699" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#7a4e2a">
+    speed = distance ÷ time
+  </text>
+
+  <!-- Step 6 -->
+  <rect x="968" y="578" width="164" height="145" rx="13" fill="#ffffff" stroke="#d39a3b" stroke-width="2"/>
+  <circle cx="993" cy="603" r="16" fill="#c88620"/>
+  <text x="993" y="609" text-anchor="middle" font-family="sans-serif" font-size="15" font-weight="700" fill="#ffffff">6</text>
+  <text x="1016" y="609" font-family="sans-serif" font-size="17" font-weight="700" fill="#17384d">Validate</text>
+  <text x="982" y="639" font-family="sans-serif" font-size="14" fill="#425f6c">
+    <tspan x="982" dy="0">Compare with evidence.</tspan>
+    <tspan x="982" dy="21">Where does the model</tspan>
+    <tspan x="982" dy="21">work—or break down?</tspan>
+  </text>
+
+  <text x="600" y="754" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="700" fill="#245b78">
+    A useful model explains observations, makes predictions, and clearly states its limits.
+  </text>
+</svg>
