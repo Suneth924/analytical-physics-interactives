@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Point-Particle Model Selector</title>
+<style>
+  :root {
+    color-scheme: light;
+    --navy: #12243a;
+    --blue: #1769aa;
+    --blue-soft: #eaf4fc;
+    --red: #d13c3c;
+    --green: #18794e;
+    --green-soft: #e5f6ed;
+    --amber: #9a6700;
+    --amber-soft: #fff4d6;
+    --poor: #b42318;
+    --poor-soft: #fdecea;
+    --ink: #17212b;
+    --muted: #5c6873;
+    --line: #ccd6df;
+    --panel: #ffffff;
+    --background: #eef3f7;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+
+  header {
+    padding: 1.25rem clamp(1rem, 4vw, 3rem);
+    color: white;
+    background: linear-gradient(125deg, #10243b, #165c8f);
+  }
+
+  header h1 {
+    margin: 0 0 .35rem;
+    font-size: clamp(1.55rem, 3vw, 2.35rem);
+  }
+
+  header p {
+    max-width: 960px;
+    margin: 0;
+    color: #dceefd;
+  }
+
+  main {
+    width: min(1450px, 100%);
+    margin: auto;
+    padding: 1rem;
+  }
+
+  .intro {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: .45rem;
+    margin-bottom: 1rem;
+  }
+
+  .step {
+    min-height: 72px;
+    padding: .65rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: white;
+    font-size: .88rem;
+  }
+
+  .step b {
+    display: block;
+    margin-bottom: .2rem;
+    color: var(--blue);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(290px, 390px) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    box-shadow: 0 2px 9px rgba(25, 48, 69, .07);
+  }
+
+  .controls {
+    padding: 1rem;
+  }
+
+  .controls h2,
+  .results h2,
+  .notice h2 {
+    margin: 0 0 .7rem;
+    font-size: 1.16rem;
+    color: var(--navy);
+  }
+
+  .control-group {
+    padding-bottom: .9rem;
+    margin-bottom: .9rem;
+    border-bottom: 1px solid #e4e9ee;
+  }
+
+  .control-group:last-of-type {
+    border-bottom: 0;
+  }
+
+  label.main-label {
+    display: block;
+    margin-bottom: .3rem;
+    font-weight: 700;
+  }
+
+  select, button, input {
+    font: inherit;
+  }
+
+  select {
+    width: 100%;
+    padding: .58rem;
+    border: 1px solid #aab8c4;
+    border-radius: 7px;
+    background: white;
+    color: var(--ink);
+  }
+
+  .range-head {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+    align-items: baseline;
+    margin-bottom: .15rem;
+  }
+
+  .range-head label {
+    font-weight: 700;
+  }
+
+  output {
+    color: var(--blue);
+    font-weight: 750;
+    text-align: right;
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--blue);
+  }
+
+  .small {
+    color: var(--muted);
+    font-size: .82rem;
+  }
+
+  .check-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .4rem;
+  }
+
+  .check {
+    display: flex;
+    gap: .42rem;
+    align-items: center;
+    padding: .4rem;
+    border: 1px solid #d8e0e7;
+    border-radius: 7px;
+    background: #fafcfd;
+    font-size: .86rem;
+  }
+
+  .check input {
+    accent-color: var(--red);
+  }
+
+  .threshold-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: .45rem;
+    align-items: center;
+    margin-top: .35rem;
+  }
+
+  .threshold-row input {
+    min-width: 0;
+  }
+
+  .threshold-row output {
+    min-width: 3.7rem;
+  }
+
+  .button-row {
+    display: flex;
+    gap: .5rem;
+  }
+
+  button {
+    border: 0;
+    border-radius: 8px;
+    padding: .65rem .85rem;
+    cursor: pointer;
+    font-weight: 750;
+  }
+
+  #resetBtn {
+    color: white;
+    background: var(--blue);
+  }
+
+  #defaultsBtn {
+    color: var(--navy);
+    background: #e4ebf1;
+  }
+
+  button:hover { filter: brightness(.96); }
+  button:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid rgba(23,105,170,.25);
+    outline-offset: 2px;
+  }
+
+  .right-column {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .visual-panel {
+    overflow: hidden;
+  }
+
+  .visual-heading {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: .4rem;
+    padding: .75rem 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .visual-heading strong {
+    color: var(--navy);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: clamp(330px, 47vw, 510px);
+    background: #f9fcfe;
+  }
+
+  .readouts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: .65rem;
+  }
+
+  .readout {
+    padding: .8rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: white;
+  }
+
+  .readout .name {
+    min-height: 2.3em;
+    color: var(--muted);
+    font-size: .78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .025em;
+  }
+
+  .readout .value {
+    margin-top: .25rem;
+    color: var(--navy);
+    font-size: clamp(1rem, 2.1vw, 1.34rem);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+
+  .readout .formula {
+    margin-top: .2rem;
+    color: var(--muted);
+    font-size: .78rem;
+  }
+
+  .classification {
+    padding: 1rem;
+    border: 2px solid;
+    border-radius: 12px;
+    transition: background .15s;
+  }
+
+  .classification.strong {
+    color: #105c3b;
+    border-color: #53a77e;
+    background: var(--green-soft);
+  }
+
+  .classification.borderline {
+    color: #775200;
+    border-color: #d7a51d;
+    background: var(--amber-soft);
+  }
+
+  .classification.poor {
+    color: #8b2119;
+    border-color: #d56a61;
+    background: var(--poor-soft);
+  }
+
+  .class-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  .badge {
+    display: inline-block;
+    min-width: 115px;
+    padding: .4rem .75rem;
+    border-radius: 999px;
+    color: white;
+    text-align: center;
+    font-weight: 850;
+    letter-spacing: .03em;
+  }
+
+  .strong .badge { background: var(--green); }
+  .borderline .badge { background: var(--amber); }
+  .poor .badge { background: var(--poor); }
+
+  .classification h2 {
+    margin: 0;
+    font-size: 1.1rem;
+  }
+
+  .classification p {
+    margin: .6rem 0 0;
+  }
+
+  .model-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .8rem;
+  }
+
+  .model-box > div {
+    padding: .9rem;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: white;
+  }
+
+  .model-box h3 {
+    margin: 0 0 .4rem;
+    color: var(--navy);
+    font-size: 1rem;
+  }
+
+  .model-box p {
+    margin: .25rem 0;
+  }
+
+  .notice {
+    margin-top: 1rem;
+    padding: 1rem;
+  }
+
+  .notice-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 1rem;
+  }
+
+  .notice ul {
+    margin: .35rem 0 0;
+    padding-left: 1.25rem;
+  }
+
+  .equation {
+    padding: .75rem;
+    border-left: 4px solid var(--blue);
+    background: var(--blue-soft);
+    border-radius: 5px;
+  }
+
+  .warning {
+    display: none;
+    margin-top: .65rem;
+    padding: .65rem;
+    border-left: 4px solid var(--red);
+    background: #fff4f3;
+    color: #7d211b;
+  }
+
+  .warning.visible { display: block; }
+
+  footer {
+    padding: 1rem;
+    color: var(--muted);
+    font-size: .82rem;
+    text-align: center;
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .controls { order: 1; }
+    .right-column { order: 0; }
+    .intro { grid-template-columns: 1fr; }
+    .step { min-height: auto; }
+  }
+
+  @media (max-width: 650px) {
+    main { padding: .65rem; }
+    .readouts { grid-template-columns: 1fr 1fr; }
+    .model-box, .notice-grid { grid-template-columns: 1fr; }
+    canvas { height: 420px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Interactive Point-Particle Model Selector</h1>
+  <p>Decide when an extended object can be represented by one moving point. The real object never loses its size—the point is a deliberately simplified model chosen for a particular question.</p>
+</header>
+
+<main>
+  <section class="intro" aria-label="Analytical physics process">
+    <div class="step"><b>1. Ask a question</b>Flight path, impact, orbit, rotation, parking, or tides?</div>
+    <div class="step"><b>2. Identify scales</b>Compare object size with distances and field-variation scales.</div>
+    <div class="step"><b>3. Make assumptions</b>Decide which physical features can reasonably be ignored.</div>
+    <div class="step"><b>4. Analyze the model</b>Use simple ratios and compare them with the needed accuracy.</div>
+    <div class="step"><b>5. Check validity</b>A useful model depends on both the scale ratio and the question.</div>
+  </section>
+
+  <div class="layout">
+    <aside class="panel controls" aria-label="Simulation controls">
+      <h2>Choose the physical situation</h2>
+
+      <div class="control-group">
+        <label class="main-label" for="systemSelect">System</label>
+        <select id="systemSelect">
+          <option value="baseball">Baseball</option>
+          <option value="car">Car</option>
+          <option value="satellite">Satellite</option>
+          <option value="earth">Earth</option>
+          <option value="planet">Planet orbiting the Sun</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="main-label" for="presetSelect">Question preset</label>
+        <select id="presetSelect"></select>
+        <div id="questionText" class="small" style="margin-top:.4rem"></div>
+      </div>
+
+      <div class="control-group">
+        <div class="range-head">
+          <label for="sizeRange">Object size, D</label>
+          <output id="sizeOut"></output>
+        </div>
+        <input id="sizeRange" type="range" min="-3" max="9.4" step="0.01">
+        <div class="small">Representative diameter or length of the extended object.</div>
+      </div>
+
+      <div class="control-group">
+        <div class="range-head">
+          <label for="distanceRange">Relevant distance, L</label>
+          <output id="distanceOut"></output>
+        </div>
+        <input id="distanceRange" type="range" min="-3" max="13" step="0.01">
+        <div class="small">The observation scale, travel distance, separation, clearance, or positional scale important to the question.</div>
+      </div>
+
+      <div class="control-group">
+        <div class="range-head">
+          <label for="fieldRange">Field-variation scale, L<sub>field</sub></label>
+          <output id="fieldOut"></output>
+        </div>
+        <input id="fieldRange" type="range" min="-3" max="13" step="0.01">
+        <div class="small">Distance over which gravity, force, or the environment changes appreciably.</div>
+      </div>
+
+      <div class="control-group">
+        <div class="range-head">
+          <label for="accuracyRange">Required accuracy</label>
+          <output id="accuracyOut"></output>
+        </div>
+        <input id="accuracyRange" type="range" min="-2" max="1.301" step="0.01">
+        <div class="small">The allowed fractional effect, expressed as a percentage. Smaller values demand a more careful model.</div>
+      </div>
+
+      <div class="control-group">
+        <label class="main-label">Does the question directly involve extended structure?</label>
+        <div class="check-grid">
+          <label class="check"><input type="checkbox" value="rotation"> Rotation</label>
+          <label class="check"><input type="checkbox" value="tides"> Tides</label>
+          <label class="check"><input type="checkbox" value="collision"> Collision/contact</label>
+          <label class="check"><input type="checkbox" value="drag"> Drag or shape</label>
+          <label class="check"><input type="checkbox" value="internal"> Internal structure</label>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="main-label">Classroom thresholds</label>
+        <div class="small">The scale burden is measured relative to the allowed accuracy budget.</div>
+        <div class="threshold-row">
+          <label for="strongRange">Strong up to</label>
+          <output id="strongOut"></output>
+          <input id="strongRange" type="range" min="0.1" max="1.5" step="0.1">
+          <span class="small">× budget</span>
+        </div>
+        <div class="threshold-row">
+          <label for="borderRange">Borderline up to</label>
+          <output id="borderOut"></output>
+          <input id="borderRange" type="range" min="0.5" max="5" step="0.1">
+          <span class="small">× budget</span>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="resetBtn" type="button">Reset simulation</button>
+        <button id="defaultsBtn" type="button">Reload preset</button>
+      </div>
+    </aside>
+
+    <section class="right-column">
+      <div class="panel visual-panel">
+        <div class="visual-heading">
+          <strong>Extended object and point-model overlay</strong>
+          <span class="small">Red cross/dot = modeled center position</span>
+        </div>
+        <canvas id="scene" role="img" aria-label="Comparison of an extended object with its point-particle representation"></canvas>
+      </div>
+
+      <div class="readouts" aria-live="polite">
+        <div class="readout">
+          <div class="name">Object-size ratio</div>
+          <div class="value" id="ratioOut">—</div>
+          <div class="formula">D / L</div>
+        </div>
+        <div class="readout">
+          <div class="name">Field-variation ratio</div>
+          <div class="value" id="fieldRatioOut">—</div>
+          <div class="formula">D / L<sub>field</sub></div>
+        </div>
+        <div class="readout">
+          <div class="name">Scale burden</div>
+          <div class="value" id="burdenOut">—</div>
+          <div class="formula">larger ratio, as a percentage</div>
+        </div>
+        <div class="readout">
+          <div class="name">Accuracy-budget use</div>
+          <div class="value" id="budgetOut">—</div>
+          <div class="formula">scale burden ÷ allowed accuracy</div>
+        </div>
+      </div>
+
+      <section id="classification" class="classification strong" aria-live="polite">
+        <div class="class-top">
+          <span id="classBadge" class="badge">STRONG</span>
+          <h2 id="classTitle">The point approximation is strong for this question.</h2>
+        </div>
+        <p id="classReason"></p>
+        <div id="structureWarning" class="warning"></div>
+      </section>
+
+      <div class="model-box">
+        <div>
+          <h3>What the point model keeps</h3>
+          <p>Position of a chosen point, usually the center of mass.</p>
+          <p>Whole-object quantities such as total mass, velocity, and net force can still be assigned to that point.</p>
+        </div>
+        <div>
+          <h3>What the point model leaves out</h3>
+          <p>Orientation, shape, surface contact, deformation, and variation from one side of the object to the other.</p>
+          <p id="assumptionText" class="small"></p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <section class="panel notice">
+    <h2>What to notice</h2>
+    <div class="notice-grid">
+      <div>
+        <ul>
+          <li>A point-particle model does <strong>not</strong> claim that the real object has zero size. It says size is not needed for the current question.</li>
+          <li>Reducing <strong>D/L</strong> usually strengthens the model because the object occupies a smaller fraction of the relevant scale.</li>
+          <li>If the surrounding field changes across the object, <strong>D/L<sub>field</sub></strong> also matters.</li>
+          <li>Required accuracy matters: a ratio acceptable for a rough estimate may be unacceptable for precision work.</li>
+          <li>Rotation, tides, contact, drag, and internal structure can make size or shape essential even when the geometric ratio is small.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="equation">
+          <strong>Simple classroom test</strong><br>
+          Scale burden = larger of D/L and D/L<sub>field</sub><br>
+          Budget use = scale burden ÷ required fractional accuracy
+        </div>
+        <p class="small">This ratio test is a modeling guide, not a universal error formula. A final validity check must return to the physical question and the assumptions.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Analytical physics means constructing, analyzing, and checking models—not merely selecting a memorized equation.
+</footer>
+
+<script>
+"use strict";
+
+const systems = {
+  baseball: {
+    name: "Baseball",
+    defaultSize: 0.074,
+    presets: [
+      {
+        name: "Baseball flight",
+        question: "Where is the baseball during a 30 m flight if spin, drag, and orientation are initially ignored?",
+        D: 0.074, L: 30, F: 100, accuracy: 5, flags: []
+      },
+      {
+        name: "Baseball impact",
+        question: "What happens while the ball and bat are in contact?",
+        D: 0.074, L: 0.006, F: 0.02, accuracy: 5, flags: ["collision", "internal"]
+      }
+    ]
+  },
+  car: {
+    name: "Car",
+    defaultSize: 4.5,
+    presets: [
+      {
+        name: "Car road trip",
+        question: "How far does the car's center travel along a 300 km route?",
+        D: 4.5, L: 300000, F: 50000, accuracy: 1, flags: []
+      },
+      {
+        name: "Car parking",
+        question: "Will the car fit into a space with limited clearance?",
+        D: 4.5, L: 0.5, F: 10, accuracy: 5, flags: ["collision"]
+      }
+    ]
+  },
+  satellite: {
+    name: "Satellite",
+    defaultSize: 2,
+    presets: [
+      {
+        name: "Satellite orbit",
+        question: "Where is the satellite's center as it travels around Earth?",
+        D: 2, L: 7000000, F: 7000000, accuracy: 0.1, flags: []
+      },
+      {
+        name: "Satellite attitude control",
+        question: "How should the satellite rotate and point its instruments?",
+        D: 2, L: 1000, F: 7000000, accuracy: 0.1, flags: ["rotation"]
+      }
+    ]
+  },
+  earth: {
+    name: "Earth",
+    defaultSize: 12742000,
+    presets: [
+      {
+        name: "Earth orbit",
+        question: "Where is Earth's center as it moves around the Sun?",
+        D: 12742000, L: 149600000000, F: 149600000000, accuracy: 0.1, flags: []
+      },
+      {
+        name: "Earth rotation",
+        question: "How do locations on Earth move as Earth spins?",
+        D: 12742000, L: 1000000000, F: 149600000000, accuracy: 1, flags: ["rotation"]
+      },
+      {
+        name: "Earth tides",
+        question: "How does the Moon's nonuniform gravitational pull act across Earth?",
+        D: 12742000, L: 384400000, F: 384400000, accuracy: 1, flags: ["tides"]
+      }
+    ]
+  },
+  planet: {
+    name: "Planet orbiting the Sun",
+    defaultSize: 140000000,
+    presets: [
+      {
+        name: "Planet orbit",
+        question: "Where is the planet's center during a wide orbit around the Sun?",
+        D: 140000000, L: 778000000000, F: 778000000000, accuracy: 1, flags: []
+      },
+      {
+        name: "Close encounter",
+        question: "What happens when the planet passes very close to another massive body?",
+        D: 140000000, L: 300000000, F: 300000000, accuracy: 5, flags: ["tides", "collision"]
+      }
+    ]
+  }
+};
+
+const els = {
+  system: document.getElementById("systemSelect"),
+  preset: document.getElementById("presetSelect"),
+  question: document.getElementById("questionText"),
+  size: document.getElementById("sizeRange"),
+  distance: document.getElementById("distanceRange"),
+  field: document.getElementById("fieldRange"),
+  accuracy: document.getElementById("accuracyRange"),
+  sizeOut: document.getElementById("sizeOut"),
+  distanceOut: document.getElementById("distanceOut"),
+  fieldOut: document.getElementById("fieldOut"),
+  accuracyOut: document.getElementById("accuracyOut"),
+  strong: document.getElementById("strongRange"),
+  border: document.getElementById("borderRange"),
+  strongOut: document.getElementById("strongOut"),
+  borderOut: document.getElementById("borderOut"),
+  ratio: document.getElementById("ratioOut"),
+  fieldRatio: document.getElementById("fieldRatioOut"),
+  burden: document.getElementById("burdenOut"),
+  budget: document.getElementById("budgetOut"),
+  classification: document.getElementById("classification"),
+  badge: document.getElementById("classBadge"),
+  classTitle: document.getElementById("classTitle"),
+  classReason: document.getElementById("classReason"),
+  warning: document.getElementById("structureWarning"),
+  assumption: document.getElementById("assumptionText"),
+  canvas: document.getElementById("scene")
+};
+
+const checks = Array.from(document.querySelectorAll(".check input"));
+let currentQuestion = "";
+
+function logValue(value) {
+  return Math.log10(value);
+}
+
+function sliderValue(slider) {
+  return Math.pow(10, Number(slider.value));
+}
+
+function setLogSlider(slider, value) {
+  slider.value = String(Math.log10(value));
+}
+
+function formatLength(m) {
+  const a = Math.abs(m);
+  if (a >= 1e9) return formatNumber(m / 1e9) + " Gm";
+  if (a >= 1000) return formatNumber(m / 1000) + " km";
+  if (a >= 1) return formatNumber(m) + " m";
+  if (a >= 0.01) return formatNumber(m * 100) + " cm";
+  if (a >= 0.001) return formatNumber(m * 1000) + " mm";
+  return m.toExponential(2) + " m";
+}
+
+function formatNumber(n) {
+  if (!Number.isFinite(n)) return "—";
+  const a = Math.abs(n);
+  if ((a !== 0 && a < 0.001) || a >= 10000) return n.toExponential(2);
+  if (a >= 100) return n.toFixed(0);
+  if (a >= 10) return n.toFixed(1);
+  if (a >= 1) return n.toFixed(2).replace(/\.?0+$/, "");
+  return n.toFixed(3).replace(/\.?0+$/, "");
+}
+
+function formatRatio(r) {
+  if (r === 0) return "0";
+  if (r < 0.001 || r >= 1000) return r.toExponential(2);
+  return formatNumber(r);
+}
+
+function formatPercent(p) {
+  if (p < 0.001 || p >= 10000) return p.toExponential(2) + "%";
+  if (p < 0.1) return p.toFixed(3).replace(/0+$/, "").replace(/\.$/, "") + "%";
+  return formatNumber(p) + "%";
+}
+
+function populatePresets(loadFirst) {
+  const system = systems[els.system.value];
+  els.preset.innerHTML = "";
+  system.presets.forEach((p, i) => {
+    const option = document.createElement("option");
+    option.value = String(i);
+    option.textContent = p.name;
+    els.preset.appendChild(option);
+  });
+  if (loadFirst) els.preset.value = "0";
+  loadPreset();
+}
+
+function loadPreset() {
+  const p = systems[els.system.value].presets[Number(els.preset.value)];
+  setLogSlider(els.size, p.D);
+  setLogSlider(els.distance, p.L);
+  setLogSlider(els.field, p.F);
+  setLogSlider(els.accuracy, p.accuracy);
+  currentQuestion = p.question;
+  els.question.textContent = p.question;
+  checks.forEach(c => { c.checked = p.flags.includes(c.value); });
+  update();
+}
+
+function selectedFlags() {
+  return checks.filter(c => c.checked).map(c => c.value);
+}
+
+function update() {
+  let strongThreshold = Number(els.strong.value);
+  let borderThreshold = Number(els.border.value);
+
+  if (borderThreshold <= strongThreshold) {
+    if (document.activeElement === els.strong) {
+      borderThreshold = Math.min(5, strongThreshold + 0.1);
+      els.border.value = String(borderThreshold);
+    } else {
+      strongThreshold = Math.max(0.1, borderThreshold - 0.1);
+      els.strong.value = String(strongThreshold);
+    }
+  }
+
+  const D = sliderValue(els.size);
+  const L = sliderValue(els.distance);
+  const F = sliderValue(els.field);
+  const accuracyPct = sliderValue(els.accuracy);
+  const accuracyFraction = accuracyPct / 100;
+  const r = D / L;
+  const rf = D / F;
+  const burdenFraction = Math.max(r, rf);
+  const burdenPct = burdenFraction * 100;
+  const budgetUse = burdenFraction / accuracyFraction;
+  const flags = selectedFlags();
+
+  els.sizeOut.textContent = formatLength(D);
+  els.distanceOut.textContent = formatLength(L);
+  els.fieldOut.textContent = formatLength(F);
+  els.accuracyOut.textContent = formatPercent(accuracyPct);
+  els.strongOut.textContent = strongThreshold.toFixed(1) + "×";
+  els.borderOut.textContent = borderThreshold.toFixed(1) + "×";
+
+  els.ratio.textContent = formatRatio(r) + "  (" + formatPercent(r * 100) + ")";
+  els.fieldRatio.textContent = formatRatio(rf) + "  (" + formatPercent(rf * 100) + ")";
+  els.burden.textContent = formatPercent(burdenPct);
+  els.budget.textContent = formatNumber(budgetUse) + "×";
+
+  let level;
+  let title;
+  let reason;
+
+  if (flags.length > 0) {
+    level = "poor";
+    title = "A point-only model is poor for this question.";
+    reason = "The scale ratios still describe the geometry, but the selected question directly asks about information that a single point does not contain.";
+  } else if (budgetUse <= strongThreshold) {
+    level = "strong";
+    title = "The point approximation is strong for this question.";
+    reason = "The larger scale ratio uses " + formatNumber(budgetUse) + "× the allowed accuracy budget, below the strong threshold of " + strongThreshold.toFixed(1) + "×.";
+  } else if (budgetUse <= borderThreshold) {
+    level = "borderline";
+    title = "The point approximation is borderline.";
+    reason = "The larger scale ratio uses " + formatNumber(budgetUse) + "× the allowed accuracy budget. The model may support a rough answer, but its assumptions need checking.";
+  } else {
+    level = "poor";
+    title = "The point approximation is poor at the requested accuracy.";
+    reason = "The larger scale ratio uses " + formatNumber(budgetUse) + "× the allowed accuracy budget, above the borderline threshold of " + borderThreshold.toFixed(1) + "×.";
+  }
+
+  els.classification.className = "classification " + level;
+  els.badge.textContent = level.toUpperCase();
+  els.classTitle.textContent = title;
+  els.classReason.textContent = reason;
+
+  if (flags.length) {
+    const descriptions = {
+      rotation: "rotation requires orientation and the distribution of matter about an axis",
+      tides: "tides arise because the force differs from one side of the object to the other",
+      collision: "contact and collision depend on surfaces, clearance, shape, or deformation",
+      drag: "drag depends on area, shape, orientation, and the surrounding flow",
+      internal: "internal structure requires more than total mass and center position"
+    };
+    els.warning.classList.add("visible");
+    els.warning.innerHTML = "<strong>Small D/L is not sufficient here:</strong> " +
+      flags.map(f => descriptions[f]).join("; ") + ". An extended-body model, or a point model supplemented by additional structure-dependent information, is needed.";
+  } else {
+    els.warning.classList.remove("visible");
+    els.warning.textContent = "";
+  }
+
+  if (flags.length) {
+    els.assumption.textContent = "For this question, at least one omitted feature is essential. The point model may still track the center, but it cannot answer the whole question by itself.";
+  } else {
+    els.assumption.textContent = "Current assumption: orientation, shape, surface contact, deformation, and internal differences do not significantly affect the requested answer.";
+  }
+
+  drawScene(D, L, F, r, rf, flags);
+}
+
+function roundedRect(ctx, x, y, w, h, radius, fill, stroke) {
+  const r = Math.min(radius, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
+}
+
+function drawPoint(ctx, x, y) {
+  ctx.save();
+  ctx.strokeStyle = "#d13c3c";
+  ctx.fillStyle = "#d13c3c";
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.arc(x, y, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x - 13, y);
+  ctx.lineTo(x + 13, y);
+  ctx.moveTo(x, y - 13);
+  ctx.lineTo(x, y + 13);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function drawObject(ctx, type, x, y, w, h, alpha) {
+  ctx.save();
+  ctx.globalAlpha = alpha == null ? 1 : alpha;
+  const outline = "#1b3d5a";
+  const fill = "#68a7cf";
+
+  if (type === "baseball") {
+    const rad = Math.min(w, h) / 2;
+    ctx.fillStyle = "#f8f7f0";
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, rad, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.strokeStyle = "#c84545";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x - rad * .22, y, rad * .72, -1.25, 1.25);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x + rad * .22, y, rad * .72, 1.9, 4.4);
+    ctx.stroke();
+  } else if (type === "car") {
+    ctx.fillStyle = "#347eb5";
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 2;
+    roundedRect(ctx, x - w / 2, y - h * .23, w, h * .46, h * .12, "#347eb5", outline);
+    ctx.beginPath();
+    ctx.moveTo(x - w * .25, y - h * .23);
+    ctx.lineTo(x - w * .12, y - h * .48);
+    ctx.lineTo(x + w * .24, y - h * .48);
+    ctx.lineTo(x + w * .36, y - h * .23);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = "#d8f0fa";
+    ctx.fillRect(x - w * .08, y - h * .42, w * .27, h * .17);
+    ctx.fillStyle = "#263746";
+    [x - w * .3, x + w * .3].forEach(wx => {
+      ctx.beginPath();
+      ctx.arc(wx, y + h * .22, h * .13, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  } else if (type === "satellite") {
+    ctx.fillStyle = "#d8dde2";
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 2;
+    roundedRect(ctx, x - w * .16, y - h * .25, w * .32, h * .5, 4, "#d8dde2", outline);
+    ctx.fillStyle = "#265ea0";
+    ctx.fillRect(x - w * .48, y - h * .18, w * .28, h * .36);
+    ctx.fillRect(x + w * .20, y - h * .18, w * .28, h * .36);
+    ctx.strokeRect(x - w * .48, y - h * .18, w * .28, h * .36);
+    ctx.strokeRect(x + w * .20, y - h * .18, w * .28, h * .36);
+    ctx.beginPath();
+    ctx.arc(x, y - h * .31, h * .14, Math.PI, 0);
+    ctx.stroke();
+  } else {
+    const rad = Math.min(w, h) / 2;
+    const earth = type === "earth";
+    ctx.fillStyle = earth ? "#3186c6" : "#d89a45";
+    ctx.strokeStyle = outline;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x, y, rad, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    if (earth) {
+      ctx.fillStyle = "#5ca95e";
+      ctx.beginPath();
+      ctx.ellipse(x - rad * .25, y - rad * .15, rad * .32, rad * .18, -.35, 0, Math.PI * 2);
+      ctx.ellipse(x + rad * .22, y + rad * .2, rad * .26, rad * .35, .5, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = "rgba(112,69,29,.65)";
+      ctx.lineWidth = Math.max(1, rad * .08);
+      ctx.beginPath();
+      ctx.moveTo(x - rad * .85, y - rad * .18);
+      ctx.lineTo(x + rad * .85, y - rad * .18);
+      ctx.moveTo(x - rad * .75, y + rad * .24);
+      ctx.lineTo(x + rad * .75, y + rad * .24);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function drawScene(D, L, F, r, rf, flags) {
+  const canvas = els.canvas;
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(320, rect.width);
+  const height = Math.max(300, rect.height);
+
+  if (canvas.width !== Math.round(width * dpr) || canvas.height !== Math.round(height * dpr)) {
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+  }
+
+  const ctx = canvas.getContext("2d");
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#f9fcfe";
+  ctx.fillRect(0, 0, width, height);
+
+  const compact = width < 620;
+  const type = els.system.value;
+
+  ctx.fillStyle = "#12243a";
+  ctx.font = "700 15px system-ui, sans-serif";
+
+  let left, right;
+  if (!compact) {
+    left = { x: 18, y: 18, w: width * .34 - 25, h: height - 36 };
+    right = { x: width * .34 + 8, y: 18, w: width * .66 - 26, h: height - 36 };
+  } else {
+    left = { x: 14, y: 14, w: width - 28, h: height * .43 - 18 };
+    right = { x: 14, y: height * .43 + 7, w: width - 28, h: height * .57 - 21 };
+  }
+
+  roundedRect(ctx, left.x, left.y, left.w, left.h, 10, "#edf6fc", "#bfd1df");
+  roundedRect(ctx, right.x, right.y, right.w, right.h, 10, "#ffffff", "#bfd1df");
+
+  ctx.fillStyle = "#12243a";
+  ctx.fillText("Magnified extended object", left.x + 14, left.y + 24);
+  ctx.font = "12px system-ui, sans-serif";
+  ctx.fillStyle = "#5c6873";
+  ctx.fillText("Size is visible here; red point overlays its center.", left.x + 14, left.y + 43);
+
+  const objCenterX = left.x + left.w / 2;
+  const objCenterY = left.y + left.h * .53;
+  const maxObjW = Math.min(left.w * .72, 220);
+  const maxObjH = Math.min(left.h * .42, 150);
+  const wide = (type === "car" || type === "satellite");
+  drawObject(ctx, type, objCenterX, objCenterY, wide ? maxObjW : maxObjH, maxObjH, 1);
+  drawPoint(ctx, objCenterX, objCenterY);
+
+  ctx.strokeStyle = "#1769aa";
+  ctx.lineWidth = 2;
+  const bracketY = left.y + left.h - 50;
+  ctx.beginPath();
+  ctx.moveTo(left.x + left.w * .18, bracketY);
+  ctx.lineTo(left.x + left.w * .82, bracketY);
+  ctx.moveTo(left.x + left.w * .18, bracketY - 6);
+  ctx.lineTo(left.x + left.w * .18, bracketY + 6);
+  ctx.moveTo(left.x + left.w * .82, bracketY - 6);
+  ctx.lineTo(left.x + left.w * .82, bracketY + 6);
+  ctx.stroke();
+  ctx.fillStyle = "#1769aa";
+  ctx.font = "700 12px system-ui, sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("real size D = " + formatLength(D), left.x + left.w / 2, bracketY + 20);
+  ctx.textAlign = "left";
+
+  ctx.fillStyle = "#12243a";
+  ctx.font = "700 15px system-ui, sans-serif";
+  ctx.fillText("True scale within the observation window", right.x + 14, right.y + 24);
+  ctx.font = "12px system-ui, sans-serif";
+  ctx.fillStyle = "#5c6873";
+  ctx.fillText("The horizontal ruler represents L. Object width is D/L of it.", right.x + 14, right.y + 43);
+
+  const lineX1 = right.x + right.w * .1;
+  const lineX2 = right.x + right.w * .9;
+  const lineW = lineX2 - lineX1;
+  const lineY = right.y + right.h * .48;
+  const centerX = (lineX1 + lineX2) / 2;
+
+  ctx.strokeStyle = "#344d61";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(lineX1, lineY);
+  ctx.lineTo(lineX2, lineY);
+  ctx.moveTo(lineX1, lineY - 7);
+  ctx.lineTo(lineX1, lineY + 7);
+  ctx.moveTo(lineX2, lineY - 7);
+  ctx.lineTo(lineX2, lineY + 7);
+  ctx.stroke();
+
+  ctx.fillStyle = "#344d61";
+  ctx.textAlign = "center";
+  ctx.font = "700 12px system-ui, sans-serif";
+  ctx.fillText("observation scale L = " + formatLength(L), centerX, lineY + 29);
+
+  const truePixels = lineW * r;
+  if (truePixels >= 1.2 && truePixels <= right.w * 1.4) {
+    const visualW = Math.max(truePixels, 1.2);
+    const visualH = Math.max(2, Math.min(visualW * (wide ? .35 : 1), right.h * .28));
+    drawObject(ctx, type, centerX, lineY - visualH * .55, visualW, visualH, .72);
+  } else if (truePixels > right.w * 1.4) {
+    ctx.fillStyle = "rgba(104,167,207,.25)";
+    ctx.fillRect(right.x + 2, lineY - 42, right.w - 4, 42);
+    ctx.fillStyle = "#5c6873";
+    ctx.fillText("Object is larger than the displayed L window", centerX, lineY - 52);
+  } else {
+    ctx.fillStyle = "#5c6873";
+    ctx.fillText("At true scale, D is less than 1 screen pixel", centerX, lineY - 42);
+  }
+  drawPoint(ctx, centerX, lineY - 3);
+
+  const ratioY = right.y + right.h * .72;
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#12243a";
+  ctx.font = "700 13px system-ui, sans-serif";
+  ctx.fillText("Scale comparison", right.x + 14, ratioY);
+
+  const barX = right.x + 14;
+  const barY = ratioY + 12;
+  const barW = right.w - 28;
+  roundedRect(ctx, barX, barY, barW, 17, 8, "#e6edf2", null);
+
+  const logMin = -10;
+  const logMax = 1;
+  const logr = Math.log10(Math.max(r, 1e-12));
+  const fraction = Math.max(0, Math.min(1, (logr - logMin) / (logMax - logMin)));
+  roundedRect(ctx, barX, barY, Math.max(3, barW * fraction), 17, 8, r < .01 ? "#3b9a6d" : (r < .2 ? "#d7a51d" : "#d05a50"), null);
+
+  ctx.font = "11px system-ui, sans-serif";
+  ctx.fillStyle = "#5c6873";
+  ctx.fillText("D/L = 10⁻¹⁰", barX, barY + 35);
+  ctx.textAlign = "right";
+  ctx.fillText("D/L = 10", barX + barW, barY + 35);
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#12243a";
+  ctx.font = "700 12px system-ui, sans-serif";
+  const markerX = barX + barW * fraction;
+  ctx.beginPath();
+  ctx.moveTo(markerX, barY - 4);
+  ctx.lineTo(markerX - 5, barY - 11);
+  ctx.lineTo(markerX + 5, barY - 11);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillText("current " + formatRatio(r), Math.max(barX + 42, Math.min(barX + barW - 42, markerX)), barY - 17);
+
+  ctx.textAlign = "left";
+  ctx.font = "12px system-ui, sans-serif";
+  ctx.fillStyle = flags.length ? "#a52b23" : "#5c6873";
+  const note = flags.length
+    ? "Scale ratio alone cannot answer the selected structure-dependent question."
+    : "Changing L visually zooms the window; the numerical D/L ratio preserves the true comparison.";
+  wrapText(ctx, note, right.x + 14, right.y + right.h - 33, right.w - 28, 15);
+  ctx.textAlign = "left";
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(" ");
+  let line = "";
+  let yy = y;
+  for (let i = 0; i < words.length; i++) {
+    const test = line + words[i] + " ";
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line.trim(), x, yy);
+      line = words[i] + " ";
+      yy += lineHeight;
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line.trim(), x, yy);
+}
+
+els.system.addEventListener("change", () => populatePresets(true));
+els.preset.addEventListener("change", loadPreset);
+
+[els.size, els.distance, els.field, els.accuracy, els.strong, els.border].forEach(el => {
+  el.addEventListener("input", update);
+});
+
+checks.forEach(c => c.addEventListener("change", update));
+
+document.getElementById("defaultsBtn").addEventListener("click", loadPreset);
+
+document.getElementById("resetBtn").addEventListener("click", () => {
+  els.system.value = "baseball";
+  els.strong.value = "0.5";
+  els.border.value = "2";
+  populatePresets(true);
+});
+
+window.addEventListener("resize", update);
+
+els.strong.value = "0.5";
+els.border.value = "2";
+populatePresets(true);
+</script>
+</body>
+</html>
