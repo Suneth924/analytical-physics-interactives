@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Detecting Interactions from Changes in Motion</title>
+<style>
+  :root {
+    --navy: #15283b;
+    --blue: #1769aa;
+    --blue-dark: #0e4f86;
+    --blue-soft: #e8f3fb;
+    --orange: #e66d19;
+    --orange-soft: #fff0e4;
+    --green: #23845b;
+    --green-soft: #e7f6ef;
+    --red: #bd3f3f;
+    --ink: #1e2b36;
+    --muted: #5d6b77;
+    --line: #ced9e1;
+    --panel: #ffffff;
+    --background: #eef3f6;
+    --shadow: 0 5px 18px rgba(23, 44, 62, 0.09);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--background);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.45;
+  }
+
+  button, select, input { font: inherit; }
+
+  button:focus-visible, select:focus-visible {
+    outline: 3px solid rgba(23, 105, 170, 0.35);
+    outline-offset: 2px;
+  }
+
+  .page {
+    width: min(1260px, 100%);
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  header {
+    margin-bottom: 16px;
+  }
+
+  .context {
+    margin: 0 0 4px;
+    color: var(--blue-dark);
+    font-size: 0.83rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--navy);
+    font-size: clamp(1.65rem, 3vw, 2.45rem);
+    line-height: 1.14;
+  }
+
+  .subtitle {
+    max-width: 850px;
+    margin: 8px 0 0;
+    color: var(--muted);
+  }
+
+  .mode-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 18px 0 12px;
+    padding: 5px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #dde7ed;
+  }
+
+  .mode-tabs button {
+    flex: 1;
+    min-height: 45px;
+    padding: 8px 12px;
+    border: 0;
+    border-radius: 9px;
+    color: #40515f;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 750;
+  }
+
+  .mode-tabs button[aria-selected="true"] {
+    color: white;
+    background: var(--blue-dark);
+    box-shadow: 0 2px 6px rgba(12, 63, 104, 0.24);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(285px, 0.75fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+  }
+
+  .control-card {
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .section-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+  }
+
+  .choice-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .choice-button {
+    flex: 1 1 145px;
+    min-height: 42px;
+    padding: 8px 10px;
+    border: 1px solid #b9c9d5;
+    border-radius: 9px;
+    color: #344654;
+    background: white;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .choice-button[aria-pressed="true"] {
+    border-color: var(--blue);
+    color: var(--blue-dark);
+    background: var(--blue-soft);
+    box-shadow: inset 0 0 0 1px var(--blue);
+  }
+
+  .secondary-control {
+    display: flex;
+    gap: 12px;
+    align-items: end;
+    margin-top: 13px;
+    padding-top: 12px;
+    border-top: 1px solid #e1e8ed;
+  }
+
+  .secondary-control label {
+    flex: 1;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  select {
+    width: 100%;
+    min-height: 40px;
+    margin-top: 5px;
+    padding: 7px 34px 7px 10px;
+    border: 1px solid #b8c8d3;
+    border-radius: 8px;
+    color: var(--ink);
+    background: white;
+  }
+
+  .interaction-area {
+    margin-top: 13px;
+    padding: 12px;
+    border: 1px solid #f1c5a5;
+    border-radius: 10px;
+    background: var(--orange-soft);
+  }
+
+  .interaction-area p {
+    margin: 7px 0 0;
+    color: #70401e;
+    font-size: 0.9rem;
+  }
+
+  .interaction-button {
+    min-height: 42px;
+    padding: 8px 14px;
+    border: 1px solid var(--orange);
+    border-radius: 9px;
+    color: #91420c;
+    background: white;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .interaction-button.on {
+    color: white;
+    background: var(--orange);
+  }
+
+  .stage-card {
+    overflow: hidden;
+  }
+
+  .stage-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    background: #f8fbfc;
+  }
+
+  .stage-heading strong { color: var(--navy); }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 0.79rem;
+  }
+
+  .legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-mark {
+    display: inline-block;
+    width: 20px;
+    height: 4px;
+    border-radius: 4px;
+    background: var(--blue);
+  }
+
+  .legend-mark.orange { background: var(--orange); }
+  .legend-mark.dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #86a1b4;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    height: clamp(330px, 48vw, 500px);
+    min-height: 330px;
+    background: #f8fcfe;
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .canvas-note {
+    position: absolute;
+    left: 12px;
+    bottom: 10px;
+    max-width: calc(100% - 24px);
+    padding: 5px 9px;
+    border: 1px solid rgba(145, 165, 178, 0.45);
+    border-radius: 7px;
+    color: #4f626f;
+    background: rgba(255,255,255,0.9);
+    font-size: 0.76rem;
+    pointer-events: none;
+  }
+
+  .transport {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--line);
+    background: #f8fbfc;
+  }
+
+  .transport button {
+    min-height: 42px;
+    padding: 8px 14px;
+    border: 1px solid #afc1ce;
+    border-radius: 9px;
+    color: #2e4351;
+    background: white;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .transport button.primary {
+    border-color: var(--blue);
+    color: white;
+    background: var(--blue);
+  }
+
+  .transport button:hover { filter: brightness(0.97); }
+
+  .readouts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .readout {
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: white;
+    text-align: center;
+  }
+
+  .readout .name {
+    display: block;
+    color: var(--muted);
+    font-size: 0.73rem;
+    font-weight: 750;
+  }
+
+  .readout .value {
+    display: block;
+    margin-top: 2px;
+    color: var(--navy);
+    font-size: clamp(0.96rem, 2vw, 1.18rem);
+    font-variant-numeric: tabular-nums;
+    font-weight: 850;
+    white-space: nowrap;
+  }
+
+  .side-card {
+    padding: 15px;
+    margin-bottom: 12px;
+  }
+
+  .side-card h2 {
+    margin: 0 0 10px;
+    color: var(--navy);
+    font-size: 1.08rem;
+  }
+
+  .evidence-list {
+    display: grid;
+    gap: 8px;
+  }
+
+  .evidence-item {
+    display: grid;
+    grid-template-columns: 105px 1fr;
+    gap: 8px;
+    padding: 8px 9px;
+    border-radius: 8px;
+    background: #f2f6f8;
+  }
+
+  .evidence-item span:first-child {
+    color: var(--muted);
+    font-size: 0.84rem;
+    font-weight: 750;
+  }
+
+  .evidence-item strong {
+    color: var(--ink);
+    font-size: 0.9rem;
+  }
+
+  .conclusion {
+    margin-top: 11px;
+    padding: 11px;
+    border-left: 5px solid var(--green);
+    border-radius: 7px;
+    color: #19583f;
+    background: var(--green-soft);
+    font-weight: 760;
+  }
+
+  .conclusion.interaction {
+    border-left-color: var(--orange);
+    color: #793a10;
+    background: var(--orange-soft);
+  }
+
+  .notice {
+    border-color: #b9d4e6;
+    background: #f5fbff;
+  }
+
+  .notice ul {
+    margin: 7px 0 0;
+    padding-left: 20px;
+  }
+
+  .notice li { margin: 7px 0; }
+
+  .law-box {
+    padding: 12px;
+    border-radius: 9px;
+    color: #263d4e;
+    background: var(--blue-soft);
+  }
+
+  .law-box strong {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--blue-dark);
+  }
+
+  .small-note {
+    margin: 10px 0 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 880px) {
+    .layout { grid-template-columns: 1fr; }
+    .readouts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 520px) {
+    .page { padding: 11px; }
+    .mode-tabs { flex-direction: column; }
+    .choice-button { flex-basis: 100%; }
+    .canvas-wrap { height: 340px; }
+    .transport button { flex: 1 1 44%; }
+    .evidence-item { grid-template-columns: 92px 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <header>
+    <p class="context">Interactions, Net Force, and Changes in Velocity</p>
+    <h1>Detecting Interactions from Changes in Motion</h1>
+    <p class="subtitle">
+      Compare positions and velocity arrows at equal time intervals. A change in either the
+      length or direction of a velocity arrow is evidence of a net interaction.
+    </p>
+  </header>
+
+  <nav class="mode-tabs" aria-label="Simulation mode">
+    <button id="exploreTab" type="button" aria-selected="true">Explore changes in motion</button>
+    <button id="lawTab" type="button" aria-selected="false">Newton's First Law mode</button>
+  </nav>
+
+  <div class="layout">
+    <section>
+      <div class="card control-card">
+        <div id="exploreControls">
+          <span class="section-label">Choose a motion case</span>
+          <div class="choice-row" id="exploreChoices">
+            <button class="choice-button" type="button" data-case="constant" aria-pressed="true">Constant velocity</button>
+            <button class="choice-button" type="button" data-case="speed" aria-pressed="false">Changing speed</button>
+            <button class="choice-button" type="button" data-case="direction" aria-pressed="false">Changing direction</button>
+          </div>
+          <div class="secondary-control hidden" id="speedOptions">
+            <label for="speedBehavior">
+              How should the speed change?
+              <select id="speedBehavior">
+                <option value="up">Speeding up</option>
+                <option value="down">Slowing down</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div id="lawControls" class="hidden">
+          <span class="section-label">Choose a Newton's First Law case</span>
+          <div class="choice-row" id="lawChoices">
+            <button class="choice-button" type="button" data-case="rest" aria-pressed="true">Remain at rest</button>
+            <button class="choice-button" type="button" data-case="coast" aria-pressed="false">Continue at constant velocity</button>
+            <button class="choice-button" type="button" data-case="switch" aria-pressed="false">Turn on a net interaction</button>
+          </div>
+          <div id="interactionArea" class="interaction-area hidden">
+            <button id="interactionButton" class="interaction-button" type="button" aria-pressed="false">Add net interaction</button>
+            <p id="interactionHelp">With no net interaction, the object keeps its present velocity.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card stage-card">
+        <div class="stage-heading">
+          <strong id="stageTitle">Constant velocity</strong>
+          <div class="legend" aria-label="Visual legend">
+            <span><i class="legend-mark dot"></i> sampled position</span>
+            <span><i class="legend-mark"></i> velocity</span>
+            <span><i class="legend-mark orange"></i> net interaction cue</span>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" id="canvasWrap">
+          <canvas id="motionCanvas" aria-label="Two-dimensional motion simulation"></canvas>
+          <div class="canvas-note">Positions are sampled every 0.75 s. Arrow length represents speed.</div>
+        </div>
+
+        <div class="transport" aria-label="Playback controls">
+          <button id="playButton" class="primary" type="button">▶ Play</button>
+          <button id="pauseButton" type="button">Ⅱ Pause</button>
+          <button id="stepButton" type="button">Step +0.75 s</button>
+          <button id="resetButton" type="button">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="readouts" aria-live="polite">
+        <div class="readout">
+          <span class="name">Time</span>
+          <span class="value" id="timeValue">0.00 s</span>
+        </div>
+        <div class="readout">
+          <span class="name">Speed</span>
+          <span class="value" id="speedValue">2.00 m/s</span>
+        </div>
+        <div class="readout">
+          <span class="name">Horizontal velocity, v<sub>x</sub></span>
+          <span class="value" id="vxValue">2.00 m/s</span>
+        </div>
+        <div class="readout">
+          <span class="name">Vertical velocity, v<sub>y</sub></span>
+          <span class="value" id="vyValue">0.00 m/s</span>
+        </div>
+      </div>
+    </section>
+
+    <aside>
+      <section class="card side-card">
+        <h2>Motion evidence</h2>
+        <div class="evidence-list">
+          <div class="evidence-item">
+            <span>Speed</span>
+            <strong id="speedEvidence">Does not change</strong>
+          </div>
+          <div class="evidence-item">
+            <span>Direction</span>
+            <strong id="directionEvidence">Does not change</strong>
+          </div>
+          <div class="evidence-item">
+            <span>Velocity</span>
+            <strong id="velocityEvidence">Does not change</strong>
+          </div>
+          <div class="evidence-item">
+            <span>Net interaction</span>
+            <strong id="interactionEvidence">None required</strong>
+          </div>
+        </div>
+        <div class="conclusion" id="conclusion">
+          No change in velocity: the net interaction is zero.
+        </div>
+      </section>
+
+      <section class="card side-card notice">
+        <h2>What to notice</h2>
+        <ul id="noticeList">
+          <li>Equal-length, parallel velocity arrows represent unchanged velocity.</li>
+          <li>Equal spacing between sampled positions represents constant speed.</li>
+          <li>No net interaction does not mean no interactions at all; separate interactions may balance.</li>
+        </ul>
+      </section>
+
+      <section class="card side-card">
+        <div class="law-box">
+          <strong>Newton's First Law</strong>
+          An object remains at rest or continues with constant velocity unless a net interaction changes its velocity.
+        </div>
+        <p class="small-note">
+          Velocity includes both speed and direction. Changing either one means the velocity has changed.
+        </p>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script>
+"use strict";
+
+(function () {
+  const canvas = document.getElementById("motionCanvas");
+  const ctx = canvas.getContext("2d");
+  const canvasWrap = document.getElementById("canvasWrap");
+
+  const exploreTab = document.getElementById("exploreTab");
+  const lawTab = document.getElementById("lawTab");
+  const exploreControls = document.getElementById("exploreControls");
+  const lawControls = document.getElementById("lawControls");
+  const exploreChoices = Array.from(document.querySelectorAll("#exploreChoices .choice-button"));
+  const lawChoices = Array.from(document.querySelectorAll("#lawChoices .choice-button"));
+  const speedOptions = document.getElementById("speedOptions");
+  const speedBehavior = document.getElementById("speedBehavior");
+  const interactionArea = document.getElementById("interactionArea");
+  const interactionButton = document.getElementById("interactionButton");
+  const interactionHelp = document.getElementById("interactionHelp");
+
+  const playButton = document.getElementById("playButton");
+  const pauseButton = document.getElementById("pauseButton");
+  const stepButton = document.getElementById("stepButton");
+  const resetButton = document.getElementById("resetButton");
+
+  const stageTitle = document.getElementById("stageTitle");
+  const timeValue = document.getElementById("timeValue");
+  const speedValue = document.getElementById("speedValue");
+  const vxValue = document.getElementById("vxValue");
+  const vyValue = document.getElementById("vyValue");
+
+  const speedEvidence = document.getElementById("speedEvidence");
+  const directionEvidence = document.getElementById("directionEvidence");
+  const velocityEvidence = document.getElementById("velocityEvidence");
+  const interactionEvidence = document.getElementById("interactionEvidence");
+  const conclusion = document.getElementById("conclusion");
+  const noticeList = document.getElementById("noticeList");
+
+  const WORLD_WIDTH = 24;
+  const WORLD_HEIGHT = 12;
+  const SAMPLE_INTERVAL = 0.75;
+  const MAX_TIME = 9.0;
+
+  let width = 800;
+  let height = 450;
+  let mode = "explore";
+  let exploreCase = "constant";
+  let lawCase = "rest";
+  let interactionOn = false;
+  let running = false;
+  let simTime = 0;
+  let nextSampleTime = SAMPLE_INTERVAL;
+  let samples = [];
+  let state = { x: 2, y: 6, vx: 2, vy: 0 };
+  let lastFrame = 0;
+  let animationId = 0;
+
+  function cloneState(source) {
+    return { x: source.x, y: source.y, vx: source.vx, vy: source.vy };
+  }
+
+  function getExploreState(t) {
+    if (exploreCase === "constant") {
+      return { x: 2 + 2 * t, y: 6, vx: 2, vy: 0 };
+    }
+
+    if (exploreCase === "speed") {
+      const speedingUp = speedBehavior.value === "up";
+      const v0 = speedingUp ? 0.8 : 3.0;
+      const a = speedingUp ? 0.30 : -0.25;
+      return {
+        x: 2 + v0 * t + 0.5 * a * t * t,
+        y: 6,
+        vx: v0 + a * t,
+        vy: 0
+      };
+    }
+
+    const radius = 4;
+    const centerX = 10;
+    const centerY = 6;
+    const speed = 2;
+    const angle = -Math.PI / 2 + (speed / radius) * t;
+    return {
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle),
+      vx: -speed * Math.sin(angle),
+      vy: speed * Math.cos(angle)
+    };
+  }
+
+  function getLawBaseState(t) {
+    if (lawCase === "rest") {
+      return { x: 6, y: 6, vx: 0, vy: 0 };
+    }
+    if (lawCase === "coast") {
+      return { x: 2 + 2 * t, y: 6, vx: 2, vy: 0 };
+    }
+    return state;
+  }
+
+  function initialState() {
+    if (mode === "explore") return getExploreState(0);
+    if (lawCase === "rest") return { x: 6, y: 6, vx: 0, vy: 0 };
+    if (lawCase === "coast") return { x: 2, y: 6, vx: 2, vy: 0 };
+    return { x: 2, y: 3.2, vx: 1.7, vy: 0 };
+  }
+
+  function resetSimulation() {
+    running = false;
+    simTime = 0;
+    nextSampleTime = SAMPLE_INTERVAL;
+    state = initialState();
+    samples = [cloneState(state)];
+    lastFrame = 0;
+    updateAll();
+  }
+
+  function advanceState(dt) {
+    if (mode === "explore") {
+      simTime += dt;
+      state = getExploreState(simTime);
+      return;
+    }
+
+    if (lawCase !== "switch") {
+      simTime += dt;
+      state = getLawBaseState(simTime);
+      return;
+    }
+
+    const ax = 0;
+    const ay = interactionOn ? 0.18 : 0;
+    state.x += state.vx * dt + 0.5 * ax * dt * dt;
+    state.y += state.vy * dt + 0.5 * ay * dt * dt;
+    state.vx += ax * dt;
+    state.vy += ay * dt;
+    simTime += dt;
+  }
+
+  function advanceBy(duration) {
+    let remaining = Math.min(duration, MAX_TIME - simTime);
+
+    while (remaining > 0.000001) {
+      const untilSample = nextSampleTime - simTime;
+      const chunk = Math.min(remaining, Math.max(0, untilSample));
+
+      if (chunk > 0.000001) {
+        advanceState(chunk);
+        remaining -= chunk;
+      } else {
+        nextSampleTime += SAMPLE_INTERVAL;
+      }
+
+      if (simTime >= nextSampleTime - 0.00001) {
+        samples.push(cloneState(state));
+        nextSampleTime += SAMPLE_INTERVAL;
+      }
+    }
+
+    if (simTime >= MAX_TIME - 0.00001) {
+      simTime = MAX_TIME;
+      running = false;
+    }
+
+    updateAll();
+  }
+
+  function animate(timestamp) {
+    if (!running) return;
+
+    if (!lastFrame) lastFrame = timestamp;
+    const elapsed = Math.min((timestamp - lastFrame) / 1000, 0.05);
+    lastFrame = timestamp;
+    advanceBy(elapsed);
+
+    if (running) animationId = requestAnimationFrame(animate);
+  }
+
+  function startPlaying() {
+    if (simTime >= MAX_TIME) resetSimulation();
+    running = true;
+    lastFrame = 0;
+    cancelAnimationFrame(animationId);
+    animationId = requestAnimationFrame(animate);
+  }
+
+  function pausePlaying() {
+    running = false;
+    lastFrame = 0;
+    cancelAnimationFrame(animationId);
+    updateAll();
+  }
+
+  function selectButton(buttons, chosen) {
+    buttons.forEach(function (button) {
+      button.setAttribute("aria-pressed", String(button.dataset.case === chosen));
+    });
+  }
+
+  function setMode(newMode) {
+    mode = newMode;
+    exploreTab.setAttribute("aria-selected", String(mode === "explore"));
+    lawTab.setAttribute("aria-selected", String(mode === "law"));
+    exploreControls.classList.toggle("hidden", mode !== "explore");
+    lawControls.classList.toggle("hidden", mode !== "law");
+    resetSimulation();
+  }
+
+  function setExploreCase(newCase) {
+    exploreCase = newCase;
+    selectButton(exploreChoices, exploreCase);
+    speedOptions.classList.toggle("hidden", exploreCase !== "speed");
+    resetSimulation();
+  }
+
+  function setLawCase(newCase) {
+    lawCase = newCase;
+    interactionOn = false;
+    selectButton(lawChoices, lawCase);
+    interactionArea.classList.toggle("hidden", lawCase !== "switch");
+    updateInteractionButton();
+    resetSimulation();
+  }
+
+  function updateInteractionButton() {
+    interactionButton.textContent = interactionOn ? "Remove net interaction" : "Add net interaction";
+    interactionButton.classList.toggle("on", interactionOn);
+    interactionButton.setAttribute("aria-pressed", String(interactionOn));
+    interactionHelp.textContent = interactionOn
+      ? "The net interaction is on. Watch the velocity arrow change direction."
+      : "With no net interaction, the object keeps its present velocity.";
+  }
+
+  function formatNumber(number) {
+    const clean = Math.abs(number) < 0.005 ? 0 : number;
+    return clean.toFixed(2);
+  }
+
+  function updateReadouts() {
+    const speed = Math.hypot(state.vx, state.vy);
+    timeValue.textContent = simTime.toFixed(2) + " s";
+    speedValue.textContent = formatNumber(speed) + " m/s";
+    vxValue.textContent = formatNumber(state.vx) + " m/s";
+    vyValue.textContent = formatNumber(state.vy) + " m/s";
+  }
+
+  function setEvidence(speedText, directionText, velocityText, interactionText, conclusionText, hasInteraction) {
+    speedEvidence.textContent = speedText;
+    directionEvidence.textContent = directionText;
+    velocityEvidence.textContent = velocityText;
+    interactionEvidence.textContent = interactionText;
+    conclusion.textContent = conclusionText;
+    conclusion.classList.toggle("interaction", hasInteraction);
+  }
+
+  function setNotice(items) {
+    noticeList.replaceChildren();
+    items.forEach(function (item) {
+      const li = document.createElement("li");
+      li.textContent = item;
+      noticeList.appendChild(li);
+    });
+  }
+
+  function updateExplanations() {
+    if (mode === "explore") {
+      if (exploreCase === "constant") {
+        stageTitle.textContent = "Constant velocity";
+        setEvidence(
+          "Does not change",
+          "Does not change",
+          "Does not change",
+          "No net interaction",
+          "No change in velocity: the net interaction is zero.",
+          false
+        );
+        setNotice([
+          "The sampled positions are equally spaced because the speed is constant.",
+          "Every velocity arrow has the same length and direction.",
+          "No net interaction does not mean no interactions at all; separate interactions may balance."
+        ]);
+      } else if (exploreCase === "speed") {
+        const up = speedBehavior.value === "up";
+        stageTitle.textContent = up ? "Changing speed — speeding up" : "Changing speed — slowing down";
+        setEvidence(
+          up ? "Increases" : "Decreases",
+          "Stays the same",
+          "Changes",
+          "Evidence of a net interaction",
+          "The speed changes, so the velocity changes. This is evidence of a net interaction.",
+          true
+        );
+        setNotice([
+          up
+            ? "The velocity arrows grow longer while continuing in the same direction."
+            : "The velocity arrows become shorter while continuing in the same direction.",
+          up
+            ? "The gaps between equal-time samples grow larger."
+            : "The gaps between equal-time samples become smaller.",
+          "A change in speed is a change in velocity, even when the direction stays the same."
+        ]);
+      } else {
+        stageTitle.textContent = "Changing direction — curved motion";
+        setEvidence(
+          "Stays constant",
+          "Changes continuously",
+          "Changes",
+          "Evidence of a net interaction",
+          "The direction changes, so the velocity changes. This is evidence of a net interaction.",
+          true
+        );
+        setNotice([
+          "Each velocity arrow is tangent to the curved path.",
+          "The arrows have equal lengths, showing constant speed, but they point in different directions.",
+          "A net interaction can change direction without changing speed."
+        ]);
+      }
+      return;
+    }
+
+    if (lawCase === "rest") {
+      stageTitle.textContent = "At rest with no net interaction";
+      setEvidence(
+        "Zero",
+        "No motion",
+        "Remains zero",
+        "No net interaction",
+        "With zero velocity and no net interaction, the object remains at rest.",
+        false
+      );
+      setNotice([
+        "Successive sampled positions lie on top of one another.",
+        "Remaining at rest does not require a continuing net force.",
+        "Balanced interactions also produce zero net interaction."
+      ]);
+    } else if (lawCase === "coast") {
+      stageTitle.textContent = "Constant velocity with no net interaction";
+      setEvidence(
+        "Does not change",
+        "Does not change",
+        "Does not change",
+        "No net interaction",
+        "With no net interaction, the moving object continues at constant velocity.",
+        false
+      );
+      setNotice([
+        "Motion does not require a net interaction to keep going.",
+        "The equal velocity arrows show that both speed and direction remain unchanged.",
+        "A net interaction is needed to change velocity, not to maintain constant velocity."
+      ]);
+    } else if (interactionOn) {
+      stageTitle.textContent = "Net interaction turned on";
+      setEvidence(
+        "Changes after turning on",
+        "Changes",
+        "Changes",
+        "Net interaction is ON",
+        "The net interaction changes the velocity. Removing it will not remove the velocity already gained.",
+        true
+      );
+      setNotice([
+        "The orange cue shows the direction of the net interaction.",
+        "The vertical part of the velocity grows while the interaction is on.",
+        "Remove the net interaction and the object will continue with its new constant velocity."
+      ]);
+    } else {
+      stageTitle.textContent = "Net interaction removed";
+      setEvidence(
+        "Remains constant",
+        "Remains constant",
+        "Remains constant",
+        "Net interaction is OFF",
+        "With the net interaction removed, the object keeps its present velocity.",
+        false
+      );
+      setNotice([
+        "Press “Add net interaction,” then play or step to produce a velocity change.",
+        "When the interaction is removed, the velocity arrow stops changing.",
+        "The object does not return to its old velocity by itself."
+      ]);
+    }
+  }
+
+  function worldToCanvas(x, y) {
+    const pad = Math.max(30, Math.min(width, height) * 0.075);
+    const usableWidth = width - 2 * pad;
+    const usableHeight = height - 2 * pad;
+    return {
+      x: pad + (x / WORLD_WIDTH) * usableWidth,
+      y: height - pad - (y / WORLD_HEIGHT) * usableHeight
+    };
+  }
+
+  function drawArrow(startX, startY, vx, vy, color, scale, lineWidth) {
+    const endX = startX + vx * scale;
+    const endY = startY - vy * scale;
+    const angle = Math.atan2(endY - startY, endX - startX);
+    const arrowLength = Math.hypot(endX - startX, endY - startY);
+    if (arrowLength < 1) return;
+
+    const head = Math.min(10, Math.max(6, arrowLength * 0.26));
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineCap = "round";
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(endX, endY);
+    ctx.lineTo(endX - head * Math.cos(angle - Math.PI / 6), endY - head * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(endX - head * Math.cos(angle + Math.PI / 6), endY - head * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+
+  function drawBackground() {
+    ctx.clearRect(0, 0, width, height);
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, height);
+    gradient.addColorStop(0, "#f9fdff");
+    gradient.addColorStop(1, "#eef7fa");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = "rgba(91, 132, 154, 0.13)";
+    for (let x = 45; x < width; x += 54) {
+      for (let y = 42; y < height; y += 54) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    const baseA = worldToCanvas(0, 0.8);
+    const baseB = worldToCanvas(WORLD_WIDTH, 0.8);
+    ctx.beginPath();
+    ctx.moveTo(baseA.x, baseA.y);
+    ctx.lineTo(baseB.x, baseB.y);
+    ctx.strokeStyle = "rgba(87, 119, 137, 0.2)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    drawScaleBar();
+    drawGuidePath();
+  }
+
+  function drawScaleBar() {
+    const start = worldToCanvas(18.5, 11.1);
+    const end = worldToCanvas(20.5, 11.1);
+    ctx.beginPath();
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
+    ctx.strokeStyle = "#536a79";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    [start, end].forEach(function (point) {
+      ctx.beginPath();
+      ctx.moveTo(point.x, point.y - 5);
+      ctx.lineTo(point.x, point.y + 5);
+      ctx.stroke();
+    });
+
+    ctx.fillStyle = "#536a79";
+    ctx.font = "700 12px system-ui, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("2 m", (start.x + end.x) / 2, start.y - 9);
+  }
+
+  function drawGuidePath() {
+    ctx.save();
+    ctx.strokeStyle = "rgba(74, 111, 134, 0.22)";
+    ctx.lineWidth = 2;
+    ctx.setLineDash([7, 7]);
+
+    if (mode === "explore" && exploreCase === "direction") {
+      const center = worldToCanvas(10, 6);
+      const right = worldToCanvas(14, 6);
+      const radiusPixels = Math.abs(right.x - center.x);
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, radiusPixels, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      const y = mode === "law" && lawCase === "switch" ? 3.2 : 6;
+      const a = worldToCanvas(1, y);
+      const b = worldToCanvas(23, y);
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawTrail() {
+    if (samples.length > 1) {
+      ctx.beginPath();
+      samples.forEach(function (sample, index) {
+        const point = worldToCanvas(sample.x, sample.y);
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.strokeStyle = "rgba(63, 104, 129, 0.32)";
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    const arrowScale = Math.max(17, Math.min(26, width / 38));
+
+    samples.forEach(function (sample, index) {
+      const point = worldToCanvas(sample.x, sample.y);
+
+      ctx.beginPath();
+      ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = index === 0 ? "#557b92" : "#88a6b7";
+      ctx.fill();
+      ctx.strokeStyle = "white";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      drawArrow(point.x, point.y, sample.vx, sample.vy, "#1769aa", arrowScale, 3);
+    });
+  }
+
+  function drawInteractionCue() {
+    let ax = 0;
+    let ay = 0;
+    let show = false;
+
+    if (mode === "explore" && exploreCase === "speed") {
+      ax = speedBehavior.value === "up" ? 1 : -1;
+      show = true;
+    } else if (mode === "explore" && exploreCase === "direction") {
+      ax = 10 - state.x;
+      ay = 6 - state.y;
+      const magnitude = Math.hypot(ax, ay);
+      if (magnitude > 0) {
+        ax /= magnitude;
+        ay /= magnitude;
+      }
+      show = true;
+    } else if (mode === "law" && lawCase === "switch" && interactionOn) {
+      ay = 1;
+      show = true;
+    }
+
+    if (!show) return;
+
+    const point = worldToCanvas(state.x, state.y);
+    drawArrow(point.x, point.y, ax, ay, "#e66d19", 43, 4);
+
+    ctx.fillStyle = "#a24a0d";
+    ctx.font = "700 12px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("net interaction", point.x + 12, point.y - 28);
+  }
+
+  function drawCurrentObject() {
+    const point = worldToCanvas(state.x, state.y);
+    const radius = 11;
+
+    ctx.save();
+    ctx.shadowColor = "rgba(12, 49, 73, 0.25)";
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+    ctx.beginPath();
+    ctx.arc(point.x, point.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#153f5e";
+    ctx.fill();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.arc(point.x - 3, point.y - 4, 3.1, 0, Math.PI * 2);
+    ctx.fillStyle = "#8fd0f4";
+    ctx.fill();
+
+    const speed = Math.hypot(state.vx, state.vy);
+    if (speed > 0.001) {
+      const arrowScale = Math.max(17, Math.min(26, width / 38));
+      drawArrow(point.x, point.y, state.vx, state.vy, "#0e4f86", arrowScale, 4);
+    } else {
+      ctx.fillStyle = "#314c5d";
+      ctx.font = "700 12px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("v = 0", point.x, point.y - 20);
+    }
+  }
+
+  function drawTimeLabel() {
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.strokeStyle = "rgba(130, 153, 168, 0.5)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(12, 12, 116, 34, 7);
+    } else {
+      ctx.rect(12, 12, 116, 34);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = "#334d5e";
+    ctx.font = "800 14px system-ui, sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillText("t = " + simTime.toFixed(2) + " s", 24, 34);
+  }
+
+  function render() {
+    drawBackground();
+    drawTrail();
+    drawInteractionCue();
+    drawCurrentObject();
+    drawTimeLabel();
+  }
+
+  function updateAll() {
+    updateInteractionButton();
+    updateReadouts();
+    updateExplanations();
+    render();
+
+    playButton.textContent = running ? "▶ Playing…" : "▶ Play";
+    playButton.setAttribute("aria-pressed", String(running));
+  }
+
+  function resizeCanvas() {
+    const rect = canvasWrap.getBoundingClientRect();
+    width = Math.max(300, rect.width);
+    height = Math.max(300, rect.height);
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    render();
+  }
+
+  exploreTab.addEventListener("click", function () { setMode("explore"); });
+  lawTab.addEventListener("click", function () { setMode("law"); });
+
+  exploreChoices.forEach(function (button) {
+    button.addEventListener("click", function () {
+      setExploreCase(button.dataset.case);
+    });
+  });
+
+  lawChoices.forEach(function (button) {
+    button.addEventListener("click", function () {
+      setLawCase(button.dataset.case);
+    });
+  });
+
+  speedBehavior.addEventListener("change", resetSimulation);
+
+  interactionButton.addEventListener("click", function () {
+    interactionOn = !interactionOn;
+    updateAll();
+  });
+
+  playButton.addEventListener("click", startPlaying);
+  pauseButton.addEventListener("click", pausePlaying);
+  stepButton.addEventListener("click", function () {
+    pausePlaying();
+    if (simTime >= MAX_TIME) resetSimulation();
+    advanceBy(SAMPLE_INTERVAL);
+  });
+  resetButton.addEventListener("click", resetSimulation);
+
+  window.addEventListener("resize", resizeCanvas);
+
+  if (typeof ResizeObserver !== "undefined") {
+    const observer = new ResizeObserver(resizeCanvas);
+    observer.observe(canvasWrap);
+  }
+
+  selectButton(exploreChoices, exploreCase);
+  selectButton(lawChoices, lawCase);
+  resetSimulation();
+  resizeCanvas();
+})();
+</script>
+</body>
+</html>
