@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two-Dimensional Average Velocity Explorer</title>
+<style>
+  :root{
+    --ink:#172238;
+    --muted:#56657a;
+    --paper:#ffffff;
+    --soft:#f4f7fb;
+    --line:#d5deea;
+    --blue:#1565c0;
+    --orange:#d66a00;
+    --purple:#7030a0;
+    --green:#16835b;
+    --red:#b8333a;
+    --focus:#ffbf47;
+  }
+
+  *{box-sizing:border-box}
+
+  body{
+    margin:0;
+    color:var(--ink);
+    background:#eef3f8;
+    font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    line-height:1.5;
+  }
+
+  header{
+    color:white;
+    background:linear-gradient(125deg,#17365d,#1565c0);
+    padding:1.5rem max(1rem,calc((100% - 1200px)/2));
+  }
+
+  header h1{
+    margin:0 0 .35rem;
+    font-size:clamp(1.65rem,4vw,2.55rem);
+    line-height:1.15;
+  }
+
+  header p{
+    max-width:850px;
+    margin:.35rem 0 0;
+    font-size:1.05rem;
+  }
+
+  main{
+    width:min(1200px,calc(100% - 1.5rem));
+    margin:1rem auto 3rem;
+  }
+
+  .panel{
+    margin:1rem 0;
+    padding:clamp(1rem,2vw,1.4rem);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:14px;
+    box-shadow:0 3px 12px rgba(23,34,56,.07);
+  }
+
+  h2,h3{line-height:1.25}
+  h2{margin:.1rem 0 .65rem}
+  h3{margin:.1rem 0 .45rem}
+  p{margin:.45rem 0}
+  .lead{font-size:1.08rem}
+  .muted,.hint{color:var(--muted)}
+  .small{font-size:.9rem}
+
+  .why{
+    border-left:6px solid var(--blue);
+  }
+
+  .progression{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1rem;
+  }
+
+  .stage{
+    padding:1rem;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:white;
+  }
+
+  .stage.current{
+    border:2px solid var(--blue);
+    background:#f5f9ff;
+  }
+
+  .stage-label{
+    display:inline-block;
+    margin-bottom:.5rem;
+    padding:.18rem .55rem;
+    border-radius:99px;
+    color:white;
+    background:#40536b;
+    font-weight:750;
+    font-size:.82rem;
+  }
+
+  .stage.current .stage-label{background:var(--blue)}
+
+  .sequence{
+    margin:.65rem 0 0;
+    padding-left:1.2rem;
+  }
+
+  .sequence li{margin:.45rem 0}
+  .sequence strong{color:#243b5a}
+
+  .mini-diagram{
+    display:block;
+    width:100%;
+    height:100px;
+    margin:.6rem 0;
+    border-radius:8px;
+    background:var(--soft);
+  }
+
+  .equation{
+    margin:.6rem 0;
+    padding:.65rem .8rem;
+    overflow-wrap:anywhere;
+    color:#102e55;
+    background:#eef5ff;
+    border-left:4px solid var(--blue);
+    border-radius:5px;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:1.05rem;
+  }
+
+  .vector{font-weight:750}
+  sub{line-height:0}
+
+  .sim-layout{
+    display:grid;
+    grid-template-columns:minmax(255px,320px) minmax(0,1fr);
+    gap:1rem;
+    align-items:start;
+  }
+
+  .controls{
+    padding:1rem;
+    background:var(--soft);
+    border:1px solid var(--line);
+    border-radius:12px;
+  }
+
+  fieldset{
+    margin:0 0 .9rem;
+    padding:.75rem;
+    border:1px solid #c8d4e2;
+    border-radius:9px;
+  }
+
+  legend{
+    padding:0 .35rem;
+    font-weight:750;
+  }
+
+  .control-row{
+    display:grid;
+    grid-template-columns:3rem 1fr 5rem;
+    gap:.5rem;
+    align-items:center;
+    margin:.6rem 0;
+  }
+
+  label{font-weight:650}
+
+  input[type="range"]{
+    width:100%;
+    min-height:30px;
+    accent-color:var(--blue);
+    cursor:pointer;
+    touch-action:pan-y;
+  }
+
+  input[type="number"]{
+    width:100%;
+    min-height:40px;
+    padding:.35rem;
+    border:1px solid #aebdce;
+    border-radius:7px;
+    color:var(--ink);
+    background:white;
+    font:inherit;
+  }
+
+  input:focus,button:focus{
+    outline:3px solid var(--focus);
+    outline-offset:2px;
+  }
+
+  .button-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:.55rem;
+  }
+
+  button{
+    min-height:46px;
+    padding:.55rem .7rem;
+    border:1px solid #245891;
+    border-radius:8px;
+    color:white;
+    background:#1968b3;
+    font:inherit;
+    font-weight:750;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  button:hover{background:#125793}
+  button.secondary{
+    color:#17365d;
+    background:white;
+  }
+  button.secondary:hover{background:#e9f1fb}
+
+  .canvas-wrap{
+    min-width:0;
+  }
+
+  canvas{
+    display:block;
+    width:100%;
+    aspect-ratio:16/10;
+    min-height:340px;
+    border:1px solid #bfcbd8;
+    border-radius:12px;
+    background:white;
+    touch-action:none;
+  }
+
+  .readout{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:.7rem;
+    margin-top:1rem;
+  }
+
+  .value-card{
+    min-width:0;
+    padding:.75rem;
+    border:1px solid var(--line);
+    border-radius:9px;
+    background:#fbfcfe;
+  }
+
+  .value-card .name{
+    display:block;
+    color:var(--muted);
+    font-size:.86rem;
+    font-weight:700;
+  }
+
+  .value-card output{
+    display:block;
+    margin-top:.2rem;
+    color:#142d4c;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:1.05rem;
+    font-weight:750;
+    overflow-wrap:anywhere;
+  }
+
+  .time-strip{
+    margin-top:.75rem;
+    padding:.65rem .8rem;
+    border-radius:8px;
+    background:#edf8f3;
+    border:1px solid #b9dece;
+  }
+
+  .notice{
+    border-left:6px solid var(--green);
+    background:#f3fbf7;
+  }
+
+  .notice ul{margin:.5rem 0 .2rem;padding-left:1.3rem}
+  .notice li{margin:.4rem 0}
+
+  .warning{
+    padding:.75rem;
+    border-radius:8px;
+    background:#fff6e8;
+    border:1px solid #edc986;
+  }
+
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.5rem 1rem;
+    margin:.55rem 0 0;
+    font-size:.88rem;
+  }
+
+  .key{white-space:nowrap}
+  .swatch{
+    display:inline-block;
+    width:1.5rem;
+    height:.2rem;
+    margin-right:.3rem;
+    vertical-align:middle;
+    background:currentColor;
+  }
+
+  .blue{color:var(--blue)}
+  .orange{color:var(--orange)}
+  .purple{color:var(--purple)}
+  .green{color:var(--green)}
+
+  footer{
+    padding:1.5rem;
+    color:#43546a;
+    text-align:center;
+    font-size:.9rem;
+  }
+
+  @media (max-width:900px){
+    .progression{grid-template-columns:1fr}
+    .sim-layout{grid-template-columns:1fr}
+    .controls{order:2}
+    .canvas-wrap{order:1}
+  }
+
+  @media (max-width:620px){
+    main{width:min(100% - .75rem,1200px)}
+    .panel{padding:.85rem;border-radius:10px}
+    .readout{grid-template-columns:1fr 1fr}
+    .control-row{grid-template-columns:2.7rem 1fr 4.7rem}
+    canvas{min-height:310px}
+  }
+
+  @media (max-width:420px){
+    .readout{grid-template-columns:1fr}
+    .button-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Two-Dimensional Average Velocity Explorer</h1>
+  <p>One motion can involve two coordinate changes. Explore how those changes combine to form one average velocity vector.</p>
+</header>
+
+<main>
+  <section class="panel why" aria-labelledby="why-title">
+    <h2 id="why-title">Why do we need coordinates and vectors?</h2>
+    <p class="lead">Saying “the object moved 8 meters” is incomplete if direction matters. Did it move right, left, upward, or diagonally?</p>
+    <p>A <strong>coordinate system</strong> gives everyone the same reference for describing position and motion. A <strong>vector</strong> records both <strong>magnitude</strong> and <strong>direction</strong>. Its components tell us how much of the vector points along each coordinate axis.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="progress-title">
+    <h2 id="progress-title">Building from one dimension to three</h2>
+    <p class="muted">At every stage: begin with the physical idea, draw it, represent it mathematically, calculate a simple example, and interpret the result.</p>
+
+    <div class="progression">
+      <article class="stage">
+        <span class="stage-label">1-D: one axis</span>
+        <h3>Motion along a line</h3>
+        <svg class="mini-diagram" viewBox="0 0 300 100" role="img" aria-label="One-dimensional number line with a position at positive four meters">
+          <line x1="25" y1="56" x2="278" y2="56" stroke="#34495e" stroke-width="2"/>
+          <polygon points="278,56 267,50 267,62" fill="#34495e"/>
+          <line x1="150" y1="45" x2="150" y2="67" stroke="#34495e" stroke-width="2"/>
+          <line x1="230" y1="45" x2="230" y2="67" stroke="#1565c0" stroke-width="3"/>
+          <circle cx="230" cy="56" r="7" fill="#1565c0"/>
+          <text x="142" y="83" font-size="14">0</text>
+          <text x="218" y="83" font-size="14">+4 m</text>
+          <text x="252" y="39" font-size="13">+x</text>
+        </svg>
+        <ol class="sequence">
+          <li><strong>Physical concept:</strong> a position is left or right of an origin.</li>
+          <li><strong>Visual:</strong> a number line supplies an origin and a positive direction.</li>
+          <li><strong>Mathematics:</strong> <span class="vector">r</span> = &lt;x&gt;.</li>
+          <li><strong>Example:</strong> <span class="vector">r</span> = &lt;4 m&gt;.</li>
+          <li><strong>Interpretation:</strong> the object is 4 m in the positive x direction.</li>
+        </ol>
+      </article>
+
+      <article class="stage current">
+        <span class="stage-label">2-D: two axes</span>
+        <h3>Motion on a plane</h3>
+        <svg class="mini-diagram" viewBox="0 0 300 100" role="img" aria-label="Two-dimensional coordinate axes and a position vector to three comma two">
+          <line x1="35" y1="76" x2="275" y2="76" stroke="#34495e" stroke-width="2"/>
+          <line x1="65" y1="92" x2="65" y2="10" stroke="#34495e" stroke-width="2"/>
+          <polygon points="275,76 264,70 264,82" fill="#34495e"/>
+          <polygon points="65,10 59,21 71,21" fill="#34495e"/>
+          <line x1="65" y1="76" x2="220" y2="28" stroke="#7030a0" stroke-width="4"/>
+          <polygon points="220,28 205,27 210,39" fill="#7030a0"/>
+          <line x1="65" y1="76" x2="220" y2="76" stroke="#d66a00" stroke-width="2" stroke-dasharray="6 4"/>
+          <line x1="220" y1="76" x2="220" y2="28" stroke="#1565c0" stroke-width="2" stroke-dasharray="6 4"/>
+          <text x="235" y="25" font-size="13">⟨3, 2⟩</text>
+          <text x="278" y="91" font-size="13">x</text>
+          <text x="48" y="15" font-size="13">y</text>
+        </svg>
+        <ol class="sequence">
+          <li><strong>Physical concept:</strong> a position can be horizontal and vertical.</li>
+          <li><strong>Visual:</strong> perpendicular x and y axes share one origin.</li>
+          <li><strong>Mathematics:</strong> <span class="vector">r</span> = &lt;x,y&gt; = x <strong>i</strong> + y <strong>j</strong>.</li>
+          <li><strong>Example:</strong> <span class="vector">r</span> = &lt;3 m,2 m&gt;.</li>
+          <li><strong>Interpretation:</strong> move 3 m in +x and 2 m in +y to reach the position.</li>
+        </ol>
+      </article>
+
+      <article class="stage">
+        <span class="stage-label">3-D: three axes</span>
+        <h3>Motion in space</h3>
+        <svg class="mini-diagram" viewBox="0 0 300 100" role="img" aria-label="Three-dimensional coordinate axes labeled x y and z">
+          <line x1="120" y1="69" x2="267" y2="69" stroke="#d66a00" stroke-width="3"/>
+          <polygon points="267,69 256,63 256,75" fill="#d66a00"/>
+          <line x1="120" y1="69" x2="62" y2="91" stroke="#16835b" stroke-width="3"/>
+          <polygon points="62,91 70,81 74,93" fill="#16835b"/>
+          <line x1="120" y1="69" x2="120" y2="10" stroke="#1565c0" stroke-width="3"/>
+          <polygon points="120,10 114,21 126,21" fill="#1565c0"/>
+          <line x1="120" y1="69" x2="220" y2="26" stroke="#7030a0" stroke-width="4"/>
+          <polygon points="220,26 205,27 211,39" fill="#7030a0"/>
+          <text x="272" y="74" font-size="14">x</text>
+          <text x="47" y="96" font-size="14">y</text>
+          <text x="129" y="15" font-size="14">z</text>
+          <text x="224" y="25" font-size="13">r</text>
+        </svg>
+        <ol class="sequence">
+          <li><strong>Physical concept:</strong> real locations can also differ in height or depth.</li>
+          <li><strong>Visual:</strong> add a z axis perpendicular to x and y.</li>
+          <li><strong>Mathematics:</strong> <span class="vector">r</span> = &lt;x,y,z&gt; = x <strong>i</strong> + y <strong>j</strong> + z <strong>k</strong>.</li>
+          <li><strong>Example:</strong> <span class="vector">r</span> = &lt;3 m,2 m,4 m&gt;.</li>
+          <li><strong>Interpretation:</strong> all three components are needed to locate the object in space.</li>
+        </ol>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="explorer-title">
+    <h2 id="explorer-title">Average Velocity in Two Dimensions</h2>
+    <p>Choose an initial position, a final position, and a positive elapsed time. Both coordinate changes occur during the <strong>same time interval</strong>.</p>
+
+    <div class="sim-layout">
+      <div class="controls" aria-label="Simulation controls">
+        <fieldset>
+          <legend>Initial position (meters)</legend>
+          <div class="control-row">
+            <label for="xiRange">x<sub>i</sub></label>
+            <input id="xiRange" type="range" min="-10" max="10" step="0.5" value="-6">
+            <input id="xiNumber" type="number" min="-10" max="10" step="0.5" value="-6" aria-label="Initial x coordinate in meters">
+          </div>
+          <div class="control-row">
+            <label for="yiRange">y<sub>i</sub></label>
+            <input id="yiRange" type="range" min="-10" max="10" step="0.5" value="-3">
+            <input id="yiNumber" type="number" min="-10" max="10" step="0.5" value="-3" aria-label="Initial y coordinate in meters">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Final position (meters)</legend>
+          <div class="control-row">
+            <label for="xfRange">x<sub>f</sub></label>
+            <input id="xfRange" type="range" min="-10" max="10" step="0.5" value="7">
+            <input id="xfNumber" type="number" min="-10" max="10" step="0.5" value="7" aria-label="Final x coordinate in meters">
+          </div>
+          <div class="control-row">
+            <label for="yfRange">y<sub>f</sub></label>
+            <input id="yfRange" type="range" min="-10" max="10" step="0.5" value="5">
+            <input id="yfNumber" type="number" min="-10" max="10" step="0.5" value="5" aria-label="Final y coordinate in meters">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Elapsed time</legend>
+          <div class="control-row">
+            <label for="dtRange">Δt</label>
+            <input id="dtRange" type="range" min="0.5" max="20" step="0.5" value="8">
+            <input id="dtNumber" type="number" min="0.5" max="20" step="0.5" value="8" aria-label="Positive elapsed time in seconds">
+          </div>
+          <p class="hint small">Elapsed time must be greater than zero.</p>
+        </fieldset>
+
+        <div class="button-grid">
+          <button id="playButton" type="button" aria-pressed="false">▶ Play</button>
+          <button id="resetButton" type="button" class="secondary">↺ Reset</button>
+          <button id="backButton" type="button" class="secondary">◀ Step Back</button>
+          <button id="forwardButton" type="button" class="secondary">Step Forward ▶</button>
+        </div>
+        <p class="small muted">Each step moves through one tenth of the selected time interval.</p>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="simCanvas" width="900" height="560" role="img" aria-label="Coordinate plane showing initial and final positions, displacement components, moving object, and average velocity vector">
+          Your browser does not support the HTML canvas element.
+        </canvas>
+        <div class="legend" aria-label="Diagram legend">
+          <span class="key blue"><span class="swatch"></span>vertical component</span>
+          <span class="key orange"><span class="swatch"></span>horizontal component</span>
+          <span class="key purple"><span class="swatch"></span>resultant vector</span>
+          <span class="key green"><span class="swatch"></span>moving object</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="readout" aria-live="polite">
+      <div class="value-card">
+        <span class="name">Horizontal displacement</span>
+        <output id="dxOutput">Δx = 13.00 m</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Vertical displacement</span>
+        <output id="dyOutput">Δy = 8.00 m</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Displacement vector</span>
+        <output id="drOutput">Δr = &lt;13.00, 8.00&gt; m</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Horizontal average velocity</span>
+        <output id="vxOutput">v<sub>x</sub> = 1.63 m/s</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Vertical average velocity</span>
+        <output id="vyOutput">v<sub>y</sub> = 1.00 m/s</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Average velocity vector</span>
+        <output id="vOutput">v = &lt;1.63, 1.00&gt; m/s</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Magnitude of average velocity</span>
+        <output id="speedOutput">|v| = 1.91 m/s</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Unit-vector notation</span>
+        <output id="unitOutput">v = 1.63 i + 1.00 j m/s</output>
+      </div>
+      <div class="value-card">
+        <span class="name">Animated position</span>
+        <output id="positionOutput">r = &lt;−6.00, −3.00&gt; m</output>
+      </div>
+    </div>
+
+    <div class="time-strip">
+      <strong>Animation time:</strong>
+      <output id="timeOutput">0.00 s of 8.00 s</output>
+      <span class="muted"> — The marker represents the object's position during the interval.</span>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="math-title">
+    <h2 id="math-title">From the physical change to the algebra</h2>
+    <p>First compare the final coordinates with the initial coordinates:</p>
+    <div class="equation">
+      Δx = x<sub>f</sub> − x<sub>i</sub>
+      &nbsp;&nbsp; and &nbsp;&nbsp;
+      Δy = y<sub>f</sub> − y<sub>i</sub>
+    </div>
+    <p>The two changes form one displacement vector:</p>
+    <div class="equation">
+      Δ<span class="vector">r</span> = &lt;Δx, Δy&gt;
+    </div>
+    <p>Divide both displacement components by the same elapsed time:</p>
+    <div class="equation">
+      <span class="vector">v</span> = &lt;v<sub>x</sub>,v<sub>y</sub>&gt;
+      = &lt;Δx/Δt, Δy/Δt&gt;
+      = v<sub>x</sub> <strong>i</strong> + v<sub>y</sub> <strong>j</strong>
+    </div>
+    <p>The magnitude follows from the Pythagorean theorem:</p>
+    <div class="equation">
+      |<span class="vector">v</span>| = √(v<sub>x</sub><sup>2</sup> + v<sub>y</sub><sup>2</sup>)
+    </div>
+    <div class="warning">
+      <strong>Vector versus magnitude:</strong>
+      <span class="vector">v</span> is a velocity vector, so it includes direction.
+      |<span class="vector">v</span>| is its magnitude, a nonnegative number. The magnitude of velocity is the average speed for the straight, constant-rate motion shown here; velocity and speed are not the same kind of quantity.
+    </div>
+    <p class="small muted">In three dimensions the same idea becomes <span class="vector">v</span> = &lt;v<sub>x</sub>,v<sub>y</sub>,v<sub>z</sub>&gt; = v<sub>x</sub> <strong>i</strong> + v<sub>y</sub> <strong>j</strong> + v<sub>z</sub> <strong>k</strong>.</p>
+  </section>
+
+  <section class="panel notice" aria-labelledby="notice-title">
+    <h2 id="notice-title">What to notice</h2>
+    <ul>
+      <li>There is <strong>one</strong> two-dimensional average velocity vector, not two separate motions.</li>
+      <li>Its horizontal and vertical components come from two coordinate changes over the <strong>same elapsed time</strong>.</li>
+      <li>A negative component indicates direction along a negative axis; it does not mean a negative magnitude.</li>
+      <li>If Δx is zero, the velocity is vertical. If Δy is zero, it is horizontal. If both are zero, the average velocity is zero.</li>
+      <li>Increasing the elapsed time while keeping both positions fixed decreases both velocity components and the magnitude.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>Use the controls to test motions in different quadrants and explain each result physically before using the equations.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  const defaults = { xi: -6, yi: -3, xf: 7, yf: 5, dt: 8 };
+  const state = { ...defaults, progress: 0, playing: false, lastTime: null };
+
+  const canvas = document.getElementById("simCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const controls = {
+    xi: [document.getElementById("xiRange"), document.getElementById("xiNumber")],
+    yi: [document.getElementById("yiRange"), document.getElementById("yiNumber")],
+    xf: [document.getElementById("xfRange"), document.getElementById("xfNumber")],
+    yf: [document.getElementById("yfRange"), document.getElementById("yfNumber")],
+    dt: [document.getElementById("dtRange"), document.getElementById("dtNumber")]
+  };
+
+  const outputs = {
+    dx: document.getElementById("dxOutput"),
+    dy: document.getElementById("dyOutput"),
+    dr: document.getElementById("drOutput"),
+    vx: document.getElementById("vxOutput"),
+    vy: document.getElementById("vyOutput"),
+    v: document.getElementById("vOutput"),
+    speed: document.getElementById("speedOutput"),
+    unit: document.getElementById("unitOutput"),
+    position: document.getElementById("positionOutput"),
+    time: document.getElementById("timeOutput")
+  };
+
+  const playButton = document.getElementById("playButton");
+  const resetButton = document.getElementById("resetButton");
+  const backButton = document.getElementById("backButton");
+  const forwardButton = document.getElementById("forwardButton");
+
+  function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function clean(value) {
+    return Math.abs(value) < 0.0000001 ? 0 : value;
+  }
+
+  function fixed(value) {
+    value = clean(value);
+    return value.toFixed(2).replace("-", "−");
+  }
+
+  function signedTerm(value, symbol, first) {
+    value = clean(value);
+    if (first) return fixed(value) + " " + symbol;
+    return value >= 0
+      ? " + " + fixed(value) + " " + symbol
+      : " − " + fixed(Math.abs(value)) + " " + symbol;
+  }
+
+  function calculations() {
+    const dx = state.xf - state.xi;
+    const dy = state.yf - state.yi;
+    const vx = dx / state.dt;
+    const vy = dy / state.dt;
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    const xNow = state.xi + state.progress * dx;
+    const yNow = state.yi + state.progress * dy;
+    return { dx, dy, vx, vy, speed, xNow, yNow };
+  }
+
+  function syncButton() {
+    playButton.textContent = state.playing ? "❚❚ Pause" : "▶ Play";
+    playButton.setAttribute("aria-pressed", String(state.playing));
+  }
+
+  function updateOutputs() {
+    const c = calculations();
+    outputs.dx.textContent = "Δx = " + fixed(c.dx) + " m";
+    outputs.dy.textContent = "Δy = " + fixed(c.dy) + " m";
+    outputs.dr.textContent = "Δr = <" + fixed(c.dx) + ", " + fixed(c.dy) + "> m";
+    outputs.vx.innerHTML = "v<sub>x</sub> = " + fixed(c.vx) + " m/s";
+    outputs.vy.innerHTML = "v<sub>y</sub> = " + fixed(c.vy) + " m/s";
+    outputs.v.textContent = "v = <" + fixed(c.vx) + ", " + fixed(c.vy) + "> m/s";
+    outputs.speed.textContent = "|v| = " + fixed(c.speed) + " m/s";
+    outputs.unit.textContent = "v = " + signedTerm(c.vx, "i", true) + signedTerm(c.vy, "j", false) + " m/s";
+    outputs.position.textContent = "r = <" + fixed(c.xNow) + ", " + fixed(c.yNow) + "> m";
+    outputs.time.textContent = fixed(state.progress * state.dt) + " s of " + fixed(state.dt) + " s";
+  }
+
+  function setPlaying(value) {
+    state.playing = value;
+    state.lastTime = null;
+    syncButton();
+  }
+
+  function handleControl(key, source, partner) {
+    let value = Number(source.value);
+    if (!Number.isFinite(value)) return;
+
+    const min = Number(source.min);
+    const max = Number(source.max);
+    value = clamp(value, min, max);
+
+    if (key === "dt") value = Math.max(0.5, value);
+
+    state[key] = value;
+    source.value = String(value);
+    partner.value = String(value);
+    state.progress = 0;
+    setPlaying(false);
+    update();
+  }
+
+  Object.keys(controls).forEach(function (key) {
+    const range = controls[key][0];
+    const number = controls[key][1];
+
+    range.addEventListener("input", function () {
+      handleControl(key, range, number);
+    });
+
+    number.addEventListener("input", function () {
+      if (number.value !== "") handleControl(key, number, range);
+    });
+
+    number.addEventListener("change", function () {
+      if (number.value === "" || !Number.isFinite(Number(number.value))) {
+        number.value = String(state[key]);
+      } else {
+        handleControl(key, number, range);
+      }
+    });
+  });
+
+  playButton.addEventListener("click", function () {
+    if (state.playing) {
+      setPlaying(false);
+    } else {
+      if (state.progress >= 1) state.progress = 0;
+      setPlaying(true);
+      requestAnimationFrame(animate);
+    }
+    update();
+  });
+
+  resetButton.addEventListener("click", function () {
+    Object.assign(state, defaults, { progress: 0, playing: false, lastTime: null });
+    Object.keys(controls).forEach(function (key) {
+      controls[key][0].value = String(state[key]);
+      controls[key][1].value = String(state[key]);
+    });
+    syncButton();
+    update();
+  });
+
+  backButton.addEventListener("click", function () {
+    setPlaying(false);
+    state.progress = clamp(Math.round((state.progress - 0.1) * 10) / 10, 0, 1);
+    update();
+  });
+
+  forwardButton.addEventListener("click", function () {
+    setPlaying(false);
+    state.progress = clamp(Math.round((state.progress + 0.1) * 10) / 10, 0, 1);
+    update();
+  });
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const width = Math.max(320, Math.round(rect.width * ratio));
+    const height = Math.max(300, Math.round(rect.height * ratio));
+
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    draw();
+  }
+
+  function line(x1, y1, x2, y2, color, width, dash) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.setLineDash(dash || []);
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function arrow(x1, y1, x2, y2, color, width, dash) {
+    line(x1, y1, x2, y2, color, width, dash);
+    const angle = Math.atan2(y2 - y1, x2 - x1);
+    const length = Math.hypot(x2 - x1, y2 - y1);
+    if (length < 3) return;
+    const head = Math.min(13, Math.max(7, length * 0.18));
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(x2, y2);
+    ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function label(text, x, y, color, align, background) {
+    ctx.save();
+    ctx.font = "600 12px system-ui, sans-serif";
+    ctx.textAlign = align || "center";
+    ctx.textBaseline = "middle";
+    const metrics = ctx.measureText(text);
+    if (background) {
+      const left = (align === "left") ? x - 4 : (align === "right" ? x - metrics.width - 4 : x - metrics.width / 2 - 4);
+      ctx.fillStyle = "rgba(255,255,255,.88)";
+      ctx.fillRect(left, y - 9, metrics.width + 8, 18);
+    }
+    ctx.fillStyle = color || "#172238";
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  function drawMainPlane(area, c) {
+    const min = -10;
+    const max = 10;
+    const pad = 32;
+    const size = Math.min(area.w - pad * 2, area.h - pad * 2);
+    const left = area.x + (area.w - size) / 2;
+    const top = area.y + (area.h - size) / 2;
+
+    function sx(x) { return left + ((x - min) / (max - min)) * size; }
+    function sy(y) { return top + size - ((y - min) / (max - min)) * size; }
+
+    ctx.save();
+    ctx.fillStyle = "#fbfcfe";
+    ctx.fillRect(left, top, size, size);
+    ctx.strokeStyle = "#c6d2df";
+    ctx.strokeRect(left, top, size, size);
+
+    for (let n = min; n <= max; n += 2) {
+      const px = sx(n);
+      const py = sy(n);
+      line(px, top, px, top + size, n === 0 ? "#56657a" : "#e2e8f0", n === 0 ? 2 : 1);
+      line(left, py, left + size, py, n === 0 ? "#56657a" : "#e2e8f0", n === 0 ? 2 : 1);
+
+      if (n !== 0) {
+        label(String(n).replace("-", "−"), px, sy(0) + 13, "#66758a", "center", false);
+        label(String(n).replace("-", "−"), sx(0) - 7, py, "#66758a", "right", false);
+      }
+    }
+
+    label("x (m)", left + size - 2, sy(0) - 14, "#243b5a", "right", true);
+    label("y (m)", sx(0) + 8, top + 10, "#243b5a", "left", true);
+    label("Position and displacement", left, top - 16, "#172238", "left", false);
+
+    const xi = sx(state.xi);
+    const yi = sy(state.yi);
+    const xf = sx(state.xf);
+    const yf = sy(state.yf);
+    const cornerX = xf;
+    const cornerY = yi;
+
+    arrow(xi, yi, cornerX, cornerY, "#d66a00", 3, [8, 5]);
+    arrow(cornerX, cornerY, xf, yf, "#1565c0", 3, [8, 5]);
+    arrow(xi, yi, xf, yf, "#7030a0", 4, []);
+
+    if (Math.abs(c.dx) > 0.01) {
+      label("Δx = " + fixed(c.dx) + " m", (xi + cornerX) / 2, yi + (c.dy >= 0 ? 15 : -15), "#9b4c00", "center", true);
+    }
+    if (Math.abs(c.dy) > 0.01) {
+      label("Δy = " + fixed(c.dy) + " m", cornerX + (c.dx >= 0 ? -8 : 8), (cornerY + yf) / 2, "#0e559f", c.dx >= 0 ? "right" : "left", true);
+    }
+
+    ctx.fillStyle = "#172238";
+    ctx.beginPath();
+    ctx.arc(xi, yi, 6, 0, Math.PI * 2);
+    ctx.fill();
+    label("initial", xi + 9, yi + 15, "#172238", "left", true);
+
+    ctx.fillStyle = "#b8333a";
+    ctx.beginPath();
+    ctx.arc(xf, yf, 7, 0, Math.PI * 2);
+    ctx.fill();
+    label("final", xf + 9, yf - 14, "#8f252d", "left", true);
+
+    const px = sx(c.xNow);
+    const py = sy(c.yNow);
+    ctx.fillStyle = "#16835b";
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(px, py, 9, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    label("object", px, py - 17, "#116746", "center", true);
+    ctx.restore();
+  }
+
+  function drawVelocityInset(area, c) {
+    const margin = 17;
+    const boxX = area.x + margin;
+    const boxY = area.y + 38;
+    const boxW = area.w - margin * 2;
+    const boxH = area.h - 58;
+
+    ctx.save();
+    ctx.fillStyle = "#f7f2fb";
+    ctx.fillRect(boxX, boxY, boxW, boxH);
+    ctx.strokeStyle = "#cdb9dc";
+    ctx.strokeRect(boxX, boxY, boxW, boxH);
+    label("Average velocity", area.x + area.w / 2, area.y + 16, "#4e226e", "center", false);
+    label("axes in m/s", area.x + area.w / 2, area.y + 31, "#66758a", "center", false);
+
+    const scaleMax = Math.max(1, Math.ceil(Math.max(Math.abs(c.vx), Math.abs(c.vy)) * 1.2));
+    const halfW = boxW / 2 - 18;
+    const halfH = boxH / 2 - 18;
+    const ox = boxX + boxW / 2;
+    const oy = boxY + boxH / 2;
+    const scale = Math.min(halfW, halfH) / scaleMax;
+
+    line(boxX + 8, oy, boxX + boxW - 8, oy, "#718096", 1.5);
+    line(ox, boxY + 8, ox, boxY + boxH - 8, "#718096", 1.5);
+    label("+vₓ", boxX + boxW - 9, oy - 12, "#56657a", "right", true);
+    label("+vᵧ", ox + 7, boxY + 12, "#56657a", "left", true);
+    label("±" + scaleMax, boxX + boxW - 8, boxY + boxH - 10, "#7a8798", "right", false);
+
+    const endX = ox + c.vx * scale;
+    const endY = oy - c.vy * scale;
+    const cornerX = endX;
+    const cornerY = oy;
+
+    arrow(ox, oy, cornerX, cornerY, "#d66a00", 3, [6, 4]);
+    arrow(cornerX, cornerY, endX, endY, "#1565c0", 3, [6, 4]);
+    arrow(ox, oy, endX, endY, "#7030a0", 4, []);
+
+    if (Math.abs(c.vx) > 0.005) {
+      label("vₓ = " + fixed(c.vx), (ox + cornerX) / 2, oy + (c.vy >= 0 ? 14 : -14), "#9b4c00", "center", true);
+    }
+    if (Math.abs(c.vy) > 0.005) {
+      label("vᵧ = " + fixed(c.vy), cornerX + (c.vx >= 0 ? -6 : 6), (cornerY + endY) / 2, "#0e559f", c.vx >= 0 ? "right" : "left", true);
+    }
+
+    label("v = <" + fixed(c.vx) + ", " + fixed(c.vy) + ">", area.x + area.w / 2, boxY + boxH - 18, "#4e226e", "center", true);
+    ctx.restore();
+  }
+
+  function draw() {
+    const ratio = Math.min(window.devicePixelRatio || 1, 2);
+    const w = canvas.width / ratio;
+    const h = canvas.height / ratio;
+    const c = calculations();
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, w, h);
+
+    if (w < 570) {
+      const upper = { x: 0, y: 0, w: w, h: h * 0.63 };
+      const lower = { x: 0, y: h * 0.63, w: w, h: h * 0.37 };
+      drawMainPlane(upper, c);
+      drawVelocityInset(lower, c);
+    } else {
+      const divider = w * 0.68;
+      drawMainPlane({ x: 0, y: 0, w: divider, h: h }, c);
+      line(divider, 18, divider, h - 18, "#d5deea", 1);
+      drawVelocityInset({ x: divider, y: 0, w: w - divider, h: h }, c);
+    }
+  }
+
+  function update() {
+    updateOutputs();
+    draw();
+  }
+
+  function animate(timestamp) {
+    if (!state.playing) return;
+
+    if (state.lastTime === null) state.lastTime = timestamp;
+    const elapsedSeconds = (timestamp - state.lastTime) / 1000;
+    state.lastTime = timestamp;
+    state.progress += elapsedSeconds / state.dt;
+
+    if (state.progress >= 1) {
+      state.progress = 1;
+      setPlaying(false);
+      update();
+      return;
+    }
+
+    update();
+    requestAnimationFrame(animate);
+  }
+
+  let resizeTimer;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(resizeCanvas, 80);
+  });
+
+  syncButton();
+  resizeCanvas();
+  update();
+})();
+</script>
+</body>
+</html>

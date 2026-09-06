@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three-Dimensional Vector Explorer</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #5d6678;
+      --line: #d9deea;
+      --panel: #ffffff;
+      --page: #f4f6fb;
+      --accent: #5b4bdb;
+      --accent-dark: #3e32aa;
+      --x: #d44343;
+      --y: #078b80;
+      --z: #c27a00;
+      --soft-purple: #f0edff;
+      --soft-blue: #eef6ff;
+      --shadow: 0 12px 32px rgba(36, 44, 75, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      color: white;
+      background:
+        radial-gradient(circle at 80% 10%, rgba(255,255,255,0.15), transparent 27%),
+        linear-gradient(135deg, #27336f, #5b4bdb);
+      padding: 2.8rem 1.25rem 2.4rem;
+    }
+
+    .header-inner,
+    main {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 0.4rem;
+      color: #dcd8ff;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      line-height: 1.08;
+    }
+
+    header .lead {
+      max-width: 780px;
+      margin: 1rem 0 0;
+      color: #f1f2ff;
+      font-size: clamp(1rem, 2vw, 1.18rem);
+    }
+
+    main {
+      padding: 1.5rem 0 3rem;
+    }
+
+    section,
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    section {
+      margin: 1.25rem 0;
+      padding: clamp(1.1rem, 3vw, 1.75rem);
+    }
+
+    h2, h3, h4, p {
+      margin-top: 0;
+    }
+
+    h2 {
+      margin-bottom: 0.65rem;
+      font-size: clamp(1.35rem, 3vw, 1.8rem);
+    }
+
+    h3 {
+      font-size: 1.08rem;
+    }
+
+    .intro-grid,
+    .progression-grid,
+    .sim-layout,
+    .readout-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .intro-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    .why-card {
+      padding: 1.2rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(145deg, #fff, #f7f8ff);
+    }
+
+    .why-card strong {
+      color: var(--accent-dark);
+    }
+
+    .concept-banner {
+      margin-top: 1rem;
+      padding: 1rem 1.1rem;
+      border-left: 5px solid var(--accent);
+      border-radius: 8px;
+      background: var(--soft-purple);
+    }
+
+    .stage-label {
+      display: inline-block;
+      margin-bottom: 0.7rem;
+      padding: 0.22rem 0.65rem;
+      color: white;
+      background: var(--accent);
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .progression-grid {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      margin-top: 1rem;
+    }
+
+    .step-card {
+      min-width: 0;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: #fbfcff;
+    }
+
+    .step-number {
+      display: inline-grid;
+      width: 1.75rem;
+      height: 1.75rem;
+      margin-bottom: 0.55rem;
+      place-items: center;
+      color: white;
+      background: var(--accent);
+      border-radius: 50%;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .step-card h3 {
+      margin-bottom: 0.35rem;
+    }
+
+    .step-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .math {
+      color: #202a4c;
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 1.06em;
+      white-space: nowrap;
+    }
+
+    .diagram {
+      width: 100%;
+      min-height: 125px;
+      margin: 0.35rem 0 0.45rem;
+      border: 1px solid #e2e5ee;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .stage-note {
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .simulation {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .sim-heading {
+      padding: 1.4rem 1.5rem 1rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .sim-heading p {
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    .axis-convention {
+      display: inline-block;
+      margin-top: 0.75rem;
+      padding: 0.55rem 0.8rem;
+      border: 1px solid #cfd5e5;
+      border-radius: 9px;
+      background: #f8f9fd;
+      font-size: 0.92rem;
+      font-weight: 650;
+    }
+
+    .sim-layout {
+      grid-template-columns: minmax(270px, 0.72fr) minmax(420px, 1.55fr);
+      padding: 1.2rem;
+    }
+
+    .controls {
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fafbff;
+    }
+
+    .controls h3 {
+      margin-bottom: 0.25rem;
+    }
+
+    .control-help {
+      margin-bottom: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .component-control {
+      margin-bottom: 1.15rem;
+      padding-left: 0.75rem;
+      border-left: 4px solid;
+    }
+
+    .component-control.x { border-color: var(--x); }
+    .component-control.y { border-color: var(--y); }
+    .component-control.z { border-color: var(--z); }
+
+    .control-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .control-top label {
+      font-weight: 750;
+    }
+
+    .number-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.32rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    input[type="number"] {
+      width: 4.6rem;
+      padding: 0.35rem 0.4rem;
+      color: var(--ink);
+      background: white;
+      border: 1px solid #bfc6d7;
+      border-radius: 7px;
+      font: inherit;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .x input[type="range"] { accent-color: var(--x); }
+    .y input[type="range"] { accent-color: var(--y); }
+    .z input[type="range"] { accent-color: var(--z); }
+
+    .range-scale {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    button {
+      min-height: 40px;
+      padding: 0.55rem 0.8rem;
+      color: var(--ink);
+      background: white;
+      border: 1px solid #bbc3d5;
+      border-radius: 9px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #f0f2f8;
+      border-color: #8f99b0;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    canvas:focus-visible {
+      outline: 3px solid rgba(91, 75, 219, 0.3);
+      outline-offset: 2px;
+    }
+
+    .reset {
+      width: 100%;
+      color: white;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .reset:hover {
+      color: white;
+      background: var(--accent-dark);
+      border-color: var(--accent-dark);
+    }
+
+    .visual-column {
+      min-width: 0;
+    }
+
+    .canvas-shell {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #cfd5e3;
+      border-radius: 14px;
+      background: linear-gradient(#ffffff, #f8faff);
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 490px;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    .canvas-tip {
+      position: absolute;
+      top: 0.7rem;
+      left: 0.7rem;
+      padding: 0.35rem 0.55rem;
+      color: #46506a;
+      background: rgba(255,255,255,0.9);
+      border: 1px solid #d5daea;
+      border-radius: 7px;
+      font-size: 0.78rem;
+      pointer-events: none;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem 0.8rem;
+      margin: 0.75rem 0;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .swatch {
+      width: 1.1rem;
+      height: 0.28rem;
+      border-radius: 999px;
+    }
+
+    .view-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .view-controls strong {
+      margin-right: 0.25rem;
+      font-size: 0.9rem;
+    }
+
+    .readout-area {
+      padding: 1.2rem;
+      border-top: 1px solid var(--line);
+      background: #fbfbfe;
+    }
+
+    .readout-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .readout {
+      min-width: 0;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: white;
+    }
+
+    .readout h3 {
+      margin-bottom: 0.35rem;
+      color: var(--muted);
+      font-size: 0.83rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .readout-value {
+      margin: 0;
+      overflow-wrap: anywhere;
+      color: #222950;
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: clamp(1.05rem, 2.2vw, 1.3rem);
+      font-weight: 700;
+    }
+
+    .calculation,
+    .interpretation {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+    }
+
+    .calculation {
+      background: var(--soft-blue);
+      border-left: 4px solid #3982c4;
+    }
+
+    .interpretation {
+      background: #f7f4ff;
+      border-left: 4px solid var(--accent);
+    }
+
+    .calculation p,
+    .interpretation p {
+      margin: 0;
+    }
+
+    .notice {
+      background: #fffaf0;
+      border-color: #ead7ad;
+    }
+
+    .notice ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.25rem;
+    }
+
+    .notice li {
+      margin: 0.38rem 0;
+    }
+
+    .vocabulary {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+
+    .vocab-card {
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcff;
+    }
+
+    .vocab-card h3 {
+      margin-bottom: 0.25rem;
+    }
+
+    .vocab-card p {
+      margin-bottom: 0;
+      color: var(--muted);
+    }
+
+    footer {
+      padding: 1.2rem;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 940px) {
+      .progression-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .sim-layout {
+        grid-template-columns: 1fr;
+      }
+
+      canvas {
+        height: 450px;
+      }
+    }
+
+    @media (max-width: 650px) {
+      .intro-grid,
+      .progression-grid,
+      .readout-grid,
+      .vocabulary {
+        grid-template-columns: 1fr;
+      }
+
+      .header-inner,
+      main {
+        width: min(100% - 1rem, 1180px);
+      }
+
+      section {
+        border-radius: 13px;
+      }
+
+      .sim-layout {
+        padding: 0.75rem;
+      }
+
+      canvas {
+        height: 390px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <p class="eyebrow">Vectors and Coordinate Systems</p>
+      <h1>Three-Dimensional Vector Explorer</h1>
+      <p class="lead">
+        Connect three velocity components to one velocity vector, its direction, and its magnitude.
+        Begin with the physical need for coordinates, then progress from one dimension to three.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section aria-labelledby="why-title">
+      <h2 id="why-title">Why do we need coordinates and vectors?</h2>
+      <div class="intro-grid">
+        <article class="why-card">
+          <h3>A number alone is sometimes incomplete</h3>
+          <p>
+            Saying “the building is 300 metres away” gives a size, but not a direction.
+            Different people could walk 300 metres and arrive at different places.
+          </p>
+          <p>
+            A <strong>coordinate system</strong> gives everyone the same origin and the same
+            positive directions, so positions and motions can be described consistently.
+          </p>
+        </article>
+        <article class="why-card">
+          <h3>Motion has direction</h3>
+          <p>
+            A car moving east at 20 m/s and a car moving west at 20 m/s have the same
+            speed, but different velocities.
+          </p>
+          <p>
+            A <strong>vector</strong> is a quantity with both magnitude and direction.
+            Its components tell how much of the vector lies along each coordinate axis.
+          </p>
+        </article>
+      </div>
+      <div class="concept-banner">
+        <strong>Central idea:</strong> coordinates provide the shared reference; a vector uses
+        that reference to communicate magnitude and direction.
+      </div>
+    </section>
+
+    <section aria-labelledby="one-d-title">
+      <span class="stage-label">Stage 1</span>
+      <h2 id="one-d-title">One dimension: one coordinate</h2>
+      <p class="stage-note">Example convention: the origin is 0, right is positive, and left is negative.</p>
+
+      <div class="progression-grid">
+        <article class="step-card">
+          <span class="step-number">1</span>
+          <h3>Physical concept</h3>
+          <p>An object constrained to a straight track needs only one coordinate to specify its position.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">2</span>
+          <h3>Visual diagram</h3>
+          <svg class="diagram" viewBox="0 0 230 125" role="img" aria-label="One-dimensional number line with a point three metres left of the origin">
+            <defs>
+              <marker id="oneArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 Z" fill="#59637a"></path>
+              </marker>
+            </defs>
+            <line x1="20" y1="67" x2="214" y2="67" stroke="#59637a" stroke-width="2" marker-end="url(#oneArrow)"></line>
+            <line x1="115" y1="57" x2="115" y2="77" stroke="#172033" stroke-width="2"></line>
+            <text x="110" y="94" font-size="13" fill="#172033">0</text>
+            <line x1="115" y1="45" x2="55" y2="45" stroke="#5b4bdb" stroke-width="4"></line>
+            <polygon points="55,45 65,39 65,51" fill="#5b4bdb"></polygon>
+            <circle cx="55" cy="67" r="6" fill="#5b4bdb"></circle>
+            <text x="34" y="29" font-size="13" fill="#3e32aa">x = −3 m</text>
+            <text x="194" y="91" font-size="12" fill="#59637a">+x</text>
+          </svg>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">3</span>
+          <h3>Mathematical representation</h3>
+          <p><span class="math"><i>r</i> = &lang;<i>x</i>&rang;</span></p>
+          <p>The single component may be positive, negative, or zero.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">4</span>
+          <h3>Numerical example</h3>
+          <p><span class="math"><i>r</i> = &lang;−3&rang; m</span></p>
+          <p>Its magnitude is <span class="math">|<i>r</i>| = 3 m</span>.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">5</span>
+          <h3>Physical interpretation</h3>
+          <p>The negative sign means “left of the origin,” not “less position.” Magnitude is a nonnegative size.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="two-d-title">
+      <span class="stage-label">Stage 2</span>
+      <h2 id="two-d-title">Two dimensions: two independent directions</h2>
+      <p class="stage-note">For a flat map, take +x to the right and +y toward the top of the map.</p>
+
+      <div class="progression-grid">
+        <article class="step-card">
+          <span class="step-number">1</span>
+          <h3>Physical concept</h3>
+          <p>A location on a floor or map needs two coordinates. One number cannot distinguish all possible locations.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">2</span>
+          <h3>Visual diagram</h3>
+          <svg class="diagram" viewBox="0 0 230 150" role="img" aria-label="Two-dimensional vector with components three and four">
+            <defs>
+              <marker id="twoArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 Z" fill="#59637a"></path>
+              </marker>
+              <marker id="vecArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 Z" fill="#5b4bdb"></path>
+              </marker>
+            </defs>
+            <line x1="35" y1="125" x2="215" y2="125" stroke="#59637a" stroke-width="2" marker-end="url(#twoArrow)"></line>
+            <line x1="35" y1="125" x2="35" y2="15" stroke="#59637a" stroke-width="2" marker-end="url(#twoArrow)"></line>
+            <line x1="35" y1="125" x2="150" y2="125" stroke="#d44343" stroke-width="4"></line>
+            <line x1="150" y1="125" x2="150" y2="37" stroke="#078b80" stroke-width="4" stroke-dasharray="5 4"></line>
+            <line x1="35" y1="125" x2="150" y2="37" stroke="#5b4bdb" stroke-width="4" marker-end="url(#vecArrow)"></line>
+            <circle cx="150" cy="37" r="5" fill="#5b4bdb"></circle>
+            <text x="195" y="143" font-size="12" fill="#59637a">+x</text>
+            <text x="9" y="24" font-size="12" fill="#59637a">+y</text>
+            <text x="82" y="143" font-size="12" fill="#b33535">3 m</text>
+            <text x="157" y="83" font-size="12" fill="#08756c">4 m</text>
+          </svg>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">3</span>
+          <h3>Mathematical representation</h3>
+          <p><span class="math"><i>r</i> = &lang;<i>x</i>, <i>y</i>&rang;</span></p>
+          <p>The ordered components must match the agreed axis order.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">4</span>
+          <h3>Numerical example</h3>
+          <p><span class="math"><i>r</i> = &lang;3, 4&rang; m</span></p>
+          <p><span class="math">|<i>r</i>| = √(3² + 4²) = 5 m</span></p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">5</span>
+          <h3>Physical interpretation</h3>
+          <p>The point is 3 m in +x and 4 m in +y. The straight-line distance from the origin is 5 m.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="simulation" aria-labelledby="sim-title">
+      <div class="sim-heading">
+        <span class="stage-label">Stage 3: Interactive model</span>
+        <h2 id="sim-title">Three dimensions: velocity components and magnitude</h2>
+        <p>
+          Set each component to a positive, negative, or zero value. The display updates immediately.
+          Drag the diagram to rotate your view; this changes only the viewpoint, not the physical vector.
+        </p>
+        <div class="axis-convention">
+          Axis convention: +x is right, +y is away along the floor, and +z is upward.
+        </div>
+      </div>
+
+      <div class="sim-layout">
+        <aside class="controls" aria-label="Velocity component controls">
+          <h3>Velocity components</h3>
+          <p class="control-help">Use a slider or enter a whole-number value from −10 to +10 m/s.</p>
+
+          <div class="component-control x">
+            <div class="control-top">
+              <label for="vxRange"><i>v</i><sub>x</sub> component</label>
+              <span class="number-wrap">
+                <input id="vxNumber" type="number" min="-10" max="10" step="1" value="6" aria-label="x velocity component in metres per second">
+                <span>m/s</span>
+              </span>
+            </div>
+            <input id="vxRange" type="range" min="-10" max="10" step="1" value="6">
+            <div class="range-scale"><span>−10</span><span>0</span><span>+10</span></div>
+          </div>
+
+          <div class="component-control y">
+            <div class="control-top">
+              <label for="vyRange"><i>v</i><sub>y</sub> component</label>
+              <span class="number-wrap">
+                <input id="vyNumber" type="number" min="-10" max="10" step="1" value="-4" aria-label="y velocity component in metres per second">
+                <span>m/s</span>
+              </span>
+            </div>
+            <input id="vyRange" type="range" min="-10" max="10" step="1" value="-4">
+            <div class="range-scale"><span>−10</span><span>0</span><span>+10</span></div>
+          </div>
+
+          <div class="component-control z">
+            <div class="control-top">
+              <label for="vzRange"><i>v</i><sub>z</sub> component</label>
+              <span class="number-wrap">
+                <input id="vzNumber" type="number" min="-10" max="10" step="1" value="3" aria-label="z velocity component in metres per second">
+                <span>m/s</span>
+              </span>
+            </div>
+            <input id="vzRange" type="range" min="-10" max="10" step="1" value="3">
+            <div class="range-scale"><span>−10</span><span>0</span><span>+10</span></div>
+          </div>
+
+          <button id="resetButton" class="reset" type="button">Reset components and view</button>
+        </aside>
+
+        <div class="visual-column">
+          <div class="canvas-shell">
+            <canvas id="vectorCanvas" tabindex="0" role="img" aria-label="Three-dimensional velocity vector diagram"></canvas>
+            <div class="canvas-tip">Drag to rotate the view</div>
+          </div>
+
+          <div class="legend" aria-label="Diagram legend">
+            <span><i class="swatch" style="background:#d44343"></i><i>v</i><sub>x</sub> component</span>
+            <span><i class="swatch" style="background:#078b80"></i><i>v</i><sub>y</sub> component</span>
+            <span><i class="swatch" style="background:#c27a00"></i><i>v</i><sub>z</sub> component</span>
+            <span><i class="swatch" style="background:#5b4bdb"></i>complete vector <i>v</i></span>
+            <span><i class="swatch" style="background:#9aa2b5"></i>dashed component path</span>
+          </div>
+
+          <div class="view-controls" aria-label="View rotation controls">
+            <strong>View:</strong>
+            <button type="button" data-view="left" aria-label="Rotate view left">↶ Left</button>
+            <button type="button" data-view="right" aria-label="Rotate view right">Right ↷</button>
+            <button type="button" data-view="up" aria-label="Raise view">↑ Up</button>
+            <button type="button" data-view="down" aria-label="Lower view">↓ Down</button>
+            <button type="button" data-view="iso">Isometric</button>
+            <button type="button" data-view="front">Front</button>
+            <button type="button" data-view="top">Top</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="readout-area" aria-live="polite">
+        <div class="readout-grid">
+          <article class="readout">
+            <h3>Component notation</h3>
+            <p id="componentNotation" class="readout-value"></p>
+          </article>
+          <article class="readout">
+            <h3>Unit-vector notation</h3>
+            <p id="unitNotation" class="readout-value"></p>
+          </article>
+          <article class="readout">
+            <h3>Magnitude of velocity</h3>
+            <p id="magnitudeReadout" class="readout-value"></p>
+          </article>
+        </div>
+
+        <div class="calculation">
+          <p id="magnitudeCalculation" class="math"></p>
+        </div>
+
+        <div class="interpretation">
+          <p><strong>Physical interpretation:</strong> <span id="physicalInterpretation"></span></p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="three-sequence-title">
+      <h2 id="three-sequence-title">Making sense of the three-dimensional model</h2>
+      <div class="progression-grid">
+        <article class="step-card">
+          <span class="step-number">1</span>
+          <h3>Physical concept</h3>
+          <p>Motion through space can include sideways, forward–backward, and upward–downward motion at the same time.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">2</span>
+          <h3>Visual diagram</h3>
+          <p>The colored component arrows lie along the axes. The purple arrow combines all three into one velocity vector.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">3</span>
+          <h3>Mathematical representation</h3>
+          <p><span class="math"><i>r</i> = &lang;<i>x</i>, <i>y</i>, <i>z</i>&rang;</span></p>
+          <p><span class="math"><i>v</i> = &lang;<i>v</i><sub>x</sub>, <i>v</i><sub>y</sub>, <i>v</i><sub>z</sub>&rang;</span></p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">4</span>
+          <h3>Numerical example</h3>
+          <p>For <span class="math"><i>v</i> = &lang;6, −4, 3&rang; m/s</span>,</p>
+          <p><span class="math">|<i>v</i>| = √(6² + (−4)² + 3²) = √61 ≈ 7.81 m/s</span>.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">5</span>
+          <h3>Physical interpretation</h3>
+          <p>The signs give axis directions. The magnitude gives speed; it does not replace the directional information in velocity.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="notation-title">
+      <h2 id="notation-title">Two ways to write the same vector</h2>
+      <div class="vocabulary">
+        <article class="vocab-card">
+          <h3>Component notation</h3>
+          <p>
+            <span class="math"><i>r</i> = &lang;<i>x</i>, <i>y</i>, <i>z</i>&rang;</span> and
+            <span class="math"><i>v</i> = &lang;<i>v</i><sub>x</sub>, <i>v</i><sub>y</sub>, <i>v</i><sub>z</sub>&rang;</span>.
+            The order corresponds to x, then y, then z.
+          </p>
+        </article>
+        <article class="vocab-card">
+          <h3>Unit-vector notation</h3>
+          <p>
+            <span class="math"><i>r</i> = <i>x i</i> + <i>y j</i> + <i>z k</i></span> and
+            <span class="math"><i>v</i> = <i>v</i><sub>x</sub><i> i</i> + <i>v</i><sub>y</sub><i> j</i> + <i>v</i><sub>z</sub><i> k</i></span>.
+            Here <span class="math"><i>i</i>, <i>j</i>, <i>k</i></span> indicate the positive x, y, and z directions.
+          </p>
+        </article>
+        <article class="vocab-card">
+          <h3>Vector versus magnitude</h3>
+          <p>
+            <span class="math"><i>v</i></span> is velocity, including direction.
+            <span class="math">|<i>v</i>|</span> is its nonnegative magnitude. The magnitude of velocity is speed.
+          </p>
+        </article>
+        <article class="vocab-card">
+          <h3>Three-dimensional Pythagorean theorem</h3>
+          <p>
+            <span class="math">|<i>v</i>| = √(<i>v</i><sub>x</sub>² + <i>v</i><sub>y</sub>² + <i>v</i><sub>z</sub>²)</span>.
+            This combines perpendicular component lengths into one straight-line length.
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="notice" aria-labelledby="notice-title">
+      <h2 id="notice-title">What to notice</h2>
+      <ul>
+        <li>Three component values describe one vector; they are not three separate velocities.</li>
+        <li>A negative component reverses direction along its axis. It does not make the magnitude negative.</li>
+        <li>A zero component has zero arrow length, so the vector lies partly or entirely in a lower-dimensional space.</li>
+        <li>If two components are zero, the vector is effectively one-dimensional. If one is zero, it lies in a plane.</li>
+        <li>Rotating the view changes the drawing on the screen but not the component values, magnitude, or physical vector.</li>
+        <li>The purple arrow shows velocity, not the path already traveled by an object.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    Algebra-based vector exploration using arithmetic, geometry, and the Pythagorean theorem.
+  </footer>
+
+  <script>
+    "use strict";
+
+    const canvas = document.getElementById("vectorCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const controls = {
+      x: {
+        range: document.getElementById("vxRange"),
+        number: document.getElementById("vxNumber")
+      },
+      y: {
+        range: document.getElementById("vyRange"),
+        number: document.getElementById("vyNumber")
+      },
+      z: {
+        range: document.getElementById("vzRange"),
+        number: document.getElementById("vzNumber")
+      }
+    };
+
+    const componentNotation = document.getElementById("componentNotation");
+    const unitNotation = document.getElementById("unitNotation");
+    const magnitudeReadout = document.getElementById("magnitudeReadout");
+    const magnitudeCalculation = document.getElementById("magnitudeCalculation");
+    const physicalInterpretation = document.getElementById("physicalInterpretation");
+    const resetButton = document.getElementById("resetButton");
+
+    const colors = {
+      x: "#d44343",
+      y: "#078b80",
+      z: "#c27a00",
+      vector: "#5b4bdb",
+      axis: "#616a7d",
+      grid: "#dfe3ec",
+      guide: "#939bae",
+      ink: "#172033"
+    };
+
+    let azimuth = -40 * Math.PI / 180;
+    let elevation = 25 * Math.PI / 180;
+    let dragging = false;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function cleanNumber(value) {
+      return Object.is(value, -0) ? 0 : value;
+    }
+
+    function values() {
+      return {
+        x: cleanNumber(Number(controls.x.range.value)),
+        y: cleanNumber(Number(controls.y.range.value)),
+        z: cleanNumber(Number(controls.z.range.value))
+      };
+    }
+
+    function displayNumber(value) {
+      return value < 0 ? "−" + Math.abs(value) : String(value);
+    }
+
+    function squaredText(value) {
+      if (value < 0) {
+        return "(" + displayNumber(value) + ")²";
+      }
+      return displayNumber(value) + "²";
+    }
+
+    function signedUnitExpression(v) {
+      const terms = [
+        { value: v.x, unit: "i" },
+        { value: v.y, unit: "j" },
+        { value: v.z, unit: "k" }
+      ];
+
+      return terms.map((term, index) => {
+        const absolute = Math.abs(term.value);
+        const number = String(absolute);
+        if (index === 0) {
+          return (term.value < 0 ? "−" : "") + number + term.unit;
+        }
+        return (term.value < 0 ? " − " : " + ") + number + term.unit;
+      }).join("");
+    }
+
+    function directionPhrase(axis, value) {
+      if (value === 0) return "";
+      if (axis === "x") return Math.abs(value) + " m/s toward " + (value > 0 ? "+x (right)" : "−x (left)");
+      if (axis === "y") return Math.abs(value) + " m/s toward " + (value > 0 ? "+y (away)" : "−y (toward you)");
+      return Math.abs(value) + " m/s toward " + (value > 0 ? "+z (up)" : "−z (down)");
+    }
+
+    function interpretationText(v, magnitude) {
+      if (magnitude === 0) {
+        return "This is the zero vector. The object has zero velocity, its speed is 0 m/s, and a direction is not defined.";
+      }
+
+      const nonzero = [
+        ["x", v.x],
+        ["y", v.y],
+        ["z", v.z]
+      ].filter(item => item[1] !== 0);
+
+      let dimensionNote = "";
+      if (nonzero.length === 1) {
+        dimensionNote = " Although shown in a 3-D system, this velocity is effectively one-dimensional.";
+      } else if (nonzero.length === 2) {
+        dimensionNote = " Because one component is zero, the velocity lies in a coordinate plane.";
+      } else {
+        dimensionNote = " All three directions contribute to this three-dimensional velocity.";
+      }
+
+      const phrases = nonzero.map(item => directionPhrase(item[0], item[1]));
+      let list;
+      if (phrases.length === 1) {
+        list = phrases[0];
+      } else {
+        list = phrases.slice(0, -1).join(", ") + " and " + phrases[phrases.length - 1];
+      }
+
+      return "The motion combines " + list + ". Its speed is " +
+        magnitude.toFixed(2) + " m/s." + dimensionNote;
+    }
+
+    function updateReadouts() {
+      const v = values();
+      const magnitude = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+
+      componentNotation.textContent =
+        "v = ⟨" + displayNumber(v.x) + ", " + displayNumber(v.y) + ", " +
+        displayNumber(v.z) + "⟩ m/s";
+
+      unitNotation.textContent =
+        "v = " + signedUnitExpression(v) + " m/s";
+
+      magnitudeReadout.textContent =
+        "|v| = " + magnitude.toFixed(2) + " m/s";
+
+      magnitudeCalculation.textContent =
+        "|v| = √(vₓ² + vᵧ² + v_z²) = √(" +
+        squaredText(v.x) + " + " + squaredText(v.y) + " + " +
+        squaredText(v.z) + ") = " + magnitude.toFixed(2) + " m/s";
+
+      physicalInterpretation.textContent = interpretationText(v, magnitude);
+
+      canvas.setAttribute(
+        "aria-label",
+        "Three-dimensional velocity diagram. Velocity components are " +
+        displayNumber(v.x) + ", " + displayNumber(v.y) + ", and " +
+        displayNumber(v.z) + " metres per second. Magnitude " +
+        magnitude.toFixed(2) + " metres per second."
+      );
+    }
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const ratio = Math.max(1, window.devicePixelRatio || 1);
+      canvas.width = Math.round(rect.width * ratio);
+      canvas.height = Math.round(rect.height * ratio);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      drawScene();
+    }
+
+    function project(point) {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      const scale = Math.min(width, height) * 0.0315;
+
+      const cosA = Math.cos(azimuth);
+      const sinA = Math.sin(azimuth);
+      const cosE = Math.cos(elevation);
+      const sinE = Math.sin(elevation);
+
+      const horizontal = cosA * point.x + sinA * point.y;
+      const depth = -sinA * point.x + cosA * point.y;
+      const vertical = cosE * point.z - sinE * depth;
+
+      return {
+        x: width * 0.5 + horizontal * scale,
+        y: height * 0.53 - vertical * scale
+      };
+    }
+
+    function line3D(a, b, color, width, dashed) {
+      const p1 = project(a);
+      const p2 = project(b);
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dashed || []);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawArrow3D(a, b, color, width, label, labelOffset) {
+      const p1 = project(a);
+      const p2 = project(b);
+      const dx = p2.x - p1.x;
+      const dy = p2.y - p1.y;
+      const length = Math.hypot(dx, dy);
+
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = width;
+      ctx.lineCap = "round";
+
+      if (length < 2) {
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, Math.max(3, width), 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        const ux = dx / length;
+        const uy = dy / length;
+        const headLength = Math.min(13, Math.max(8, length * 0.18));
+        const headWidth = headLength * 0.58;
+        const baseX = p2.x - ux * headLength;
+        const baseY = p2.y - uy * headLength;
+        const px = -uy;
+        const py = ux;
+
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(baseX, baseY);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(p2.x, p2.y);
+        ctx.lineTo(baseX + px * headWidth, baseY + py * headWidth);
+        ctx.lineTo(baseX - px * headWidth, baseY - py * headWidth);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+
+      if (label) {
+        drawLabel(
+          label,
+          p2.x + (labelOffset ? labelOffset.x : 6),
+          p2.y + (labelOffset ? labelOffset.y : -8),
+          color
+        );
+      }
+    }
+
+    function drawLabel(text, x, y, color) {
+      ctx.save();
+      ctx.font = "700 13px system-ui, sans-serif";
+      const paddingX = 5;
+      const width = ctx.measureText(text).width + paddingX * 2;
+      const height = 21;
+
+      x = clamp(x, 2, canvas.clientWidth - width - 2);
+      y = clamp(y, height, canvas.clientHeight - 3);
+
+      ctx.fillStyle = "rgba(255,255,255,0.91)";
+      ctx.strokeStyle = "rgba(204,210,225,0.85)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y - height + 3, width, height, 5);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = color;
+      ctx.textBaseline = "alphabetic";
+      ctx.fillText(text, x + paddingX, y - 2);
+      ctx.restore();
+    }
+
+    function drawGrid() {
+      const limit = 10;
+      ctx.save();
+      for (let n = -limit; n <= limit; n += 5) {
+        line3D({x: n, y: -limit, z: 0}, {x: n, y: limit, z: 0}, colors.grid, 1, []);
+        line3D({x: -limit, y: n, z: 0}, {x: limit, y: n, z: 0}, colors.grid, 1, []);
+      }
+      ctx.restore();
+    }
+
+    function drawAxes() {
+      const L = 11;
+      const origin = {x: 0, y: 0, z: 0};
+
+      line3D({x: -L, y: 0, z: 0}, origin, "#aeb5c4", 1.5, [4, 4]);
+      line3D({x: 0, y: -L, z: 0}, origin, "#aeb5c4", 1.5, [4, 4]);
+      line3D({x: 0, y: 0, z: -L}, origin, "#aeb5c4", 1.5, [4, 4]);
+
+      drawArrow3D(origin, {x: L, y: 0, z: 0}, colors.axis, 2, "+x", {x: 5, y: -5});
+      drawArrow3D(origin, {x: 0, y: L, z: 0}, colors.axis, 2, "+y", {x: 5, y: -5});
+      drawArrow3D(origin, {x: 0, y: 0, z: L}, colors.axis, 2, "+z", {x: 5, y: -5});
+
+      const negativeX = project({x: -L, y: 0, z: 0});
+      const negativeY = project({x: 0, y: -L, z: 0});
+      const negativeZ = project({x: 0, y: 0, z: -L});
+      drawLabel("−x", negativeX.x + 4, negativeX.y - 3, "#737b8d");
+      drawLabel("−y", negativeY.x + 4, negativeY.y - 3, "#737b8d");
+      drawLabel("−z", negativeZ.x + 4, negativeZ.y - 3, "#737b8d");
+
+      const o = project(origin);
+      ctx.save();
+      ctx.fillStyle = colors.ink;
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.font = "700 12px system-ui, sans-serif";
+      ctx.fillText("O", o.x + 7, o.y + 15);
+      ctx.restore();
+    }
+
+    function drawComponentPath(v) {
+      const p0 = {x: 0, y: 0, z: 0};
+      const p1 = {x: v.x, y: 0, z: 0};
+      const p2 = {x: v.x, y: v.y, z: 0};
+      const p3 = {x: v.x, y: v.y, z: v.z};
+
+      line3D(p0, p1, colors.guide, 1.5, [5, 5]);
+      line3D(p1, p2, colors.guide, 1.5, [5, 5]);
+      line3D(p2, p3, colors.guide, 1.5, [5, 5]);
+
+      line3D({x: 0, y: v.y, z: 0}, p2, "#c4c9d5", 1, [3, 4]);
+      line3D({x: v.x, y: 0, z: v.z}, p3, "#c4c9d5", 1, [3, 4]);
+      line3D({x: 0, y: v.y, z: v.z}, p3, "#c4c9d5", 1, [3, 4]);
+    }
+
+    function drawZeroComponentMarker(color, radius) {
+      const o = project({x: 0, y: 0, z: 0});
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(o.x, o.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawScene() {
+      const width = canvas.clientWidth;
+      const height = canvas.clientHeight;
+      if (!width || !height) return;
+
+      ctx.clearRect(0, 0, width, height);
+      drawGrid();
+      drawAxes();
+
+      const v = values();
+      const origin = {x: 0, y: 0, z: 0};
+      const endpoint = {x: v.x, y: v.y, z: v.z};
+
+      drawComponentPath(v);
+
+      if (v.x !== 0) {
+        drawArrow3D(origin, {x: v.x, y: 0, z: 0}, colors.x, 4, "vₓ = " + displayNumber(v.x), {x: 5, y: 19});
+      } else {
+        drawZeroComponentMarker(colors.x, 7);
+      }
+
+      if (v.y !== 0) {
+        drawArrow3D(origin, {x: 0, y: v.y, z: 0}, colors.y, 4, "vᵧ = " + displayNumber(v.y), {x: 5, y: -7});
+      } else {
+        drawZeroComponentMarker(colors.y, 10);
+      }
+
+      if (v.z !== 0) {
+        drawArrow3D(origin, {x: 0, y: 0, z: v.z}, colors.z, 4, "v_z = " + displayNumber(v.z), {x: 5, y: -7});
+      } else {
+        drawZeroComponentMarker(colors.z, 13);
+      }
+
+      const magnitude = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+      if (magnitude > 0) {
+        drawArrow3D(origin, endpoint, colors.vector, 5, "v", {x: 8, y: -9});
+        const end = project(endpoint);
+        ctx.save();
+        ctx.fillStyle = colors.vector;
+        ctx.beginPath();
+        ctx.arc(end.x, end.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      } else {
+        const o = project(origin);
+        drawLabel("v = zero vector", o.x + 16, o.y - 16, colors.vector);
+      }
+    }
+
+    function updateAll() {
+      updateReadouts();
+      drawScene();
+    }
+
+    function linkControl(axis) {
+      const range = controls[axis].range;
+      const number = controls[axis].number;
+
+      range.addEventListener("input", function () {
+        number.value = range.value;
+        updateAll();
+      });
+
+      number.addEventListener("input", function () {
+        if (number.value === "") return;
+        const value = clamp(Math.round(Number(number.value)), -10, 10);
+        range.value = String(value);
+        updateAll();
+      });
+
+      number.addEventListener("change", function () {
+        let value = Number(number.value);
+        if (!Number.isFinite(value)) value = 0;
+        value = clamp(Math.round(value), -10, 10);
+        number.value = String(value);
+        range.value = String(value);
+        updateAll();
+      });
+    }
+
+    ["x", "y", "z"].forEach(linkControl);
+
+    resetButton.addEventListener("click", function () {
+      const defaults = {x: 6, y: -4, z: 3};
+      Object.keys(defaults).forEach(axis => {
+        controls[axis].range.value = defaults[axis];
+        controls[axis].number.value = defaults[axis];
+      });
+      azimuth = -40 * Math.PI / 180;
+      elevation = 25 * Math.PI / 180;
+      updateAll();
+    });
+
+    canvas.addEventListener("pointerdown", function (event) {
+      dragging = true;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      canvas.setPointerCapture(event.pointerId);
+    });
+
+    canvas.addEventListener("pointermove", function (event) {
+      if (!dragging) return;
+      const dx = event.clientX - lastPointerX;
+      const dy = event.clientY - lastPointerY;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+
+      azimuth += dx * 0.009;
+      elevation = clamp(elevation + dy * 0.007, -75 * Math.PI / 180, 80 * Math.PI / 180);
+      drawScene();
+    });
+
+    function stopDragging(event) {
+      dragging = false;
+      if (event.pointerId !== undefined && canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    canvas.addEventListener("pointerup", stopDragging);
+    canvas.addEventListener("pointercancel", stopDragging);
+
+    canvas.addEventListener("keydown", function (event) {
+      const step = 7 * Math.PI / 180;
+      let handled = true;
+      if (event.key === "ArrowLeft") azimuth -= step;
+      else if (event.key === "ArrowRight") azimuth += step;
+      else if (event.key === "ArrowUp") elevation = clamp(elevation - step, -75 * Math.PI / 180, 80 * Math.PI / 180);
+      else if (event.key === "ArrowDown") elevation = clamp(elevation + step, -75 * Math.PI / 180, 80 * Math.PI / 180);
+      else handled = false;
+
+      if (handled) {
+        event.preventDefault();
+        drawScene();
+      }
+    });
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", function () {
+        const action = button.dataset.view;
+        const step = 15 * Math.PI / 180;
+
+        if (action === "left") azimuth -= step;
+        if (action === "right") azimuth += step;
+        if (action === "up") elevation = clamp(elevation - step, -75 * Math.PI / 180, 80 * Math.PI / 180);
+        if (action === "down") elevation = clamp(elevation + step, -75 * Math.PI / 180, 80 * Math.PI / 180);
+
+        if (action === "iso") {
+          azimuth = -40 * Math.PI / 180;
+          elevation = 25 * Math.PI / 180;
+        }
+
+        if (action === "front") {
+          azimuth = 0;
+          elevation = 0;
+        }
+
+        if (action === "top") {
+          azimuth = 0;
+          elevation = 80 * Math.PI / 180;
+        }
+
+        drawScene();
+      });
+    });
+
+    if ("ResizeObserver" in window) {
+      const observer = new ResizeObserver(resizeCanvas);
+      observer.observe(canvas);
+    } else {
+      window.addEventListener("resize", resizeCanvas);
+    }
+
+    updateReadouts();
+    resizeCanvas();
+  </script>
+</body>
+</html>

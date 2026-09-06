@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magnitude Challenge: Vectors and Coordinate Systems</title>
+  <style>
+    :root {
+      --navy: #12304a;
+      --blue: #1769aa;
+      --cyan: #e7f5ff;
+      --orange: #e36b25;
+      --green: #247a4a;
+      --green-bg: #e9f7ef;
+      --red: #b73737;
+      --red-bg: #fff0f0;
+      --gold: #946200;
+      --gold-bg: #fff7d6;
+      --ink: #1e2933;
+      --muted: #5d6b78;
+      --border: #ccd7df;
+      --panel: #f7fafc;
+      --white: #ffffff;
+      --shadow: 0 5px 18px rgba(18, 48, 74, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #edf3f7;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.5;
+    }
+
+    header {
+      color: white;
+      background: linear-gradient(125deg, #102c45, #1769aa);
+      padding: 2rem 1rem;
+    }
+
+    header .inner,
+    main {
+      width: min(1180px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    h1, h2, h3, h4, p {
+      margin-top: 0;
+    }
+
+    h1 {
+      margin-bottom: 0.35rem;
+      font-size: clamp(2rem, 5vw, 3.3rem);
+      line-height: 1.1;
+    }
+
+    header p {
+      max-width: 850px;
+      margin-bottom: 0;
+      color: #e9f5ff;
+      font-size: 1.08rem;
+    }
+
+    main {
+      padding: 1.3rem 0 3rem;
+    }
+
+    .panel {
+      margin-bottom: 1.2rem;
+      padding: 1.25rem;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .why {
+      border-left: 7px solid var(--orange);
+    }
+
+    .why h2 {
+      color: var(--navy);
+      margin-bottom: 0.45rem;
+    }
+
+    .key-idea {
+      margin: 0.8rem 0 0;
+      padding: 0.8rem 1rem;
+      background: #fff6eb;
+      border-radius: 9px;
+      font-weight: 650;
+    }
+
+    .progression-title {
+      margin: 1.5rem 0 0.75rem;
+      color: var(--navy);
+    }
+
+    .dimension-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .dimension-card {
+      overflow: hidden;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      box-shadow: var(--shadow);
+    }
+
+    .dimension-card h3 {
+      margin: 0;
+      padding: 0.8rem 1rem;
+      color: white;
+      background: var(--navy);
+    }
+
+    .dimension-card ol {
+      margin: 0;
+      padding: 1rem 1rem 1rem 2.1rem;
+    }
+
+    .dimension-card li {
+      margin-bottom: 0.65rem;
+    }
+
+    .dimension-card li:last-child {
+      margin-bottom: 0;
+    }
+
+    .step-label {
+      display: block;
+      color: var(--blue);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.035em;
+      text-transform: uppercase;
+    }
+
+    .math {
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 1.05em;
+      white-space: nowrap;
+    }
+
+    .challenge {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .challenge-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      color: white;
+      background: var(--navy);
+    }
+
+    .challenge-header h2 {
+      margin: 0;
+      font-size: 1.55rem;
+    }
+
+    .dimension-badge {
+      padding: 0.35rem 0.7rem;
+      background: var(--orange);
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .challenge-body {
+      display: grid;
+      grid-template-columns: minmax(300px, 0.9fr) minmax(400px, 1.25fr);
+      gap: 1.2rem;
+      padding: 1.25rem;
+    }
+
+    .prompt-box {
+      padding: 1rem;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+    }
+
+    .context-label {
+      margin-bottom: 0.3rem;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    #scenarioText {
+      margin-bottom: 0.7rem;
+    }
+
+    #vectorDisplay {
+      margin: 0.55rem 0 1rem;
+      color: var(--navy);
+      font-size: clamp(1.35rem, 3vw, 1.8rem);
+      font-weight: 750;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-weight: 750;
+    }
+
+    .answer-row {
+      display: flex;
+      gap: 0.55rem;
+      align-items: stretch;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      min-width: 0;
+      padding: 0.75rem;
+      color: var(--ink);
+      background: white;
+      border: 2px solid #9eafbb;
+      border-radius: 8px;
+      font: inherit;
+      font-size: 1.05rem;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--blue);
+      outline: 3px solid rgba(23, 105, 170, 0.18);
+    }
+
+    button {
+      min-height: 44px;
+      padding: 0.68rem 0.95rem;
+      color: white;
+      background: var(--blue);
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 750;
+    }
+
+    button:hover {
+      filter: brightness(0.93);
+    }
+
+    button:focus-visible {
+      outline: 3px solid #ffbf47;
+      outline-offset: 2px;
+    }
+
+    button.secondary {
+      color: var(--navy);
+      background: #dceaf3;
+    }
+
+    button.reset {
+      color: #792a2a;
+      background: #f5dddd;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-top: 0.85rem;
+    }
+
+    .entry-readout {
+      min-height: 1.35rem;
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .score {
+      margin: 1rem 0 0;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .hint,
+    .feedback,
+    .solution {
+      margin-top: 0.9rem;
+      padding: 0.85rem;
+      border-radius: 9px;
+    }
+
+    .hint {
+      color: #684700;
+      background: var(--gold-bg);
+      border: 1px solid #e1c35e;
+    }
+
+    .feedback.correct {
+      color: #155b34;
+      background: var(--green-bg);
+      border: 1px solid #8bc7a4;
+    }
+
+    .feedback.incorrect {
+      color: #812b2b;
+      background: var(--red-bg);
+      border: 1px solid #dda1a1;
+    }
+
+    .solution {
+      background: #eef7fc;
+      border: 1px solid #a9cedf;
+    }
+
+    .solution h3 {
+      margin-bottom: 0.4rem;
+      color: var(--navy);
+    }
+
+    .visual-panel {
+      min-width: 0;
+      padding: 0.75rem;
+      background: #fbfdff;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+    }
+
+    #diagram {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 315px;
+      background: white;
+      border-radius: 8px;
+    }
+
+    .visual-caption {
+      margin: 0.55rem 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    .notice {
+      border-left: 7px solid var(--blue);
+    }
+
+    .notice h2 {
+      color: var(--navy);
+      margin-bottom: 0.5rem;
+    }
+
+    .notice ul {
+      margin-bottom: 0;
+      padding-left: 1.35rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .svg-axis {
+      stroke: #697a87;
+      stroke-width: 2;
+    }
+
+    .svg-vector {
+      stroke: #e36b25;
+      stroke-width: 4;
+      fill: none;
+    }
+
+    .svg-component-x {
+      stroke: #1769aa;
+      stroke-width: 4;
+      fill: none;
+    }
+
+    .svg-component-y {
+      stroke: #247a4a;
+      stroke-width: 4;
+      fill: none;
+    }
+
+    .svg-component-z {
+      stroke: #7a3eb1;
+      stroke-width: 4;
+      fill: none;
+    }
+
+    .svg-helper {
+      stroke: #8a99a5;
+      stroke-width: 2;
+      stroke-dasharray: 7 6;
+      fill: none;
+    }
+
+    .svg-label {
+      fill: #263746;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .svg-small {
+      fill: #5d6b78;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .dimension-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .challenge-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 520px) {
+      header .inner,
+      main {
+        width: min(100% - 1rem, 1180px);
+      }
+
+      .panel {
+        padding: 1rem;
+      }
+
+      .challenge {
+        padding: 0;
+      }
+
+      .challenge-header,
+      .challenge-body {
+        padding: 1rem;
+      }
+
+      .answer-row {
+        flex-direction: column;
+      }
+
+      .answer-row button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <h1>Magnitude Challenge</h1>
+      <p>Build intuition for vectors and coordinate systems, then use rectangular components and the Pythagorean theorem to find vector magnitudes.</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel why" aria-labelledby="why-title">
+      <h2 id="why-title">Why do we need coordinate systems?</h2>
+      <p>Saying that an object is “5 meters away” is not enough to locate it. Is it east, west, above, or below us? Physical quantities such as position and velocity can have direction. A coordinate system gives everyone the same origin and the same positive directions, so positions, directions, and motion can be described consistently.</p>
+      <p class="key-idea">A <strong>vector</strong> has both magnitude and direction. Its <strong>magnitude</strong> is a nonnegative scalar that tells only the vector’s size.</p>
+    </section>
+
+    <h2 class="progression-title">From one dimension to three dimensions</h2>
+
+    <section class="dimension-grid" aria-label="Dimension progression">
+      <article class="dimension-card">
+        <h3>1-D: One number line</h3>
+        <ol>
+          <li><span class="step-label">Physical concept</span>Motion is restricted to one line. A sign distinguishes the two directions.</li>
+          <li><span class="step-label">Visual diagram</span>Choose an origin, a positive direction, and a negative direction on a number line.</li>
+          <li><span class="step-label">Mathematical representation</span><span class="math">r = &lt;x&gt;</span>. The component may be positive or negative.</li>
+          <li><span class="step-label">Numerical example</span><span class="math">r = &lt;−4&gt; m</span>, while <span class="math">|r| = 4 m</span>.</li>
+          <li><span class="step-label">Physical interpretation</span>The object is 4 m from the origin on the negative side. The vector and its magnitude are not the same.</li>
+        </ol>
+      </article>
+
+      <article class="dimension-card">
+        <h3>2-D: A plane</h3>
+        <ol>
+          <li><span class="step-label">Physical concept</span>Two perpendicular directions are needed to locate an object on a floor or map.</li>
+          <li><span class="step-label">Visual diagram</span>The x- and y-components form the legs of a right triangle. The vector is the hypotenuse.</li>
+          <li><span class="step-label">Mathematical representation</span><span class="math">r = &lt;x,y&gt; = x i + y j</span>.</li>
+          <li><span class="step-label">Numerical example</span><span class="math">r = &lt;3,4&gt; m</span>, so <span class="math">|r| = √(3² + 4²) = 5 m</span>.</li>
+          <li><span class="step-label">Physical interpretation</span>The position is 3 m in x and 4 m in y. Its straight-line distance from the origin is 5 m.</li>
+        </ol>
+      </article>
+
+      <article class="dimension-card">
+        <h3>3-D: Physical space</h3>
+        <ol>
+          <li><span class="step-label">Physical concept</span>A third perpendicular direction describes height or depth as well as horizontal position.</li>
+          <li><span class="step-label">Visual diagram</span>First combine x and y into a horizontal diagonal. Then combine that diagonal with z using another right triangle.</li>
+          <li><span class="step-label">Mathematical representation</span><span class="math">r = &lt;x,y,z&gt; = x i + y j + z k</span>. Also, <span class="math">v = &lt;v<sub>x</sub>,v<sub>y</sub>,v<sub>z</sub>&gt; = v<sub>x</sub>i + v<sub>y</sub>j + v<sub>z</sub>k</span>.</li>
+          <li><span class="step-label">Numerical example</span><span class="math">r = &lt;2,3,6&gt; m</span>, so <span class="math">|r| = √(2² + 3² + 6²) = 7 m</span>.</li>
+          <li><span class="step-label">Physical interpretation</span>The three components describe direction. The single number 7 m is only the vector’s magnitude.</li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="panel challenge" aria-labelledby="challenge-title">
+      <div class="challenge-header">
+        <h2 id="challenge-title">Interactive Magnitude Challenge</h2>
+        <span id="dimensionBadge" class="dimension-badge">2-D Challenge</span>
+      </div>
+
+      <div class="challenge-body">
+        <div>
+          <div class="prompt-box">
+            <div id="quantityLabel" class="context-label">Velocity vector</div>
+            <p id="scenarioText"></p>
+            <div id="vectorDisplay" class="math"></div>
+            <p id="questionText"></p>
+
+            <label for="answerInput">Your answer, including units:</label>
+            <div class="answer-row">
+              <input id="answerInput" type="text" inputmode="decimal" autocomplete="off" placeholder="Example: 5 m/s" aria-describedby="entryReadout">
+              <button id="checkButton" type="button">Check Answer</button>
+            </div>
+            <p id="entryReadout" class="entry-readout">Enter a number followed by the displayed unit.</p>
+
+            <div class="button-row">
+              <button id="newButton" type="button">New Challenge</button>
+              <button id="hintButton" class="secondary" type="button">Hint</button>
+              <button id="resetButton" class="reset" type="button">Reset</button>
+            </div>
+
+            <p id="scoreText" class="score">Solved: 0 of 0 attempted challenges</p>
+          </div>
+
+          <div id="hintBox" class="hint hidden" aria-live="polite"></div>
+          <div id="feedbackBox" class="feedback hidden" aria-live="polite"></div>
+          <div id="solutionBox" class="solution hidden"></div>
+        </div>
+
+        <div class="visual-panel">
+          <svg id="diagram" viewBox="0 0 560 330" role="img" aria-labelledby="diagramTitle diagramDescription">
+            <title id="diagramTitle">Vector component diagram</title>
+            <desc id="diagramDescription">A coordinate-system diagram for the current vector challenge.</desc>
+          </svg>
+          <p id="visualCaption" class="visual-caption">The vector is shown in orange. Submit an attempt to reveal its rectangular-component geometry.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel notice" aria-labelledby="notice-title">
+      <h2 id="notice-title">What to notice</h2>
+      <ul>
+        <li>Components depend on the chosen coordinate directions, but together they describe one vector.</li>
+        <li>In 2-D, the magnitude is the hypotenuse of a right triangle.</li>
+        <li>In 3-D, use the Pythagorean theorem twice: combine x and y, then include z.</li>
+        <li>A velocity vector <span class="math">v</span> includes direction. Its magnitude <span class="math">|v|</span> is the object’s speed.</li>
+        <li>A position magnitude <span class="math">|r|</span> is straight-line distance from the chosen origin; it is not necessarily distance traveled.</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    "use strict";
+
+    const challengeBanks = {
+      2: [
+        {
+          dimension: 2,
+          type: "velocity",
+          components: [3, 4],
+          unit: "m/s",
+          scenario: "A cart moves across a level floor. The coordinate system defines perpendicular x- and y-directions."
+        },
+        {
+          dimension: 2,
+          type: "position",
+          components: [5, 12],
+          unit: "m",
+          scenario: "A student’s location on a campus map is measured from a chosen origin."
+        },
+        {
+          dimension: 2,
+          type: "velocity",
+          components: [8, 15],
+          unit: "m/s",
+          scenario: "A small boat has velocity components along two perpendicular map directions."
+        },
+        {
+          dimension: 2,
+          type: "position",
+          components: [6, 8],
+          unit: "m",
+          scenario: "A robot’s position is described on a flat laboratory floor."
+        }
+      ],
+      3: [
+        {
+          dimension: 3,
+          type: "velocity",
+          components: [1, 2, 2],
+          unit: "m/s",
+          scenario: "A drone moves with components along three mutually perpendicular directions."
+        },
+        {
+          dimension: 3,
+          type: "position",
+          components: [2, 3, 6],
+          unit: "m",
+          scenario: "A marker is located in a room using x, y, and vertical z coordinates."
+        },
+        {
+          dimension: 3,
+          type: "velocity",
+          components: [4, 4, 7],
+          unit: "m/s",
+          scenario: "An aircraft’s velocity is resolved along three perpendicular coordinate directions."
+        },
+        {
+          dimension: 3,
+          type: "position",
+          components: [6, 6, 7],
+          unit: "m",
+          scenario: "A point in a large hall is described relative to a selected origin."
+        }
+      ]
+    };
+
+    const elements = {
+      dimensionBadge: document.getElementById("dimensionBadge"),
+      quantityLabel: document.getElementById("quantityLabel"),
+      scenarioText: document.getElementById("scenarioText"),
+      vectorDisplay: document.getElementById("vectorDisplay"),
+      questionText: document.getElementById("questionText"),
+      answerInput: document.getElementById("answerInput"),
+      entryReadout: document.getElementById("entryReadout"),
+      checkButton: document.getElementById("checkButton"),
+      newButton: document.getElementById("newButton"),
+      hintButton: document.getElementById("hintButton"),
+      resetButton: document.getElementById("resetButton"),
+      hintBox: document.getElementById("hintBox"),
+      feedbackBox: document.getElementById("feedbackBox"),
+      solutionBox: document.getElementById("solutionBox"),
+      scoreText: document.getElementById("scoreText"),
+      diagram: document.getElementById("diagram"),
+      visualCaption: document.getElementById("visualCaption"),
+      diagramTitle: document.getElementById("diagramTitle"),
+      diagramDescription: document.getElementById("diagramDescription")
+    };
+
+    let currentChallenge;
+    let nextIndices = { 2: 1, 3: 0 };
+    let attempted = 0;
+    let solved = 0;
+    let currentCountedAsAttempt = false;
+    let currentSolved = false;
+    let geometryRevealed = false;
+
+    function magnitudeOf(components) {
+      let sum = 0;
+      for (const component of components) {
+        sum += component * component;
+      }
+      return Math.sqrt(sum);
+    }
+
+    function formatNumber(value) {
+      if (Math.abs(value - Math.round(value)) < 0.000001) {
+        return String(Math.round(value));
+      }
+      return value.toFixed(2);
+    }
+
+    function vectorSymbol(challenge) {
+      return challenge.type === "velocity" ? "v" : "r";
+    }
+
+    function magnitudeSymbol(challenge) {
+      return challenge.type === "velocity" ? "|v|" : "|r|";
+    }
+
+    function componentNames(challenge) {
+      if (challenge.type === "velocity") {
+        return challenge.dimension === 2
+          ? ["v<sub>x</sub>", "v<sub>y</sub>"]
+          : ["v<sub>x</sub>", "v<sub>y</sub>", "v<sub>z</sub>"];
+      }
+      return challenge.dimension === 2 ? ["x", "y"] : ["x", "y", "z"];
+    }
+
+    function setChallenge(challenge) {
+      currentChallenge = challenge;
+      currentCountedAsAttempt = false;
+      currentSolved = false;
+      geometryRevealed = false;
+
+      const symbol = vectorSymbol(challenge);
+      const components = challenge.components.join(",");
+      const quantityWord = challenge.type === "velocity" ? "Velocity vector" : "Position vector";
+
+      elements.dimensionBadge.textContent = challenge.dimension + "-D Challenge";
+      elements.quantityLabel.textContent = quantityWord;
+      elements.scenarioText.textContent = challenge.scenario;
+      elements.vectorDisplay.innerHTML =
+        symbol + " = &lt;" + components + "&gt; " + challenge.unit;
+      elements.questionText.innerHTML =
+        "Find the scalar magnitude <span class=\"math\">" +
+        magnitudeSymbol(challenge) + "</span>. Include units.";
+
+      elements.answerInput.value = "";
+      elements.answerInput.placeholder = challenge.type === "velocity"
+        ? "Example: 5 m/s"
+        : "Example: 5 m";
+
+      elements.entryReadout.textContent = "Enter a number followed by " + challenge.unit + ".";
+      elements.hintBox.classList.add("hidden");
+      elements.feedbackBox.classList.add("hidden");
+      elements.solutionBox.classList.add("hidden");
+      elements.hintBox.innerHTML = "";
+      elements.feedbackBox.innerHTML = "";
+      elements.solutionBox.innerHTML = "";
+      elements.visualCaption.textContent =
+        "The vector is shown in orange. Submit an attempt to reveal its rectangular-component geometry.";
+
+      updateScore();
+      drawDiagram(false);
+      elements.answerInput.focus();
+    }
+
+    function newChallenge() {
+      const newDimension = currentChallenge && currentChallenge.dimension === 2 ? 3 : 2;
+      const bank = challengeBanks[newDimension];
+      const index = nextIndices[newDimension] % bank.length;
+      nextIndices[newDimension] += 1;
+      setChallenge(bank[index]);
+    }
+
+    function resetSimulation() {
+      attempted = 0;
+      solved = 0;
+      nextIndices = { 2: 1, 3: 0 };
+      setChallenge(challengeBanks[2][0]);
+    }
+
+    function updateScore() {
+      elements.scoreText.textContent =
+        "Solved: " + solved + " of " + attempted + " attempted challenge" +
+        (attempted === 1 ? "" : "s");
+    }
+
+    function normalizeUnit(unitText) {
+      return unitText
+        .toLowerCase()
+        .replace(/\u2212/g, "-")
+        .replace(/\s+/g, "")
+        .replace(/metres?/g, "m")
+        .replace(/meters?/g, "m")
+        .replace(/seconds?/g, "s")
+        .replace(/sec/g, "s");
+    }
+
+    function unitIsValid(unitText, expectedUnit) {
+      const normalized = normalizeUnit(unitText);
+      if (expectedUnit === "m") {
+        return normalized === "m";
+      }
+      return normalized === "m/s" ||
+             normalized === "ms^-1" ||
+             normalized === "ms-1" ||
+             normalized === "mper s".replace(/\s+/g, "");
+    }
+
+    function parseResponse(text) {
+      const match = text.trim().match(
+        /^([+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?)\s*(.*)$/i
+      );
+
+      if (!match) {
+        return { validNumber: false, value: NaN, unitText: "" };
+      }
+
+      const value = Number(match[1]);
+      return {
+        validNumber: Number.isFinite(value),
+        value: value,
+        unitText: match[2].trim()
+      };
+    }
+
+    function checkAnswer() {
+      const parsed = parseResponse(elements.answerInput.value);
+      const expected = magnitudeOf(currentChallenge.components);
+
+      if (!currentCountedAsAttempt) {
+        attempted += 1;
+        currentCountedAsAttempt = true;
+      }
+
+      geometryRevealed = true;
+      drawDiagram(true);
+      showSolution();
+
+      let feedbackClass = "incorrect";
+      let feedbackMessage = "";
+
+      if (!parsed.validNumber) {
+        feedbackMessage = "<strong>Not yet.</strong> Enter a numerical magnitude followed by its unit.";
+      } else if (!parsed.unitText) {
+        feedbackMessage =
+          "<strong>The numerical response is incomplete.</strong> A physical magnitude must include the unit <strong>" +
+          currentChallenge.unit + "</strong>.";
+      } else if (!unitIsValid(parsed.unitText, currentChallenge.unit)) {
+        feedbackMessage =
+          "<strong>Check the units.</strong> This vector uses <strong>" +
+          currentChallenge.unit + "</strong>, so its magnitude has the same unit.";
+      } else if (parsed.value < 0) {
+        feedbackMessage =
+          "<strong>Check the sign.</strong> A vector component may be negative, but a magnitude cannot be negative.";
+      } else if (Math.abs(parsed.value - expected) <= 0.02) {
+        feedbackClass = "correct";
+        if (!currentSolved) {
+          solved += 1;
+          currentSolved = true;
+        }
+
+        if (currentChallenge.type === "velocity") {
+          feedbackMessage =
+            "<strong>Correct!</strong> " + magnitudeSymbol(currentChallenge) +
+            " = " + formatNumber(expected) + " " + currentChallenge.unit +
+            ". This scalar magnitude is the object’s <strong>speed</strong>. The velocity vector also contains direction.";
+        } else {
+          feedbackMessage =
+            "<strong>Correct!</strong> " + magnitudeSymbol(currentChallenge) +
+            " = " + formatNumber(expected) + " " + currentChallenge.unit +
+            ". This is the straight-line distance from the chosen origin.";
+        }
+      } else {
+        feedbackMessage =
+          "<strong>Try again.</strong> Your units are appropriate, but the magnitude is not " +
+          formatNumber(parsed.value) + " " + currentChallenge.unit +
+          ". Use the component lengths as perpendicular sides, not as quantities to add directly.";
+      }
+
+      elements.feedbackBox.className = "feedback " + feedbackClass;
+      elements.feedbackBox.innerHTML = feedbackMessage;
+      elements.feedbackBox.classList.remove("hidden");
+      elements.visualCaption.textContent = currentChallenge.dimension === 2
+        ? "The component legs form a right triangle; the orange vector is its hypotenuse."
+        : "Perspective sketch: combine x and y into a base diagonal, then combine that diagonal with z.";
+      updateScore();
+    }
+
+    function showHint() {
+      const names = componentNames(currentChallenge);
+
+      if (currentChallenge.dimension === 2) {
+        elements.hintBox.innerHTML =
+          "<strong>Hint:</strong> The two perpendicular components are the legs of a right triangle. " +
+          "Use <span class=\"math\">" + magnitudeSymbol(currentChallenge) +
+          " = √(" + names[0] + "² + " + names[1] + "²)</span>. " +
+          "The magnitude must be nonnegative and must keep the original unit.";
+      } else {
+        elements.hintBox.innerHTML =
+          "<strong>Hint:</strong> Work in two simple steps. First find the base diagonal " +
+          "<span class=\"math\">h = √(" + names[0] + "² + " + names[1] +
+          "²)</span>. Then use <span class=\"math\">" + magnitudeSymbol(currentChallenge) +
+          " = √(h² + " + names[2] + "²)</span>.";
+      }
+
+      elements.hintBox.classList.remove("hidden");
+    }
+
+    function showSolution() {
+      const c = currentChallenge.components;
+      const symbol = magnitudeSymbol(currentChallenge);
+      const expected = magnitudeOf(c);
+      const squares = c.map(value => value + "²").join(" + ");
+      const squareValues = c.map(value => value * value).join(" + ");
+      let interpretation;
+
+      if (currentChallenge.type === "velocity") {
+        interpretation =
+          "<strong>Physical interpretation:</strong> <span class=\"math\">v</span> is a vector with direction. " +
+          "<span class=\"math\">|v|</span> is a scalar and represents speed.";
+      } else {
+        interpretation =
+          "<strong>Physical interpretation:</strong> <span class=\"math\">r</span> identifies a directed position from the origin. " +
+          "<span class=\"math\">|r|</span> is the straight-line distance from that origin.";
+      }
+
+      let stepText = "";
+      if (currentChallenge.dimension === 3) {
+        const horizontalSquared = c[0] * c[0] + c[1] * c[1];
+        stepText =
+          "<p>Geometrically, the horizontal base has <span class=\"math\">h² = " +
+          c[0] + "² + " + c[1] + "² = " + horizontalSquared +
+          "</span>. The z-component then forms a second right triangle.</p>";
+      }
+
+      elements.solutionBox.innerHTML =
+        "<h3>Rectangular-component interpretation</h3>" +
+        stepText +
+        "<p class=\"math\">" + symbol + " = √(" + squares + ")</p>" +
+        "<p class=\"math\">" + symbol + " = √(" + squareValues + ") = " +
+        formatNumber(expected) + " " + currentChallenge.unit + "</p>" +
+        "<p>" + interpretation + "</p>";
+
+      elements.solutionBox.classList.remove("hidden");
+    }
+
+    function svgDefs() {
+      return `
+        <defs>
+          <marker id="arrowOrange" viewBox="0 0 10 10" refX="8.5" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#e36b25"></path>
+          </marker>
+          <marker id="arrowGray" viewBox="0 0 10 10" refX="8.5" refY="5"
+            markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#697a87"></path>
+          </marker>
+        </defs>
+      `;
+    }
+
+    function drawDiagram(reveal) {
+      if (currentChallenge.dimension === 2) {
+        draw2D(reveal);
+      } else {
+        draw3D(reveal);
+      }
+    }
+
+    function draw2D(reveal) {
+      const x = currentChallenge.components[0];
+      const y = currentChallenge.components[1];
+      const maxComponent = Math.max(x, y);
+      const scale = Math.min(24, 205 / maxComponent);
+      const origin = { x: 95, y: 270 };
+      const point = { x: origin.x + x * scale, y: origin.y - y * scale };
+      const corner = { x: point.x, y: origin.y };
+      const symbol = vectorSymbol(currentChallenge);
+
+      let geometry = "";
+      if (reveal) {
+        geometry = `
+          <path d="M ${origin.x} ${origin.y} L ${corner.x} ${corner.y}"
+            class="svg-component-x"></path>
+          <path d="M ${corner.x} ${corner.y} L ${point.x} ${point.y}"
+            class="svg-component-y"></path>
+          <path d="M ${corner.x - 15} ${corner.y}
+                   L ${corner.x - 15} ${corner.y - 15}
+                   L ${corner.x} ${corner.y - 15}"
+            class="svg-helper" style="stroke-dasharray:none"></path>
+          <text x="${(origin.x + corner.x) / 2}" y="${origin.y + 25}"
+            class="svg-label" text-anchor="middle">${x} ${currentChallenge.unit}</text>
+          <text x="${corner.x + 12}" y="${(corner.y + point.y) / 2}"
+            class="svg-label">${y} ${currentChallenge.unit}</text>
+          <text x="${(origin.x + point.x) / 2 - 18}" y="${(origin.y + point.y) / 2 - 10}"
+            class="svg-label">${magnitudeSymbol(currentChallenge)}</text>
+        `;
+      }
+
+      elements.diagram.innerHTML = svgDefs() + `
+        <title>Two-dimensional vector diagram</title>
+        <desc>A vector with x-component ${x} and y-component ${y}. Rectangular components are ${reveal ? "shown" : "hidden until an attempt"}.</desc>
+        <line x1="45" y1="${origin.y}" x2="525" y2="${origin.y}"
+          class="svg-axis" marker-end="url(#arrowGray)"></line>
+        <line x1="${origin.x}" y1="305" x2="${origin.x}" y2="25"
+          class="svg-axis" marker-end="url(#arrowGray)"></line>
+        <text x="530" y="${origin.y + 6}" class="svg-label">+x</text>
+        <text x="${origin.x + 8}" y="28" class="svg-label">+y</text>
+        <text x="${origin.x - 25}" y="${origin.y + 23}" class="svg-small">origin</text>
+        ${geometry}
+        <line x1="${origin.x}" y1="${origin.y}" x2="${point.x}" y2="${point.y}"
+          class="svg-vector" marker-end="url(#arrowOrange)"></line>
+        <circle cx="${point.x}" cy="${point.y}" r="5" fill="#e36b25"></circle>
+        <text x="${point.x + 10}" y="${point.y - 9}" class="svg-label">${symbol}</text>
+        ${reveal ? "" : `
+          <text x="280" y="45" class="svg-small" text-anchor="middle">
+            Submit an attempt to reveal the right triangle.
+          </text>
+        `}
+      `;
+    }
+
+    function draw3D(reveal) {
+      const c = currentChallenge.components;
+      const origin = { x: 270, y: 275 };
+      const xVec = { x: c[0] * 18, y: -c[0] * 6 };
+      const yVec = { x: -c[1] * 15, y: -c[1] * 8 };
+      const zVec = { x: 0, y: -c[2] * 17 };
+
+      const a = { x: origin.x + xVec.x, y: origin.y + xVec.y };
+      const b = { x: a.x + yVec.x, y: a.y + yVec.y };
+      const point = { x: b.x + zVec.x, y: b.y + zVec.y };
+      const yOnly = { x: origin.x + yVec.x, y: origin.y + yVec.y };
+      const zOnly = { x: origin.x, y: origin.y - 125 };
+      const xAxis = { x: origin.x + 155, y: origin.y - 52 };
+      const yAxis = { x: origin.x - 140, y: origin.y - 75 };
+      const symbol = vectorSymbol(currentChallenge);
+
+      let geometry = "";
+      if (reveal) {
+        geometry = `
+          <path d="M ${origin.x} ${origin.y} L ${a.x} ${a.y}"
+            class="svg-component-x"></path>
+          <path d="M ${a.x} ${a.y} L ${b.x} ${b.y}"
+            class="svg-component-y"></path>
+          <path d="M ${b.x} ${b.y} L ${point.x} ${point.y}"
+            class="svg-component-z"></path>
+
+          <path d="M ${origin.x} ${origin.y} L ${b.x} ${b.y}"
+            class="svg-helper"></path>
+          <path d="M ${origin.x} ${origin.y} L ${yOnly.x} ${yOnly.y}
+                   L ${b.x} ${b.y}"
+            class="svg-helper"></path>
+          <path d="M ${yOnly.x} ${yOnly.y} L ${yOnly.x} ${yOnly.y + zVec.y}
+                   L ${point.x} ${point.y}"
+            class="svg-helper"></path>
+          <path d="M ${a.x} ${a.y} L ${a.x} ${a.y + zVec.y}
+                   L ${point.x} ${point.y}"
+            class="svg-helper"></path>
+
+          <text x="${(origin.x + a.x) / 2 + 8}" y="${(origin.y + a.y) / 2 + 20}"
+            class="svg-label">${c[0]} ${currentChallenge.unit}</text>
+          <text x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 12}"
+            class="svg-label">${c[1]} ${currentChallenge.unit}</text>
+          <text x="${b.x + 10}" y="${(b.y + point.y) / 2}"
+            class="svg-label">${c[2]} ${currentChallenge.unit}</text>
+          <text x="${(origin.x + b.x) / 2 - 12}" y="${(origin.y + b.y) / 2 - 8}"
+            class="svg-small">base h</text>
+        `;
+      }
+
+      elements.diagram.innerHTML = svgDefs() + `
+        <title>Three-dimensional vector diagram</title>
+        <desc>A perspective sketch of a three-dimensional vector with components ${c.join(", ")}. Rectangular construction lines are ${reveal ? "shown" : "hidden until an attempt"}.</desc>
+
+        <line x1="${origin.x}" y1="${origin.y}" x2="${xAxis.x}" y2="${xAxis.y}"
+          class="svg-axis" marker-end="url(#arrowGray)"></line>
+        <line x1="${origin.x}" y1="${origin.y}" x2="${yAxis.x}" y2="${yAxis.y}"
+          class="svg-axis" marker-end="url(#arrowGray)"></line>
+        <line x1="${origin.x}" y1="${origin.y}" x2="${zOnly.x}" y2="${zOnly.y}"
+          class="svg-axis" marker-end="url(#arrowGray)"></line>
+
+        <text x="${xAxis.x + 7}" y="${xAxis.y}" class="svg-label">+x</text>
+        <text x="${yAxis.x - 20}" y="${yAxis.y}" class="svg-label">+y</text>
+        <text x="${zOnly.x + 8}" y="${zOnly.y}" class="svg-label">+z</text>
+        <text x="${origin.x + 8}" y="${origin.y + 24}" class="svg-small">origin</text>
+
+        ${geometry}
+
+        <line x1="${origin.x}" y1="${origin.y}" x2="${point.x}" y2="${point.y}"
+          class="svg-vector" marker-end="url(#arrowOrange)"></line>
+        <circle cx="${point.x}" cy="${point.y}" r="5" fill="#e36b25"></circle>
+        <text x="${point.x + 10}" y="${point.y - 8}" class="svg-label">${symbol}</text>
+
+        ${reveal ? `
+          <text x="280" y="315" class="svg-small" text-anchor="middle">
+            Perspective sketch—not a flat-scale drawing of the three perpendicular directions
+          </text>
+        ` : `
+          <text x="280" y="42" class="svg-small" text-anchor="middle">
+            Submit an attempt to reveal the rectangular components.
+          </text>
+        `}
+      `;
+    }
+
+    elements.answerInput.addEventListener("input", function () {
+      const text = elements.answerInput.value.trim();
+      elements.entryReadout.textContent = text
+        ? "Current response: " + text
+        : "Enter a number followed by " + currentChallenge.unit + ".";
+    });
+
+    elements.answerInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        checkAnswer();
+      }
+    });
+
+    elements.checkButton.addEventListener("click", checkAnswer);
+    elements.newButton.addEventListener("click", newChallenge);
+    elements.hintButton.addEventListener("click", showHint);
+    elements.resetButton.addEventListener("click", resetSimulation);
+
+    resetSimulation();
+  </script>
+</body>
+</html>

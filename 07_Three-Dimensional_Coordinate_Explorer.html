@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Three-Dimensional Coordinate Explorer</title>
+<style>
+  :root {
+    color-scheme: light;
+    --ink: #16243a;
+    --muted: #5b687b;
+    --panel: #ffffff;
+    --page: #eef3f8;
+    --line: #d6e0ea;
+    --blue: #1769d2;
+    --red: #db3a4a;
+    --green: #14865f;
+    --orange: #e78016;
+    --purple: #7147c7;
+    --focus: #0b66d1;
+    --shadow: 0 10px 28px rgba(31, 52, 76, 0.10);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.55;
+  }
+
+  header {
+    padding: 2.2rem 1.25rem 1.7rem;
+    color: white;
+    background: linear-gradient(135deg, #163d70, #1769d2 58%, #3c86dd);
+  }
+
+  header .inner,
+  main {
+    width: min(1180px, calc(100% - 2rem));
+    margin: auto;
+  }
+
+  .eyebrow {
+    margin: 0 0 .35rem;
+    font-size: .78rem;
+    font-weight: 800;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    opacity: .85;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    line-height: 1.12;
+  }
+
+  header p {
+    max-width: 800px;
+    margin: .8rem 0 0;
+    font-size: 1.06rem;
+    opacity: .94;
+  }
+
+  main { padding: 1.2rem 0 3rem; }
+
+  section,
+  .card {
+    margin-bottom: 1rem;
+    padding: 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+  }
+
+  h2, h3 { line-height: 1.25; }
+
+  h2 {
+    margin: 0 0 .7rem;
+    font-size: 1.45rem;
+  }
+
+  h3 {
+    margin: 0 0 .55rem;
+    font-size: 1.08rem;
+  }
+
+  p { margin: .45rem 0; }
+
+  .lead {
+    font-size: 1.08rem;
+    max-width: 920px;
+  }
+
+  .why-grid,
+  .progression-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .9rem;
+    margin-top: 1rem;
+  }
+
+  .idea {
+    padding: .95rem;
+    border-radius: 12px;
+    background: #f5f8fc;
+    border: 1px solid #dde6ef;
+  }
+
+  .idea strong {
+    display: block;
+    color: #174c85;
+    margin-bottom: .25rem;
+  }
+
+  .stage-number {
+    display: inline-grid;
+    place-items: center;
+    width: 2rem;
+    height: 2rem;
+    margin-right: .35rem;
+    border-radius: 50%;
+    color: white;
+    background: var(--blue);
+    font-weight: 800;
+  }
+
+  .sequence {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35rem;
+    margin: .8rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sequence li {
+    padding: .3rem .55rem;
+    border-radius: 999px;
+    background: #eaf2fc;
+    color: #174c85;
+    font-size: .82rem;
+    font-weight: 750;
+  }
+
+  .sequence li:not(:last-child)::after {
+    content: " →";
+    margin-left: .4rem;
+    color: #71839a;
+  }
+
+  .mini-diagram {
+    width: 100%;
+    height: 145px;
+    display: block;
+    margin: .55rem 0 .75rem;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e0e7ef;
+  }
+
+  .math {
+    font-family: "Cambria Math", Cambria, Georgia, serif;
+    font-size: 1.07em;
+    white-space: nowrap;
+  }
+
+  .equation {
+    margin: .55rem 0;
+    padding: .7rem .85rem;
+    border-left: 4px solid var(--blue);
+    border-radius: 4px 10px 10px 4px;
+    background: #f2f7fd;
+    overflow-x: auto;
+  }
+
+  .interpretation {
+    padding: .7rem .8rem;
+    border-radius: 10px;
+    background: #f1faf6;
+    border: 1px solid #cce9db;
+  }
+
+  .explorer-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .instruction {
+    max-width: 760px;
+    color: var(--muted);
+  }
+
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(280px, .8fr);
+    gap: 1rem;
+    margin-top: 1rem;
+    align-items: start;
+  }
+
+  .canvas-wrap {
+    position: relative;
+    min-height: 510px;
+    overflow: hidden;
+    border: 1px solid #cfdbe7;
+    border-radius: 14px;
+    background: linear-gradient(#fbfdff, #f2f7fb);
+  }
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 510px;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  canvas.dragging { cursor: grabbing; }
+
+  .canvas-note {
+    position: absolute;
+    top: .65rem;
+    left: .65rem;
+    max-width: calc(100% - 1.3rem);
+    padding: .38rem .55rem;
+    border: 1px solid rgba(173, 191, 210, .85);
+    border-radius: 8px;
+    background: rgba(255,255,255,.88);
+    color: #44556c;
+    font-size: .78rem;
+    pointer-events: none;
+  }
+
+  .controls {
+    display: grid;
+    gap: .8rem;
+  }
+
+  .control-box,
+  .readout {
+    padding: .9rem;
+    border: 1px solid #d9e3ed;
+    border-radius: 12px;
+    background: #f8fafc;
+  }
+
+  .slider-row {
+    display: grid;
+    grid-template-columns: 2rem 1fr 4.4rem;
+    gap: .55rem;
+    align-items: center;
+    margin: .72rem 0;
+  }
+
+  .slider-row label { font-weight: 850; }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--blue);
+  }
+
+  output {
+    padding: .18rem .32rem;
+    border-radius: 6px;
+    background: white;
+    border: 1px solid #d5e0eb;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .check-row {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    margin: .45rem 0;
+    font-size: .92rem;
+  }
+
+  button {
+    min-height: 42px;
+    padding: .55rem .8rem;
+    border: 1px solid #135ab5;
+    border-radius: 9px;
+    color: white;
+    background: var(--blue);
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+  }
+
+  button:hover { background: #1059b3; }
+
+  button:focus-visible,
+  input:focus-visible {
+    outline: 3px solid rgba(11,102,209,.28);
+    outline-offset: 2px;
+  }
+
+  .button-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .55rem;
+    margin-top: .7rem;
+  }
+
+  .secondary {
+    color: #174c85;
+    background: white;
+    border-color: #aabed3;
+  }
+
+  .secondary:hover { background: #edf4fb; }
+
+  .readout .large {
+    margin: .2rem 0 .55rem;
+    font-size: 1.2rem;
+    font-weight: 750;
+    color: #153e70;
+    overflow-wrap: anywhere;
+  }
+
+  .readout hr {
+    border: 0;
+    border-top: 1px solid #dce5ee;
+    margin: .7rem 0;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .55rem .8rem;
+    margin-top: .7rem;
+    font-size: .8rem;
+    color: #4e5f74;
+  }
+
+  .key {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+  }
+
+  .swatch {
+    width: 1.25rem;
+    height: .22rem;
+    border-radius: 4px;
+    background: var(--blue);
+  }
+
+  .swatch.dashed {
+    height: 0;
+    border-top: 2px dashed var(--orange);
+    background: none;
+  }
+
+  .notice {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #f0cf8d;
+    border-radius: 12px;
+    background: #fff8e9;
+  }
+
+  .notice h3 { color: #80520b; }
+
+  .notice ul {
+    margin: .45rem 0 0;
+    padding-left: 1.3rem;
+  }
+
+  .velocity-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .warning {
+    padding: .8rem;
+    border-left: 4px solid var(--red);
+    border-radius: 5px 10px 10px 5px;
+    background: #fff3f4;
+  }
+
+  footer {
+    padding: 1rem;
+    text-align: center;
+    color: #667487;
+    font-size: .85rem;
+  }
+
+  @media (max-width: 900px) {
+    .why-grid,
+    .progression-grid,
+    .workspace,
+    .velocity-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .canvas-wrap { min-height: 460px; }
+    canvas { height: 460px; }
+  }
+
+  @media (max-width: 560px) {
+    header .inner,
+    main { width: min(100% - 1rem, 1180px); }
+
+    section, .card {
+      padding: .9rem;
+      border-radius: 13px;
+    }
+
+    .canvas-wrap { min-height: 400px; }
+    canvas { height: 400px; }
+    .slider-row { grid-template-columns: 1.7rem 1fr 4rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="inner">
+    <p class="eyebrow">Coordinates, Position, and Velocity in Three Dimensions</p>
+    <h1>Three-Dimensional Coordinate Explorer</h1>
+    <p>Build spatial intuition by moving a point in three dimensions and rotating your view of the coordinate system.</p>
+  </div>
+</header>
+
+<main>
+  <section aria-labelledby="why-title">
+    <h2 id="why-title">Why do we need coordinates and vectors?</h2>
+    <p class="lead">
+      Saying that an object is “five meters away” is not enough to locate it. It might be five meters to the right, above, behind, or in some other direction. Physical quantities such as <strong>position</strong> and <strong>velocity</strong> can include direction, so everyone needs a common reference.
+    </p>
+    <div class="why-grid">
+      <div class="idea">
+        <strong>A coordinate system is a shared reference.</strong>
+        It specifies an origin, positive directions, and units so different observers can describe the same location consistently.
+      </div>
+      <div class="idea">
+        <strong>A vector has magnitude and direction.</strong>
+        Its components tell us how much of the vector points along each coordinate direction.
+      </div>
+      <div class="idea">
+        <strong>The view is not the vector.</strong>
+        Rotating a diagram changes its appearance, but it does not change the point's coordinates in the fixed coordinate system.
+      </div>
+    </div>
+  </section>
+
+  <div class="progression-grid">
+    <article class="card" aria-labelledby="one-d-title">
+      <h2 id="one-d-title"><span class="stage-number">1</span>One dimension</h2>
+      <ol class="sequence" aria-label="Learning sequence">
+        <li>Physical concept</li><li>Diagram</li><li>Math</li><li>Example</li><li>Meaning</li>
+      </ol>
+      <p><strong>Physical concept:</strong> Motion is restricted to one straight line. One signed coordinate is enough.</p>
+
+      <svg class="mini-diagram" viewBox="0 0 400 145" role="img" aria-label="A one-dimensional number line with a point at positive three meters">
+        <defs>
+          <marker id="arrow1" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#1769d2"/>
+          </marker>
+        </defs>
+        <line x1="42" y1="82" x2="360" y2="82" stroke="#233b58" stroke-width="2" marker-end="url(#arrow1)"/>
+        <line x1="95" y1="75" x2="95" y2="89" stroke="#233b58" stroke-width="2"/>
+        <line x1="200" y1="72" x2="200" y2="92" stroke="#233b58" stroke-width="2"/>
+        <line x1="305" y1="75" x2="305" y2="89" stroke="#233b58" stroke-width="2"/>
+        <line x1="200" y1="82" x2="305" y2="82" stroke="#db3a4a" stroke-width="5" marker-end="url(#arrow1)"/>
+        <circle cx="305" cy="82" r="7" fill="#db3a4a"/>
+        <text x="191" y="116" font-size="15" fill="#233b58">0</text>
+        <text x="292" y="116" font-size="15" fill="#233b58">+3 m</text>
+        <text x="365" y="87" font-size="16" fill="#233b58">+x</text>
+      </svg>
+
+      <div class="equation"><span class="math"><b>r</b> = &lt;x&gt;</span></div>
+      <p><strong>Example:</strong> <span class="math"><b>r</b> = &lt;3&gt; m</span>.</p>
+      <p class="interpretation"><strong>Physical interpretation:</strong> The object is 3 m from the origin in the positive x direction. The sign carries directional information.</p>
+    </article>
+
+    <article class="card" aria-labelledby="two-d-title">
+      <h2 id="two-d-title"><span class="stage-number">2</span>Two dimensions</h2>
+      <ol class="sequence" aria-label="Learning sequence">
+        <li>Physical concept</li><li>Diagram</li><li>Math</li><li>Example</li><li>Meaning</li>
+      </ol>
+      <p><strong>Physical concept:</strong> On a floor or map, one coordinate describes left–right and another describes down–up.</p>
+
+      <svg class="mini-diagram" viewBox="0 0 400 145" role="img" aria-label="Two-dimensional axes with a position vector to the point three comma four">
+        <defs>
+          <marker id="arrow2" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#1769d2"/>
+          </marker>
+          <marker id="arrowR" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#db3a4a"/>
+          </marker>
+        </defs>
+        <line x1="54" y1="119" x2="365" y2="119" stroke="#233b58" stroke-width="2" marker-end="url(#arrow2)"/>
+        <line x1="84" y1="132" x2="84" y2="18" stroke="#233b58" stroke-width="2" marker-end="url(#arrow2)"/>
+        <line x1="84" y1="119" x2="294" y2="35" stroke="#db3a4a" stroke-width="4" marker-end="url(#arrowR)"/>
+        <line x1="294" y1="35" x2="294" y2="119" stroke="#e78016" stroke-width="2" stroke-dasharray="6 5"/>
+        <line x1="84" y1="35" x2="294" y2="35" stroke="#e78016" stroke-width="2" stroke-dasharray="6 5"/>
+        <circle cx="294" cy="35" r="6" fill="#db3a4a"/>
+        <text x="304" y="30" font-size="15" fill="#233b58">P(3, 4)</text>
+        <text x="370" y="124" font-size="15" fill="#233b58">+x</text>
+        <text x="91" y="22" font-size="15" fill="#233b58">+y</text>
+      </svg>
+
+      <div class="equation">
+        <span class="math"><b>r</b> = &lt;x,y&gt; = x <b>i</b> + y <b>j</b></span>
+      </div>
+      <p><strong>Example:</strong> <span class="math"><b>r</b> = &lt;3,4&gt; m</span>, so <span class="math">|<b>r</b>| = √(3² + 4²) = 5 m</span>.</p>
+      <p class="interpretation"><strong>Physical interpretation:</strong> Travel 3 m along +x and 4 m along +y to reach the point. The vector's magnitude is the straight-line distance from the origin.</p>
+    </article>
+
+    <article class="card" aria-labelledby="three-d-intro">
+      <h2 id="three-d-intro"><span class="stage-number">3</span>Three dimensions</h2>
+      <ol class="sequence" aria-label="Learning sequence">
+        <li>Physical concept</li><li>Diagram</li><li>Math</li><li>Example</li><li>Meaning</li>
+      </ol>
+      <p><strong>Physical concept:</strong> A room requires a third independent direction. We use +x to the right, +y upward, and +z out of the page toward the viewer in the front view.</p>
+      <div class="equation">
+        <span class="math"><b>r</b> = &lt;x,y,z&gt; = x <b>i</b> + y <b>j</b> + z <b>k</b></span>
+      </div>
+      <p>The symbols <span class="math"><b>i</b>, <b>j</b>, <b>k</b></span> represent one unit in the positive x, y, and z directions.</p>
+      <p><strong>Example:</strong> <span class="math"><b>r</b> = &lt;3,2,4&gt; m</span>.</p>
+      <p class="interpretation"><strong>Physical interpretation:</strong> The three components are instructions measured from the origin. They belong to the coordinate system and do not depend on the viewing angle.</p>
+    </article>
+  </div>
+
+  <section aria-labelledby="explorer-title">
+    <div class="explorer-heading">
+      <div>
+        <h2 id="explorer-title">Interactive 3-D coordinate display</h2>
+        <p class="instruction">
+          Drag anywhere in the display to rotate the <em>view</em>. Use the sliders to move point P. On a tablet, drag with one finger. The coordinate axes remain fixed to the physical coordinate system.
+        </p>
+      </div>
+    </div>
+
+    <div class="workspace">
+      <div>
+        <div class="canvas-wrap">
+          <canvas id="scene" aria-label="Interactive three-dimensional coordinate system showing a point and its position vector">
+            Your browser does not support HTML canvas.
+          </canvas>
+          <div class="canvas-note">Drag to rotate the view • In the front convention, +z points out of the page toward you (⊙).</div>
+        </div>
+        <div class="legend" aria-label="Diagram legend">
+          <span class="key"><span class="swatch" style="background:#db3a4a"></span>position vector <span class="math"><b>r</b></span></span>
+          <span class="key"><span class="swatch dashed"></span>projection guides</span>
+          <span class="key"><span class="swatch" style="background:#1769d2"></span>x axis</span>
+          <span class="key"><span class="swatch" style="background:#14865f"></span>y axis</span>
+          <span class="key"><span class="swatch" style="background:#7147c7"></span>z axis</span>
+        </div>
+      </div>
+
+      <aside class="controls" aria-label="Simulation controls and measurements">
+        <div class="control-box">
+          <h3>Point P coordinates</h3>
+          <p style="font-size:.87rem;color:#5b687b">Range: −5 m to +5 m</p>
+
+          <div class="slider-row">
+            <label for="xSlider">x</label>
+            <input id="xSlider" type="range" min="-5" max="5" step="0.5" value="3">
+            <output id="xOut" for="xSlider">3.0 m</output>
+          </div>
+          <div class="slider-row">
+            <label for="ySlider">y</label>
+            <input id="ySlider" type="range" min="-5" max="5" step="0.5" value="2">
+            <output id="yOut" for="ySlider">2.0 m</output>
+          </div>
+          <div class="slider-row">
+            <label for="zSlider">z</label>
+            <input id="zSlider" type="range" min="-5" max="5" step="0.5" value="4">
+            <output id="zOut" for="zSlider">4.0 m</output>
+          </div>
+
+          <label class="check-row">
+            <input id="planesToggle" type="checkbox" checked>
+            Show coordinate planes
+          </label>
+          <label class="check-row">
+            <input id="guidesToggle" type="checkbox" checked>
+            Show projection lines
+          </label>
+
+          <div class="button-row">
+            <button id="resetButton" type="button">Reset</button>
+            <button id="frontButton" class="secondary" type="button">Front view</button>
+          </div>
+        </div>
+
+        <div class="readout" aria-live="polite">
+          <h3>Mathematical representation</h3>
+          <p>Point notation</p>
+          <div id="pointNotation" class="large math">P(3, 2, 4) m</div>
+
+          <p>Position vector</p>
+          <div id="vectorNotation" class="large math"><b>r</b> = &lt;3,2,4&gt; m</div>
+
+          <p>Unit-vector notation</p>
+          <div id="unitNotation" class="large math"><b>r</b> = 3 <b>i</b> + 2 <b>j</b> + 4 <b>k</b> m</div>
+
+          <hr>
+          <p>Magnitude of the position vector</p>
+          <div id="magnitudeFormula" class="math">|<b>r</b>| = √(3² + 2² + 4²)</div>
+          <div id="magnitudeValue" class="large math">|<b>r</b>| = 5.39 m</div>
+          <p style="font-size:.87rem;color:#5b687b">This magnitude is the straight-line distance from the origin to P.</p>
+        </div>
+
+        <div class="readout">
+          <h3>Physical interpretation</h3>
+          <p id="physicalText">From the origin, move 3 m in +x, 2 m in +y, and 4 m in +z to reach P.</p>
+        </div>
+      </aside>
+    </div>
+
+    <div class="notice">
+      <h3>What to notice</h3>
+      <ul>
+        <li>Rotate the display without moving the sliders. The diagram changes, but <span class="math">&lt;x,y,z&gt;</span> does not.</li>
+        <li>Each component describes a separate direction. Changing x alone moves P parallel to the x axis.</li>
+        <li>The projection lines connect the 3-D point to the coordinate planes and show how its three coordinates are constructed.</li>
+        <li>The vector <span class="math"><b>r</b></span> is not the same as its magnitude <span class="math">|<b>r</b>|</span>. The vector has direction; its magnitude is one nonnegative number.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section aria-labelledby="velocity-title">
+    <h2 id="velocity-title">Position and velocity in three dimensions</h2>
+    <div class="velocity-grid">
+      <div>
+        <h3>Velocity is also a vector</h3>
+        <p>Velocity states both how fast and in what direction an object moves. Its three components describe motion along the coordinate directions:</p>
+        <div class="equation">
+          <span class="math"><b>v</b> = &lt;v<sub>x</sub>,v<sub>y</sub>,v<sub>z</sub>&gt;</span><br>
+          <span class="math"><b>v</b> = v<sub>x</sub> <b>i</b> + v<sub>y</sub> <b>j</b> + v<sub>z</sub> <b>k</b></span>
+        </div>
+        <p>A negative component means motion in the negative direction of that axis; it does not mean “negative speed.”</p>
+      </div>
+
+      <div>
+        <h3>Simple numerical example</h3>
+        <p>Suppose <span class="math"><b>v</b> = &lt;2,−1,2&gt; m/s</span>. The object moves in +x, −y, and +z at the same time.</p>
+        <div class="equation">
+          <span class="math">|<b>v</b>| = √(2² + (−1)² + 2²) = √9 = 3 m/s</span>
+        </div>
+        <div class="warning">
+          <strong>Velocity versus speed:</strong>
+          <span class="math"><b>v</b></span> is the velocity vector and includes direction.
+          <span class="math">|<b>v</b>|</span> is its magnitude, which is the speed.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>Use the coordinate system as a physical reference—not merely as a set of equations to memorize.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  const canvas = document.getElementById("scene");
+  const ctx = canvas.getContext("2d");
+
+  const controls = {
+    x: document.getElementById("xSlider"),
+    y: document.getElementById("ySlider"),
+    z: document.getElementById("zSlider"),
+    xOut: document.getElementById("xOut"),
+    yOut: document.getElementById("yOut"),
+    zOut: document.getElementById("zOut"),
+    planes: document.getElementById("planesToggle"),
+    guides: document.getElementById("guidesToggle")
+  };
+
+  const pointNotation = document.getElementById("pointNotation");
+  const vectorNotation = document.getElementById("vectorNotation");
+  const unitNotation = document.getElementById("unitNotation");
+  const magnitudeFormula = document.getElementById("magnitudeFormula");
+  const magnitudeValue = document.getElementById("magnitudeValue");
+  const physicalText = document.getElementById("physicalText");
+
+  let width = 700;
+  let height = 510;
+  let dpr = 1;
+  let yaw = -0.62;
+  let pitch = 0.38;
+  let dragging = false;
+  let lastX = 0;
+  let lastY = 0;
+
+  function cleanNumber(n) {
+    return Math.abs(n) < 0.0001 ? 0 : n;
+  }
+
+  function compact(n) {
+    n = cleanNumber(n);
+    return Number.isInteger(n) ? String(n) : n.toFixed(1);
+  }
+
+  function fixed(n) {
+    return cleanNumber(n).toFixed(1);
+  }
+
+  function signedTerm(n, symbol, first) {
+    n = cleanNumber(n);
+    const amount = compact(Math.abs(n));
+    if (first) {
+      return (n < 0 ? "−" : "") + amount + " " + symbol;
+    }
+    return (n < 0 ? " − " : " + ") + amount + " " + symbol;
+  }
+
+  function directionPhrase(value, axis) {
+    value = cleanNumber(value);
+    if (value === 0) return "0 m along " + axis;
+    return compact(Math.abs(value)) + " m in " + (value > 0 ? "+" : "−") + axis;
+  }
+
+  function values() {
+    return {
+      x: Number(controls.x.value),
+      y: Number(controls.y.value),
+      z: Number(controls.z.value)
+    };
+  }
+
+  function updateReadouts() {
+    const p = values();
+    const mag = Math.sqrt(p.x * p.x + p.y * p.y + p.z * p.z);
+
+    controls.xOut.textContent = fixed(p.x) + " m";
+    controls.yOut.textContent = fixed(p.y) + " m";
+    controls.zOut.textContent = fixed(p.z) + " m";
+
+    pointNotation.textContent = "P(" + compact(p.x) + ", " + compact(p.y) + ", " + compact(p.z) + ") m";
+    vectorNotation.innerHTML = "<b>r</b> = &lt;" + compact(p.x) + "," + compact(p.y) + "," + compact(p.z) + "&gt; m";
+    unitNotation.innerHTML = "<b>r</b> = " +
+      signedTerm(p.x, "<b>i</b>", true) +
+      signedTerm(p.y, "<b>j</b>", false) +
+      signedTerm(p.z, "<b>k</b>", false) + " m";
+
+    magnitudeFormula.innerHTML = "|<b>r</b>| = √(" +
+      compact(p.x) + "² + (" + compact(p.y) + ")² + (" + compact(p.z) + ")²)";
+    magnitudeValue.innerHTML = "|<b>r</b>| = " + mag.toFixed(2) + " m";
+
+    physicalText.textContent = "From the origin, move " +
+      directionPhrase(p.x, "x") + ", " +
+      directionPhrase(p.y, "y") + ", and " +
+      directionPhrase(p.z, "z") + " to reach P.";
+
+    draw();
+  }
+
+  function resizeCanvas() {
+    const rect = canvas.getBoundingClientRect();
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = Math.max(320, rect.width);
+    height = Math.max(360, rect.height);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  function project(v) {
+    const cy = Math.cos(yaw);
+    const sy = Math.sin(yaw);
+    const cp = Math.cos(pitch);
+    const sp = Math.sin(pitch);
+
+    const horizontal = cy * v.x + sy * v.z;
+    const depthBeforePitch = -sy * v.x + cy * v.z;
+    const vertical = cp * v.y - sp * depthBeforePitch;
+    const depth = sp * v.y + cp * depthBeforePitch;
+
+    const scale = Math.min(width, height) / 13.5;
+    return {
+      x: width * 0.5 + horizontal * scale,
+      y: height * 0.55 - vertical * scale,
+      depth: depth
+    };
+  }
+
+  function line3(a, b, color, lineWidth, dash) {
+    const pa = project(a);
+    const pb = project(b);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pa.x, pa.y);
+    ctx.lineTo(pb.x, pb.y);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth || 1;
+    ctx.setLineDash(dash || []);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function polygon3(points, fill, stroke) {
+    const projected = points.map(project);
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(projected[0].x, projected[0].y);
+    for (let i = 1; i < projected.length; i++) {
+      ctx.lineTo(projected[i].x, projected[i].y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = fill;
+    ctx.fill();
+    if (stroke) {
+      ctx.strokeStyle = stroke;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function arrow3(a, b, color, lineWidth) {
+    const pa = project(a);
+    const pb = project(b);
+    const angle = Math.atan2(pb.y - pa.y, pb.x - pa.x);
+    const head = 10 + (lineWidth || 2);
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = lineWidth || 2;
+    ctx.lineCap = "round";
+    ctx.beginPath();
+    ctx.moveTo(pa.x, pa.y);
+    ctx.lineTo(pb.x, pb.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(pb.x, pb.y);
+    ctx.lineTo(pb.x - head * Math.cos(angle - Math.PI / 6), pb.y - head * Math.sin(angle - Math.PI / 6));
+    ctx.lineTo(pb.x - head * Math.cos(angle + Math.PI / 6), pb.y - head * Math.sin(angle + Math.PI / 6));
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function label3(text, v, color, dx, dy) {
+    const p = project(v);
+    label2(text, p.x + (dx || 0), p.y + (dy || 0), color);
+  }
+
+  function label2(text, x, y, color) {
+    ctx.save();
+    ctx.font = "700 13px system-ui, sans-serif";
+    ctx.textBaseline = "middle";
+    const paddingX = 5;
+    const boxHeight = 22;
+    const measured = ctx.measureText(text).width;
+    const boxWidth = measured + paddingX * 2;
+
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.strokeStyle = "rgba(184,199,214,0.92)";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(x - paddingX, y - boxHeight / 2, boxWidth, boxHeight, 5);
+    } else {
+      ctx.rect(x - paddingX, y - boxHeight / 2, boxWidth, boxHeight);
+    }
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = color;
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+
+  function drawGridOnPlane(plane) {
+    const gridColor = "rgba(80,103,130,0.12)";
+    for (let n = -5; n <= 5; n++) {
+      if (n === 0) continue;
+      if (plane === "xy") {
+        line3({x:n,y:-5,z:0}, {x:n,y:5,z:0}, gridColor, 1);
+        line3({x:-5,y:n,z:0}, {x:5,y:n,z:0}, gridColor, 1);
+      } else if (plane === "xz") {
+        line3({x:n,y:0,z:-5}, {x:n,y:0,z:5}, gridColor, 1);
+        line3({x:-5,y:0,z:n}, {x:5,y:0,z:n}, gridColor, 1);
+      } else {
+        line3({x:0,y:n,z:-5}, {x:0,y:n,z:5}, gridColor, 1);
+        line3({x:0,y:-5,z:n}, {x:0,y:5,z:n}, gridColor, 1);
+      }
+    }
+  }
+
+  function drawAxes() {
+    const L = 5.8;
+    const colors = { x: "#1769d2", y: "#14865f", z: "#7147c7" };
+
+    line3({x:-L,y:0,z:0}, {x:0,y:0,z:0}, "rgba(23,105,210,.55)", 1.7);
+    line3({x:0,y:-L,z:0}, {x:0,y:0,z:0}, "rgba(20,134,95,.55)", 1.7);
+    line3({x:0,y:0,z:-L}, {x:0,y:0,z:0}, "rgba(113,71,199,.55)", 1.7);
+
+    arrow3({x:0,y:0,z:0}, {x:L,y:0,z:0}, colors.x, 2.6);
+    arrow3({x:0,y:0,z:0}, {x:0,y:L,z:0}, colors.y, 2.6);
+    arrow3({x:0,y:0,z:0}, {x:0,y:0,z:L}, colors.z, 2.6);
+
+    for (let n = -5; n <= 5; n++) {
+      if (n === 0) continue;
+      const tick = 0.09;
+      line3({x:n,y:-tick,z:0}, {x:n,y:tick,z:0}, colors.x, 1.2);
+      line3({x:-tick,y:n,z:0}, {x:tick,y:n,z:0}, colors.y, 1.2);
+      line3({x:-tick,y:0,z:n}, {x:tick,y:0,z:n}, colors.z, 1.2);
+    }
+
+    label3("+x", {x:L,y:0,z:0}, colors.x, 8, 0);
+    label3("−x", {x:-L,y:0,z:0}, colors.x, -24, 0);
+    label3("+y", {x:0,y:L,z:0}, colors.y, 8, -3);
+    label3("−y", {x:0,y:-L,z:0}, colors.y, 8, 4);
+    label3("+z (out)", {x:0,y:0,z:L}, colors.z, 8, 2);
+    label3("−z", {x:0,y:0,z:-L}, colors.z, -25, 2);
+    label3("O", {x:0,y:0,z:0}, "#24364c", 8, 9);
+  }
+
+  function draw() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, width, height);
+
+    const p = values();
+    const P = {x:p.x, y:p.y, z:p.z};
+    const X = {x:p.x, y:0, z:0};
+    const Y = {x:0, y:p.y, z:0};
+    const Z = {x:0, y:0, z:p.z};
+    const XY = {x:p.x, y:p.y, z:0};
+    const XZ = {x:p.x, y:0, z:p.z};
+    const YZ = {x:0, y:p.y, z:p.z};
+
+    if (controls.planes.checked) {
+      polygon3(
+        [{x:-5,y:-5,z:0},{x:5,y:-5,z:0},{x:5,y:5,z:0},{x:-5,y:5,z:0}],
+        "rgba(23,105,210,0.045)", "rgba(23,105,210,0.14)"
+      );
+      polygon3(
+        [{x:-5,y:0,z:-5},{x:5,y:0,z:-5},{x:5,y:0,z:5},{x:-5,y:0,z:5}],
+        "rgba(20,134,95,0.04)", "rgba(20,134,95,0.13)"
+      );
+      polygon3(
+        [{x:0,y:-5,z:-5},{x:0,y:5,z:-5},{x:0,y:5,z:5},{x:0,y:-5,z:5}],
+        "rgba(113,71,199,0.035)", "rgba(113,71,199,0.13)"
+      );
+
+      drawGridOnPlane("xy");
+      drawGridOnPlane("xz");
+      drawGridOnPlane("yz");
+    }
+
+    drawAxes();
+
+    if (controls.guides.checked) {
+      const mainGuide = "rgba(231,128,22,0.82)";
+      const secondaryGuide = "rgba(85,103,126,0.42)";
+
+      line3(P, XY, mainGuide, 2, [6,5]);
+      line3(P, XZ, mainGuide, 2, [6,5]);
+      line3(P, YZ, mainGuide, 2, [6,5]);
+
+      line3(XY, X, secondaryGuide, 1.4, [3,4]);
+      line3(XY, Y, secondaryGuide, 1.4, [3,4]);
+      line3(XZ, X, secondaryGuide, 1.4, [3,4]);
+      line3(XZ, Z, secondaryGuide, 1.4, [3,4]);
+      line3(YZ, Y, secondaryGuide, 1.4, [3,4]);
+      line3(YZ, Z, secondaryGuide, 1.4, [3,4]);
+
+      const feet = [X, Y, Z, XY, XZ, YZ];
+      ctx.save();
+      ctx.fillStyle = "rgba(231,128,22,.8)";
+      feet.forEach(function (v) {
+        const q = project(v);
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, 2.8, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      ctx.restore();
+    }
+
+    arrow3({x:0,y:0,z:0}, P, "#db3a4a", 4.2);
+
+    const pp = project(P);
+    ctx.save();
+    ctx.shadowColor = "rgba(219,58,74,.3)";
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = "#db3a4a";
+    ctx.beginPath();
+    ctx.arc(pp.x, pp.y, 7, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    label2("P(" + compact(p.x) + ", " + compact(p.y) + ", " + compact(p.z) + ")", pp.x + 11, pp.y - 13, "#a62232");
+
+    const rp = {
+      x: p.x * 0.53,
+      y: p.y * 0.53,
+      z: p.z * 0.53
+    };
+    label3("r", rp, "#a62232", 7, -9);
+
+    if (Math.abs(yaw) < 0.035 && Math.abs(pitch) < 0.035) {
+      const o = project({x:0,y:0,z:0});
+      label2("+z ⊙ out of page", o.x + 15, o.y + 28, "#7147c7");
+    }
+  }
+
+  function pointerDown(event) {
+    dragging = true;
+    canvas.classList.add("dragging");
+    lastX = event.clientX;
+    lastY = event.clientY;
+    canvas.setPointerCapture(event.pointerId);
+  }
+
+  function pointerMove(event) {
+    if (!dragging) return;
+    const dx = event.clientX - lastX;
+    const dy = event.clientY - lastY;
+    lastX = event.clientX;
+    lastY = event.clientY;
+
+    yaw += dx * 0.009;
+    pitch -= dy * 0.009;
+    pitch = Math.max(-1.22, Math.min(1.22, pitch));
+    draw();
+  }
+
+  function pointerUp(event) {
+    dragging = false;
+    canvas.classList.remove("dragging");
+    if (canvas.hasPointerCapture && canvas.hasPointerCapture(event.pointerId)) {
+      canvas.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  canvas.addEventListener("pointerdown", pointerDown);
+  canvas.addEventListener("pointermove", pointerMove);
+  canvas.addEventListener("pointerup", pointerUp);
+  canvas.addEventListener("pointercancel", pointerUp);
+
+  [controls.x, controls.y, controls.z].forEach(function (slider) {
+    slider.addEventListener("input", updateReadouts);
+  });
+  controls.planes.addEventListener("change", draw);
+  controls.guides.addEventListener("change", draw);
+
+  document.getElementById("resetButton").addEventListener("click", function () {
+    controls.x.value = "3";
+    controls.y.value = "2";
+    controls.z.value = "4";
+    controls.planes.checked = true;
+    controls.guides.checked = true;
+    yaw = -0.62;
+    pitch = 0.38;
+    updateReadouts();
+  });
+
+  document.getElementById("frontButton").addEventListener("click", function () {
+    yaw = 0;
+    pitch = 0;
+    draw();
+  });
+
+  if ("ResizeObserver" in window) {
+    const observer = new ResizeObserver(resizeCanvas);
+    observer.observe(canvas);
+  } else {
+    window.addEventListener("resize", resizeCanvas);
+  }
+
+  updateReadouts();
+  resizeCanvas();
+})();
+</script>
+</body>
+</html>

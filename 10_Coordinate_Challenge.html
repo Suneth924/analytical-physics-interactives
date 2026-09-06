@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coordinate Challenge: Vectors and Coordinate Systems</title>
+<style>
+  :root {
+    --navy: #17324d;
+    --blue: #1769aa;
+    --blue-light: #e8f3fb;
+    --cyan: #25a9c7;
+    --orange: #e87925;
+    --orange-light: #fff3e8;
+    --green: #27834a;
+    --green-light: #eaf7ef;
+    --red: #bd2c34;
+    --red-light: #fff0f1;
+    --ink: #1e2933;
+    --muted: #607080;
+    --line: #cbd7e1;
+    --panel: #ffffff;
+    --page: #eef3f7;
+    --shadow: 0 4px 16px rgba(23, 50, 77, 0.09);
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--page);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.55;
+  }
+
+  header {
+    color: white;
+    background: linear-gradient(125deg, #17324d, #1769aa 68%, #168ea9);
+    padding: 2.2rem max(1rem, calc((100% - 1180px) / 2));
+  }
+
+  header h1 {
+    margin: 0 0 .3rem;
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    line-height: 1.05;
+  }
+
+  header p {
+    max-width: 850px;
+    margin: .55rem 0 0;
+    font-size: 1.08rem;
+  }
+
+  .eyebrow {
+    margin-bottom: .45rem;
+    color: #bdeefa;
+    font-size: .82rem;
+    font-weight: 800;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+
+  main {
+    width: min(1180px, calc(100% - 2rem));
+    margin: 1.4rem auto 3rem;
+  }
+
+  .panel {
+    margin: 1rem 0;
+    padding: clamp(1rem, 3vw, 1.6rem);
+    background: var(--panel);
+    border: 1px solid #d8e1e8;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  h2, h3, h4 { color: var(--navy); line-height: 1.2; }
+  h2 { margin: 0 0 .75rem; font-size: clamp(1.45rem, 3vw, 2rem); }
+  h3 { margin: .2rem 0 .55rem; }
+  h4 { margin: .25rem 0; }
+
+  p { margin: .55rem 0; }
+
+  .why-grid, .stage-grid, .activity-layout, .readout-grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .why-grid { grid-template-columns: repeat(3, 1fr); }
+
+  .idea-card {
+    padding: 1rem;
+    background: #f8fbfd;
+    border: 1px solid #dbe5ec;
+    border-radius: 12px;
+  }
+
+  .idea-card .number {
+    display: inline-grid;
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: .35rem;
+    color: white;
+    background: var(--blue);
+    border-radius: 50%;
+    place-items: center;
+    font-weight: 800;
+  }
+
+  .stage-title {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+  }
+
+  .stage-badge {
+    flex: 0 0 auto;
+    padding: .25rem .65rem;
+    color: white;
+    background: var(--navy);
+    border-radius: 999px;
+    font-size: .82rem;
+    font-weight: 800;
+  }
+
+  .stage-grid {
+    grid-template-columns: repeat(5, 1fr);
+    margin-top: 1rem;
+  }
+
+  .step {
+    min-height: 145px;
+    padding: .85rem;
+    background: #f8fbfd;
+    border-top: 4px solid var(--cyan);
+    border-radius: 10px;
+  }
+
+  .step-label {
+    color: var(--blue);
+    font-size: .76rem;
+    font-weight: 850;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+
+  .formula {
+    display: inline-block;
+    margin: .35rem 0;
+    padding: .32rem .55rem;
+    color: var(--navy);
+    background: #eef5fa;
+    border-radius: 7px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.06rem;
+    font-weight: 700;
+  }
+
+  .mini-svg {
+    width: 100%;
+    height: 95px;
+    margin-top: .25rem;
+    background: white;
+    border: 1px solid #dce6ed;
+    border-radius: 8px;
+  }
+
+  .activity {
+    border: 2px solid #a8d4e3;
+  }
+
+  .activity-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .8rem;
+  }
+
+  .mode-group {
+    display: inline-flex;
+    padding: .25rem;
+    background: #e7eef4;
+    border-radius: 11px;
+  }
+
+  button {
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 750;
+  }
+
+  .mode-button {
+    padding: .62rem .85rem;
+    color: #385064;
+    background: transparent;
+  }
+
+  .mode-button.active {
+    color: white;
+    background: var(--blue);
+    box-shadow: 0 2px 7px rgba(23, 105, 170, .25);
+  }
+
+  button:focus-visible, input:focus-visible, #plane:focus-visible {
+    outline: 3px solid #f5b23c;
+    outline-offset: 2px;
+  }
+
+  .activity-layout {
+    grid-template-columns: minmax(350px, 1.35fr) minmax(280px, .8fr);
+    align-items: start;
+    margin-top: 1rem;
+  }
+
+  .plane-wrap {
+    overflow: hidden;
+    background: #fbfdff;
+    border: 1px solid #cbd9e3;
+    border-radius: 13px;
+  }
+
+  #plane {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .control-panel {
+    padding: 1rem;
+    background: #f7fafc;
+    border: 1px solid #d7e2e9;
+    border-radius: 13px;
+  }
+
+  .challenge-box {
+    padding: .9rem;
+    background: var(--blue-light);
+    border-left: 5px solid var(--blue);
+    border-radius: 8px;
+  }
+
+  .challenge-main {
+    margin: .25rem 0;
+    color: var(--navy);
+    font-size: 1.25rem;
+    font-weight: 800;
+  }
+
+  .input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .8rem;
+    margin: .85rem 0;
+  }
+
+  .coord-input {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+  }
+
+  input[type="number"] {
+    width: 5.2rem;
+    padding: .55rem;
+    color: var(--ink);
+    background: white;
+    border: 2px solid #aebfcb;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 1.05rem;
+  }
+
+  .feedback {
+    min-height: 62px;
+    margin: .8rem 0;
+    padding: .75rem;
+    background: #f1f5f8;
+    border-radius: 9px;
+    font-weight: 650;
+  }
+
+  .feedback.success {
+    color: #185f34;
+    background: var(--green-light);
+    border: 1px solid #9bd0ae;
+  }
+
+  .feedback.try {
+    color: #8a242b;
+    background: var(--red-light);
+    border: 1px solid #e3afb2;
+  }
+
+  .feedback.neutral {
+    color: #425466;
+    border: 1px solid #d8e1e7;
+  }
+
+  .readout-grid {
+    grid-template-columns: 1fr 1fr;
+    margin: .75rem 0;
+  }
+
+  .readout {
+    padding: .7rem;
+    background: white;
+    border: 1px solid #d8e2e8;
+    border-radius: 9px;
+  }
+
+  .readout span {
+    display: block;
+    color: var(--muted);
+    font-size: .76rem;
+    font-weight: 750;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+
+  .readout strong {
+    color: var(--navy);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.05rem;
+  }
+
+  .button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .6rem;
+    margin-top: .9rem;
+  }
+
+  .primary, .secondary, .reset {
+    padding: .65rem .9rem;
+  }
+
+  .primary { color: white; background: var(--blue); }
+  .secondary { color: var(--navy); background: #dce9f1; }
+  .reset { color: #7a252a; background: #f7dcde; }
+
+  .primary:hover { background: #10598f; }
+  .secondary:hover { background: #cbdde8; }
+  .reset:hover { background: #efc5c8; }
+
+  .score {
+    margin-top: .75rem;
+    color: var(--muted);
+    font-size: .9rem;
+  }
+
+  .notice {
+    margin-top: 1rem;
+    padding: 1rem 1.1rem;
+    background: var(--orange-light);
+    border-left: 5px solid var(--orange);
+    border-radius: 9px;
+  }
+
+  .notice h3 { margin: 0 0 .3rem; color: #823b0c; }
+
+  .velocity-note {
+    padding: 1rem;
+    color: #17324d;
+    background: #e9f7f5;
+    border: 1px solid #b7ded8;
+    border-radius: 10px;
+  }
+
+  .key-point {
+    font-weight: 800;
+    color: var(--red);
+  }
+
+  .small { color: var(--muted); font-size: .9rem; }
+  .hidden { display: none !important; }
+
+  footer {
+    padding: 1rem;
+    color: #5c6e7b;
+    text-align: center;
+    font-size: .85rem;
+  }
+
+  @media (max-width: 900px) {
+    .why-grid { grid-template-columns: 1fr; }
+    .stage-grid { grid-template-columns: 1fr 1fr; }
+    .activity-layout { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 580px) {
+    main { width: min(100% - 1rem, 1180px); }
+    .panel { padding: .9rem; border-radius: 12px; }
+    .stage-grid { grid-template-columns: 1fr; }
+    .activity-layout { grid-template-columns: minmax(0, 1fr); }
+    .mode-group { width: 100%; }
+    .mode-button { flex: 1; font-size: .88rem; }
+    .readout-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="eyebrow">University conceptual physics · Algebra-based</div>
+  <h1>Coordinate Challenge</h1>
+  <p>Why coordinate systems and vectors are needed—and how a physical location becomes a consistent numerical description.</p>
+</header>
+
+<main>
+  <section class="panel" aria-labelledby="why-title">
+    <h2 id="why-title">Why do we need a coordinate system?</h2>
+    <p>“The object is over there” may make sense to one observer but not to another. Physics needs a shared reference so that everyone can describe the same position, direction, and motion consistently.</p>
+    <div class="why-grid">
+      <article class="idea-card">
+        <div class="number">1</div>
+        <h3>Choose a reference</h3>
+        <p>Pick an <strong>origin</strong>, positive directions, labeled axes, and units. The physical point does not move when we change coordinates; only its numerical description changes.</p>
+      </article>
+      <article class="idea-card">
+        <div class="number">2</div>
+        <h3>Describe direction</h3>
+        <p>A number alone cannot distinguish 4 m east from 4 m west. Signed components tell us how far and in which axis direction.</p>
+      </article>
+      <article class="idea-card">
+        <div class="number">3</div>
+        <h3>Use a vector</h3>
+        <p>A <strong>vector</strong> has both magnitude and direction. Its components describe one physical quantity relative to the chosen axes.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="one-d-title">
+    <div class="stage-title">
+      <span class="stage-badge">1-D</span>
+      <h2 id="one-d-title">Position along one line</h2>
+    </div>
+    <div class="stage-grid">
+      <article class="step">
+        <div class="step-label">Physical concept</div>
+        <p>An object on a straight track needs one signed number relative to the origin.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Visual diagram</div>
+        <svg class="mini-svg" viewBox="0 0 220 95" role="img" aria-label="One-dimensional number line with a point at positive three meters">
+          <line x1="15" y1="52" x2="205" y2="52" stroke="#17324d" stroke-width="3"/>
+          <polygon points="205,52 195,47 195,57" fill="#17324d"/>
+          <line x1="70" y1="40" x2="70" y2="64" stroke="#17324d" stroke-width="2"/>
+          <circle cx="160" cy="52" r="8" fill="#e87925"/>
+          <text x="65" y="80" font-size="13">0</text>
+          <text x="152" y="35" font-size="13">+3 m</text>
+          <text x="196" y="80" font-size="13">x</text>
+        </svg>
+      </article>
+      <article class="step">
+        <div class="step-label">Mathematical representation</div>
+        <div class="formula">r = &lt;x&gt;</div>
+        <p>In one dimension, the sign gives the direction from the origin.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Numerical example</div>
+        <div class="formula">r = &lt;3 m&gt;</div>
+        <p>The position coordinate is positive three metres.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Physical interpretation</div>
+        <p>The object is 3 m from the origin in the chosen positive <em>x</em> direction. A position of −3 m would be equally far in the opposite direction.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="two-d-title">
+    <div class="stage-title">
+      <span class="stage-badge">2-D</span>
+      <h2 id="two-d-title">Position and components in a plane</h2>
+    </div>
+    <div class="stage-grid">
+      <article class="step">
+        <div class="step-label">Physical concept</div>
+        <p>A location on a floor needs two independent instructions: horizontal and vertical displacement from the origin.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Visual diagram</div>
+        <svg class="mini-svg" viewBox="0 0 220 95" role="img" aria-label="Two-dimensional axes and a vector to the point three comma two">
+          <defs>
+            <marker id="miniArrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#e87925"/></marker>
+          </defs>
+          <line x1="20" y1="75" x2="205" y2="75" stroke="#17324d" stroke-width="2"/>
+          <line x1="35" y1="88" x2="35" y2="8" stroke="#17324d" stroke-width="2"/>
+          <line x1="35" y1="75" x2="155" y2="27" stroke="#e87925" stroke-width="4" marker-end="url(#miniArrow)"/>
+          <line x1="155" y1="27" x2="155" y2="75" stroke="#25a9c7" stroke-dasharray="4 4"/>
+          <line x1="35" y1="27" x2="155" y2="27" stroke="#25a9c7" stroke-dasharray="4 4"/>
+          <text x="160" y="25" font-size="13">(3, 2)</text>
+          <text x="204" y="89" font-size="13">x</text>
+          <text x="20" y="13" font-size="13">y</text>
+        </svg>
+      </article>
+      <article class="step">
+        <div class="step-label">Mathematical representation</div>
+        <div class="formula">r = &lt;x, y&gt;</div><br>
+        <div class="formula">r = x i + y j</div>
+        <p><strong>i</strong> and <strong>j</strong> indicate the positive axis directions.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Numerical example</div>
+        <div class="formula">r = &lt;3 m, 4 m&gt;</div>
+        <p>Magnitude: |r| = √(3² + 4²) = 5 m.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Physical interpretation</div>
+        <p>Move 3 m in +<em>x</em>, then 4 m in +<em>y</em>. The straight-line distance from the origin is 5 m. Components are not separate vectors; together they describe one position vector.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="panel activity" aria-labelledby="challenge-title">
+    <div class="activity-top">
+      <div>
+        <div class="eyebrow" style="color:#16809a">Interactive activity</div>
+        <h2 id="challenge-title">Coordinate Challenge</h2>
+      </div>
+      <div class="mode-group" role="group" aria-label="Activity mode">
+        <button type="button" id="placementMode" class="mode-button active" aria-pressed="true">Placement mode</button>
+        <button type="button" id="identificationMode" class="mode-button" aria-pressed="false">Identification mode</button>
+      </div>
+    </div>
+
+    <p>Coordinates are measured in metres. Challenges include all four quadrants, both axes, and the origin.</p>
+
+    <div class="activity-layout">
+      <div class="plane-wrap">
+        <svg id="plane" viewBox="0 0 640 640" role="img" tabindex="0" aria-label="Interactive coordinate plane from negative five to positive five metres on each axis"></svg>
+      </div>
+
+      <aside class="control-panel" aria-live="polite">
+        <div id="placementControls">
+          <div class="challenge-box">
+            <strong>Placement challenge</strong>
+            <div id="targetText" class="challenge-main">Place r = &lt;3 m, 2 m&gt;</div>
+            <p>Drag the orange point to the requested coordinate. It snaps to grid intersections. You may also use the arrow keys.</p>
+          </div>
+        </div>
+
+        <div id="identificationControls" class="hidden">
+          <div class="challenge-box">
+            <strong>Identification challenge</strong>
+            <div class="challenge-main">What are the point's coordinates?</div>
+            <p>Read the horizontal component first, then the vertical component.</p>
+          </div>
+          <div class="input-row">
+            <label class="coord-input"><strong>x =</strong>
+              <input id="xInput" type="number" min="-5" max="5" step="1" inputmode="numeric" aria-label="x coordinate">
+              <span>m</span>
+            </label>
+            <label class="coord-input"><strong>y =</strong>
+              <input id="yInput" type="number" min="-5" max="5" step="1" inputmode="numeric" aria-label="y coordinate">
+              <span>m</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="feedback" class="feedback neutral">Drag the point to begin.</div>
+
+        <div class="readout-grid">
+          <div class="readout">
+            <span>Coordinate vector</span>
+            <strong id="vectorReadout">r = &lt;0 m, 0 m&gt;</strong>
+          </div>
+          <div class="readout">
+            <span>Magnitude from origin</span>
+            <strong id="magnitudeReadout">|r| = 0 m</strong>
+          </div>
+          <div class="readout">
+            <span>x component</span>
+            <strong id="xReadout">x = 0 m</strong>
+          </div>
+          <div class="readout">
+            <span>y component</span>
+            <strong id="yReadout">y = 0 m</strong>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button type="button" id="newButton" class="primary">New Challenge</button>
+          <button type="button" id="centerButton" class="secondary">Return point to origin</button>
+          <button type="button" id="resetButton" class="reset">Reset</button>
+        </div>
+        <div id="score" class="score">Solved: 0 of 0 attempted</div>
+      </aside>
+    </div>
+
+    <div class="notice">
+      <h3>What to notice</h3>
+      <ul>
+        <li>The ordered pair is <strong>&lt;x, y&gt;</strong>: horizontal information comes first.</li>
+        <li>A negative component means the point lies in the negative direction of that axis; it does not mean the distance is negative.</li>
+        <li>Points on an axis have one zero component. The origin has two zero components.</li>
+        <li>The vector <strong>r</strong> and its magnitude <strong>|r|</strong> are different: <strong>r</strong> includes direction, while <strong>|r|</strong> is a nonnegative distance.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="three-d-title">
+    <div class="stage-title">
+      <span class="stage-badge">3-D</span>
+      <h2 id="three-d-title">Position in three-dimensional space</h2>
+    </div>
+    <div class="stage-grid">
+      <article class="step">
+        <div class="step-label">Physical concept</div>
+        <p>A location in a room also needs height or depth. Three mutually independent directions require three components.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Visual diagram</div>
+        <svg class="mini-svg" viewBox="0 0 220 95" role="img" aria-label="Three-dimensional coordinate axes with a position vector">
+          <defs>
+            <marker id="axisArrow" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"><polygon points="0 0, 7 3.5, 0 7" fill="#17324d"/></marker>
+          </defs>
+          <line x1="80" y1="72" x2="200" y2="72" stroke="#17324d" stroke-width="2" marker-end="url(#axisArrow)"/>
+          <line x1="80" y1="72" x2="80" y2="8" stroke="#17324d" stroke-width="2" marker-end="url(#axisArrow)"/>
+          <line x1="80" y1="72" x2="22" y2="90" stroke="#17324d" stroke-width="2" marker-end="url(#axisArrow)"/>
+          <line x1="80" y1="72" x2="156" y2="22" stroke="#e87925" stroke-width="4"/>
+          <circle cx="156" cy="22" r="6" fill="#e87925"/>
+          <text x="202" y="86" font-size="13">x</text>
+          <text x="67" y="13" font-size="13">z</text>
+          <text x="12" y="90" font-size="13">y</text>
+        </svg>
+      </article>
+      <article class="step">
+        <div class="step-label">Mathematical representation</div>
+        <div class="formula">r = &lt;x, y, z&gt;</div><br>
+        <div class="formula">r = x i + y j + z k</div>
+      </article>
+      <article class="step">
+        <div class="step-label">Numerical example</div>
+        <div class="formula">r = &lt;2 m, 3 m, 6 m&gt;</div>
+        <p>|r| = √(2² + 3² + 6²) = √49 = 7 m.</p>
+      </article>
+      <article class="step">
+        <div class="step-label">Physical interpretation</div>
+        <p>The three components give axis-by-axis instructions. The magnitude is the straight-line distance from the origin, not any single component.</p>
+      </article>
+    </div>
+
+    <div class="velocity-note" style="margin-top:1rem">
+      <h3>Position language also prepares us for velocity</h3>
+      <p>A three-dimensional velocity can be written as <span class="formula">v = &lt;v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub>&gt;</span> or <span class="formula">v = v<sub>x</sub> i + v<sub>y</sub> j + v<sub>z</sub> k</span>.</p>
+      <p><strong>Velocity</strong> is a vector and includes direction. <strong>Speed</strong> is the magnitude of velocity: <span class="formula">|v| = √(v<sub>x</sub>² + v<sub>y</sub>² + v<sub>z</sub>²)</span>. Therefore, <span class="key-point">velocity is not the same thing as speed.</span></p>
+    </div>
+  </section>
+</main>
+
+<footer>Coordinate systems provide the shared language; vectors use that language to describe magnitude and direction.</footer>
+
+<script>
+(function () {
+  "use strict";
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const plane = document.getElementById("plane");
+  const placementModeButton = document.getElementById("placementMode");
+  const identificationModeButton = document.getElementById("identificationMode");
+  const placementControls = document.getElementById("placementControls");
+  const identificationControls = document.getElementById("identificationControls");
+  const targetText = document.getElementById("targetText");
+  const feedback = document.getElementById("feedback");
+  const vectorReadout = document.getElementById("vectorReadout");
+  const magnitudeReadout = document.getElementById("magnitudeReadout");
+  const xReadout = document.getElementById("xReadout");
+  const yReadout = document.getElementById("yReadout");
+  const xInput = document.getElementById("xInput");
+  const yInput = document.getElementById("yInput");
+  const newButton = document.getElementById("newButton");
+  const centerButton = document.getElementById("centerButton");
+  const resetButton = document.getElementById("resetButton");
+  const scoreDisplay = document.getElementById("score");
+
+  const origin = 320;
+  const spacing = 52;
+  const minCoord = -5;
+  const maxCoord = 5;
+
+  const challengePoints = [
+    {x: 3, y: 2}, {x: -3, y: 4}, {x: -4, y: -2}, {x: 2, y: -4},
+    {x: 0, y: 0}, {x: 0, y: 4}, {x: 0, y: -3}, {x: 4, y: 0},
+    {x: -4, y: 0}, {x: 5, y: 3}, {x: -2, y: 1}, {x: 1, y: -2}
+  ];
+
+  let deck = [];
+  let deckIndex = 0;
+  let mode = "placement";
+  let target = {x: 3, y: 2};
+  let current = {x: 0, y: 0};
+  let dragging = false;
+  let solvedCurrent = false;
+  let attemptedCurrent = false;
+  let solvedCount = 0;
+  let attemptedCount = 0;
+
+  let componentLayer;
+  let vectorLine;
+  let pointCircle;
+  let pointLabel;
+
+  function createSvgElement(name, attributes, text) {
+    const node = document.createElementNS(svgNS, name);
+    Object.keys(attributes || {}).forEach(function (key) {
+      node.setAttribute(key, attributes[key]);
+    });
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function toSvgX(x) { return origin + x * spacing; }
+  function toSvgY(y) { return origin - y * spacing; }
+
+  function buildPlane() {
+    plane.replaceChildren();
+
+    const defs = createSvgElement("defs");
+    const marker = createSvgElement("marker", {
+      id: "vectorArrow",
+      markerWidth: "10",
+      markerHeight: "10",
+      refX: "8",
+      refY: "5",
+      orient: "auto",
+      markerUnits: "strokeWidth"
+    });
+    marker.appendChild(createSvgElement("path", {d: "M0,0 L10,5 L0,10 Z", fill: "#e87925"}));
+    defs.appendChild(marker);
+
+    const axisMarker = createSvgElement("marker", {
+      id: "planeAxisArrow",
+      markerWidth: "8",
+      markerHeight: "8",
+      refX: "7",
+      refY: "4",
+      orient: "auto"
+    });
+    axisMarker.appendChild(createSvgElement("path", {d: "M0,0 L8,4 L0,8 Z", fill: "#17324d"}));
+    defs.appendChild(axisMarker);
+    plane.appendChild(defs);
+
+    plane.appendChild(createSvgElement("rect", {
+      x: "0", y: "0", width: "640", height: "640", fill: "#fbfdff"
+    }));
+
+    const grid = createSvgElement("g", {"aria-hidden": "true"});
+
+    for (let n = minCoord; n <= maxCoord; n++) {
+      const px = toSvgX(n);
+      const py = toSvgY(n);
+
+      if (n !== 0) {
+        grid.appendChild(createSvgElement("line", {
+          x1: px, y1: toSvgY(maxCoord), x2: px, y2: toSvgY(minCoord),
+          stroke: "#dce6ed", "stroke-width": "1.5"
+        }));
+        grid.appendChild(createSvgElement("line", {
+          x1: toSvgX(minCoord), y1: py, x2: toSvgX(maxCoord), y2: py,
+          stroke: "#dce6ed", "stroke-width": "1.5"
+        }));
+      }
+    }
+    plane.appendChild(grid);
+
+    plane.appendChild(createSvgElement("line", {
+      x1: toSvgX(minCoord) - 12, y1: origin,
+      x2: toSvgX(maxCoord) + 18, y2: origin,
+      stroke: "#17324d", "stroke-width": "3", "marker-end": "url(#planeAxisArrow)"
+    }));
+    plane.appendChild(createSvgElement("line", {
+      x1: origin, y1: toSvgY(minCoord) + 12,
+      x2: origin, y2: toSvgY(maxCoord) - 18,
+      stroke: "#17324d", "stroke-width": "3", "marker-end": "url(#planeAxisArrow)"
+    }));
+
+    for (let n = minCoord; n <= maxCoord; n++) {
+      const px = toSvgX(n);
+      const py = toSvgY(n);
+
+      plane.appendChild(createSvgElement("line", {
+        x1: px, y1: origin - 6, x2: px, y2: origin + 6,
+        stroke: "#17324d", "stroke-width": "2"
+      }));
+      plane.appendChild(createSvgElement("line", {
+        x1: origin - 6, y1: py, x2: origin + 6, y2: py,
+        stroke: "#17324d", "stroke-width": "2"
+      }));
+
+      if (n !== 0) {
+        plane.appendChild(createSvgElement("text", {
+          x: px, y: origin + 24, "text-anchor": "middle",
+          fill: "#405669", "font-size": "14"
+        }, String(n)));
+        plane.appendChild(createSvgElement("text", {
+          x: origin - 15, y: py + 5, "text-anchor": "end",
+          fill: "#405669", "font-size": "14"
+        }, String(n)));
+      }
+    }
+
+    plane.appendChild(createSvgElement("text", {
+      x: origin - 14, y: origin + 22, "text-anchor": "end",
+      fill: "#405669", "font-size": "14"
+    }, "0"));
+
+    plane.appendChild(createSvgElement("text", {
+      x: 615, y: origin - 14, "text-anchor": "end",
+      fill: "#17324d", "font-size": "18", "font-weight": "700"
+    }, "x (m)"));
+
+    plane.appendChild(createSvgElement("text", {
+      x: origin + 15, y: 25,
+      fill: "#17324d", "font-size": "18", "font-weight": "700"
+    }, "y (m)"));
+
+    componentLayer = createSvgElement("g");
+    plane.appendChild(componentLayer);
+
+    vectorLine = createSvgElement("line", {
+      x1: origin, y1: origin, x2: origin, y2: origin,
+      stroke: "#e87925", "stroke-width": "5",
+      "marker-end": "url(#vectorArrow)"
+    });
+    plane.appendChild(vectorLine);
+
+    pointCircle = createSvgElement("circle", {
+      cx: origin, cy: origin, r: "12",
+      fill: "#e87925", stroke: "#8c3e08", "stroke-width": "3",
+      style: "cursor: grab"
+    });
+    plane.appendChild(pointCircle);
+
+    pointLabel = createSvgElement("text", {
+      x: origin + 16, y: origin - 16,
+      fill: "#8c3e08", "font-size": "18", "font-weight": "800"
+    }, "P");
+    plane.appendChild(pointLabel);
+  }
+
+  function shuffleDeck() {
+    deck = challengePoints.slice();
+    for (let i = deck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = deck[i];
+      deck[i] = deck[j];
+      deck[j] = temp;
+    }
+    deckIndex = 0;
+  }
+
+  function nextTarget() {
+    if (deckIndex >= deck.length) shuffleDeck();
+    target = {x: deck[deckIndex].x, y: deck[deckIndex].y};
+    deckIndex++;
+  }
+
+  function formatMagnitude(x, y) {
+    const value = Math.sqrt(x * x + y * y);
+    if (Number.isInteger(value)) return String(value);
+    return value.toFixed(2);
+  }
+
+  function updateDiagram() {
+    const px = toSvgX(current.x);
+    const py = toSvgY(current.y);
+
+    componentLayer.replaceChildren();
+
+    componentLayer.appendChild(createSvgElement("line", {
+      x1: px, y1: py, x2: px, y2: origin,
+      stroke: "#25a9c7", "stroke-width": "3", "stroke-dasharray": "8 6"
+    }));
+    componentLayer.appendChild(createSvgElement("line", {
+      x1: px, y1: py, x2: origin, y2: py,
+      stroke: "#25a9c7", "stroke-width": "3", "stroke-dasharray": "8 6"
+    }));
+
+    vectorLine.setAttribute("x2", px);
+    vectorLine.setAttribute("y2", py);
+    pointCircle.setAttribute("cx", px);
+    pointCircle.setAttribute("cy", py);
+
+    const labelX = current.x >= 4 ? px - 20 : px + 16;
+    const anchor = current.x >= 4 ? "end" : "start";
+    const labelY = current.y >= 4 ? py + 28 : py - 16;
+    pointLabel.setAttribute("x", labelX);
+    pointLabel.setAttribute("y", labelY);
+    pointLabel.setAttribute("text-anchor", anchor);
+
+    if (mode === "placement" || solvedCurrent) {
+      pointLabel.textContent = "P (" + current.x + ", " + current.y + ")";
+    } else {
+      pointLabel.textContent = "P";
+    }
+
+    updateReadouts();
+  }
+
+  function updateReadouts() {
+    if (mode === "identification" && !solvedCurrent) {
+      vectorReadout.textContent = "r = <? m, ? m>";
+      magnitudeReadout.textContent = "|r| = ?";
+      xReadout.textContent = "x = ?";
+      yReadout.textContent = "y = ?";
+      return;
+    }
+
+    vectorReadout.textContent = "r = <" + current.x + " m, " + current.y + " m>";
+    magnitudeReadout.textContent = "|r| = " + formatMagnitude(current.x, current.y) + " m";
+    xReadout.textContent = "x = " + current.x + " m";
+    yReadout.textContent = "y = " + current.y + " m";
+  }
+
+  function setFeedback(message, type) {
+    feedback.textContent = message;
+    feedback.className = "feedback " + type;
+  }
+
+  function updateScore() {
+    scoreDisplay.textContent = "Solved: " + solvedCount + " of " + attemptedCount + " attempted";
+  }
+
+  function markAttempt() {
+    if (!attemptedCurrent) {
+      attemptedCurrent = true;
+      attemptedCount++;
+      updateScore();
+    }
+  }
+
+  function markSolved(message) {
+    markAttempt();
+    if (!solvedCurrent) {
+      solvedCurrent = true;
+      solvedCount++;
+      updateScore();
+    }
+    setFeedback(message, "success");
+    updateDiagram();
+  }
+
+  function checkPlacement() {
+    markAttempt();
+    const xCorrect = current.x === target.x;
+    const yCorrect = current.y === target.y;
+
+    if (xCorrect && yCorrect) {
+      markSolved("Correct! The point has the requested horizontal and vertical components.");
+    } else if (xCorrect) {
+      setFeedback("The x component is correct. Now adjust the y component.", "try");
+    } else if (yCorrect) {
+      setFeedback("The y component is correct. Now adjust the x component.", "try");
+    } else {
+      setFeedback("Not there yet. Compare both signed components with the requested vector.", "try");
+    }
+  }
+
+  function checkIdentification() {
+    const xRaw = xInput.value.trim();
+    const yRaw = yInput.value.trim();
+
+    if (xRaw === "" || yRaw === "") {
+      setFeedback("Enter both components. Read x first, then y.", "neutral");
+      return;
+    }
+
+    markAttempt();
+    const xValue = Number(xRaw);
+    const yValue = Number(yRaw);
+    const xCorrect = xValue === target.x;
+    const yCorrect = yValue === target.y;
+
+    if (xCorrect && yCorrect) {
+      markSolved("Correct! r = <" + target.x + " m, " + target.y + " m>.");
+    } else if (xCorrect) {
+      setFeedback("The x component is correct. Recheck the point's vertical position.", "try");
+    } else if (yCorrect) {
+      setFeedback("The y component is correct. Recheck the point's horizontal position.", "try");
+    } else {
+      setFeedback("Not quite. Start at the origin: read horizontally for x, then vertically for y.", "try");
+    }
+  }
+
+  function choosePlacementStart() {
+    current = {x: 0, y: 0};
+    if (target.x === 0 && target.y === 0) {
+      current = {x: 2, y: 2};
+    }
+  }
+
+  function beginChallenge(useNextTarget) {
+    if (useNextTarget) nextTarget();
+
+    solvedCurrent = false;
+    attemptedCurrent = false;
+    xInput.value = "";
+    yInput.value = "";
+
+    if (mode === "placement") {
+      choosePlacementStart();
+      targetText.textContent = "Place r = <" + target.x + " m, " + target.y + " m>";
+      setFeedback("Drag the orange point to the requested coordinate.", "neutral");
+      pointCircle.style.cursor = "grab";
+    } else {
+      current = {x: target.x, y: target.y};
+      setFeedback("Enter the point's x and y coordinates.", "neutral");
+      pointCircle.style.cursor = "default";
+    }
+
+    updateDiagram();
+  }
+
+  function setMode(newMode) {
+    mode = newMode;
+    const placementActive = mode === "placement";
+
+    placementModeButton.classList.toggle("active", placementActive);
+    identificationModeButton.classList.toggle("active", !placementActive);
+    placementModeButton.setAttribute("aria-pressed", String(placementActive));
+    identificationModeButton.setAttribute("aria-pressed", String(!placementActive));
+    placementControls.classList.toggle("hidden", !placementActive);
+    identificationControls.classList.toggle("hidden", placementActive);
+    centerButton.classList.toggle("hidden", !placementActive);
+
+    beginChallenge(true);
+
+    if (!placementActive) xInput.focus();
+  }
+
+  function pointerCoordinates(event) {
+    const svgPoint = plane.createSVGPoint();
+    svgPoint.x = event.clientX;
+    svgPoint.y = event.clientY;
+    const ctm = plane.getScreenCTM();
+    if (!ctm) return null;
+    return svgPoint.matrixTransform(ctm.inverse());
+  }
+
+  function moveFromPointer(event) {
+    if (mode !== "placement") return;
+    const p = pointerCoordinates(event);
+    if (!p) return;
+
+    const x = Math.max(minCoord, Math.min(maxCoord, Math.round((p.x - origin) / spacing)));
+    const y = Math.max(minCoord, Math.min(maxCoord, Math.round((origin - p.y) / spacing)));
+
+    if (x !== current.x || y !== current.y) {
+      current = {x: x, y: y};
+      solvedCurrent = false;
+      updateDiagram();
+      checkPlacement();
+    }
+  }
+
+  plane.addEventListener("pointerdown", function (event) {
+    if (mode !== "placement") return;
+    dragging = true;
+    plane.setPointerCapture(event.pointerId);
+    pointCircle.style.cursor = "grabbing";
+    moveFromPointer(event);
+  });
+
+  plane.addEventListener("pointermove", function (event) {
+    if (dragging) moveFromPointer(event);
+  });
+
+  function stopDragging(event) {
+    if (!dragging) return;
+    dragging = false;
+    pointCircle.style.cursor = "grab";
+    if (event.pointerId !== undefined && plane.hasPointerCapture(event.pointerId)) {
+      plane.releasePointerCapture(event.pointerId);
+    }
+  }
+
+  plane.addEventListener("pointerup", stopDragging);
+  plane.addEventListener("pointercancel", stopDragging);
+
+  plane.addEventListener("keydown", function (event) {
+    if (mode !== "placement") return;
+    let changed = true;
+
+    if (event.key === "ArrowLeft") current.x = Math.max(minCoord, current.x - 1);
+    else if (event.key === "ArrowRight") current.x = Math.min(maxCoord, current.x + 1);
+    else if (event.key === "ArrowUp") current.y = Math.min(maxCoord, current.y + 1);
+    else if (event.key === "ArrowDown") current.y = Math.max(minCoord, current.y - 1);
+    else changed = false;
+
+    if (changed) {
+      event.preventDefault();
+      solvedCurrent = false;
+      updateDiagram();
+      checkPlacement();
+    }
+  });
+
+  xInput.addEventListener("input", checkIdentification);
+  yInput.addEventListener("input", checkIdentification);
+
+  placementModeButton.addEventListener("click", function () {
+    if (mode !== "placement") setMode("placement");
+  });
+
+  identificationModeButton.addEventListener("click", function () {
+    if (mode !== "identification") setMode("identification");
+  });
+
+  newButton.addEventListener("click", function () {
+    beginChallenge(true);
+  });
+
+  centerButton.addEventListener("click", function () {
+    if (mode !== "placement") return;
+    current = {x: 0, y: 0};
+    solvedCurrent = false;
+    updateDiagram();
+    checkPlacement();
+    plane.focus();
+  });
+
+  resetButton.addEventListener("click", function () {
+    solvedCount = 0;
+    attemptedCount = 0;
+    solvedCurrent = false;
+    attemptedCurrent = false;
+    shuffleDeck();
+    updateScore();
+    beginChallenge(true);
+  });
+
+  buildPlane();
+  shuffleDeck();
+  beginChallenge(true);
+  updateScore();
+})();
+</script>
+</body>
+</html>
