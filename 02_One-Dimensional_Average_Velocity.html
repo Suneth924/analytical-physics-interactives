@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One-Dimensional Average Velocity</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #16233a;
+      --muted: #526278;
+      --paper: #ffffff;
+      --background: #eef3f8;
+      --line: #c8d3df;
+      --navy: #173f6d;
+      --blue: #1769aa;
+      --light-blue: #e7f3ff;
+      --orange: #c45500;
+      --light-orange: #fff0e4;
+      --green: #18774b;
+      --red: #b72d34;
+      --focus: #6b45c6;
+      --shadow: 0 7px 22px rgba(23, 63, 109, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      color: white;
+      background: linear-gradient(125deg, #123b67, #1769aa);
+      padding: 2rem max(1rem, calc((100% - 1120px) / 2));
+    }
+
+    header h1 {
+      margin: 0 0 0.35rem;
+      font-size: clamp(1.75rem, 5vw, 2.8rem);
+      line-height: 1.15;
+    }
+
+    header p {
+      max-width: 780px;
+      margin: 0;
+      color: #eaf5ff;
+      font-size: 1.05rem;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 1.2rem auto 3rem;
+    }
+
+    section,
+    .panel {
+      background: var(--paper);
+      border: 1px solid #d8e0e9;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 1.2rem;
+      padding: clamp(1rem, 3vw, 1.5rem);
+    }
+
+    h2,
+    h3,
+    h4 {
+      color: var(--navy);
+      line-height: 1.25;
+    }
+
+    h2 {
+      margin: 0 0 0.75rem;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 1.12rem;
+    }
+
+    h4 {
+      margin: 0.75rem 0 0.2rem;
+      font-size: 0.98rem;
+    }
+
+    p {
+      margin: 0.4rem 0 0.8rem;
+    }
+
+    .why {
+      border-left: 6px solid var(--blue);
+    }
+
+    .key-idea {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 10px;
+      background: var(--light-blue);
+      color: #12395f;
+      font-weight: 650;
+    }
+
+    .dimension-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .dimension-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      background: #fbfdff;
+    }
+
+    .dimension-card.active {
+      border: 2px solid var(--blue);
+      background: #f5faff;
+    }
+
+    .mini-diagram {
+      position: relative;
+      height: 94px;
+      margin: 0.8rem 0;
+      overflow: hidden;
+      border-radius: 8px;
+      background:
+        linear-gradient(#f8fafc, #f8fafc) padding-box,
+        linear-gradient(90deg, #dce5ee, #eff4f8) border-box;
+      border: 1px solid transparent;
+    }
+
+    .one-d-axis::before,
+    .two-d-axis::before,
+    .three-d-axis::before {
+      content: "";
+      position: absolute;
+      height: 2px;
+      left: 12%;
+      right: 8%;
+      top: 50%;
+      background: var(--ink);
+    }
+
+    .one-d-axis::after {
+      content: "x";
+      position: absolute;
+      right: 5%;
+      top: calc(50% - 18px);
+      font-weight: 700;
+    }
+
+    .point {
+      position: absolute;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: var(--orange);
+      box-shadow: 0 0 0 4px rgba(196, 85, 0, 0.15);
+    }
+
+    .one-d-axis .point {
+      left: 68%;
+      top: calc(50% - 5px);
+    }
+
+    .two-d-axis::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      top: 10%;
+      bottom: 10%;
+      left: 42%;
+      background: var(--ink);
+    }
+
+    .two-d-axis .point {
+      left: 70%;
+      top: 21%;
+    }
+
+    .axis-label-x,
+    .axis-label-y,
+    .axis-label-z {
+      position: absolute;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .axis-label-x {
+      right: 6%;
+      top: 53%;
+    }
+
+    .axis-label-y {
+      left: 45%;
+      top: 5%;
+    }
+
+    .three-d-axis::after {
+      content: "";
+      position: absolute;
+      width: 2px;
+      height: 90px;
+      left: 49%;
+      top: 2px;
+      background: var(--ink);
+      transform: rotate(36deg);
+    }
+
+    .three-d-axis .point {
+      left: 72%;
+      top: 17%;
+    }
+
+    .math-line {
+      overflow-wrap: anywhere;
+      padding: 0.55rem 0.7rem;
+      border-left: 4px solid var(--blue);
+      background: #edf6ff;
+      font-family: "Courier New", monospace;
+      font-weight: 700;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .simulation {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .simulation-heading {
+      padding: 1.25rem 1.35rem 0.4rem;
+    }
+
+    .instructions {
+      margin: 0.3rem 0 0;
+      color: var(--muted);
+    }
+
+    .sim-layout {
+      display: grid;
+      grid-template-columns: minmax(270px, 330px) minmax(0, 1fr);
+      gap: 1.2rem;
+      padding: 1rem 1.35rem 1.35rem;
+    }
+
+    .controls {
+      display: grid;
+      gap: 1rem;
+      align-content: start;
+    }
+
+    .control-group {
+      padding: 0.9rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fbfdff;
+    }
+
+    .control-group label {
+      display: block;
+      margin-bottom: 0.55rem;
+      font-weight: 700;
+      color: var(--navy);
+    }
+
+    .paired-input {
+      display: grid;
+      grid-template-columns: minmax(100px, 1fr) 92px 22px;
+      gap: 0.55rem;
+      align-items: center;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      min-height: 34px;
+      accent-color: var(--blue);
+      cursor: pointer;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      min-height: 42px;
+      padding: 0.45rem;
+      color: var(--ink);
+      background: white;
+      border: 1px solid #9cabbc;
+      border-radius: 7px;
+      font: inherit;
+      font-variant-numeric: tabular-nums;
+    }
+
+    input:focus-visible,
+    button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+
+    .unit {
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+
+    button {
+      min-height: 46px;
+      padding: 0.65rem 0.7rem;
+      border: 1px solid #9dafc2;
+      border-radius: 8px;
+      color: var(--ink);
+      background: #f6f8fa;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:hover {
+      background: #e7edf3;
+    }
+
+    button.primary {
+      border-color: var(--blue);
+      color: white;
+      background: var(--blue);
+    }
+
+    button.primary:hover {
+      background: #0f578f;
+    }
+
+    .visual-area {
+      min-width: 0;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 330px;
+    }
+
+    .time-readout {
+      padding: 0.55rem 0.8rem;
+      border-top: 1px solid var(--line);
+      background: #f2f6fa;
+      color: var(--navy);
+      text-align: center;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1rem;
+      margin: 0.7rem 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .swatch {
+      display: inline-block;
+      width: 20px;
+      height: 4px;
+      border-radius: 3px;
+    }
+
+    .swatch.displacement {
+      background: var(--blue);
+    }
+
+    .swatch.velocity {
+      background: var(--orange);
+    }
+
+    .swatch.object {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .results {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.7rem;
+      margin-top: 0.8rem;
+    }
+
+    .result-card {
+      min-width: 0;
+      padding: 0.85rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+    }
+
+    .result-card .name {
+      display: block;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .result-card output {
+      display: block;
+      margin-top: 0.15rem;
+      color: var(--navy);
+      font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+
+    .equations {
+      margin-top: 0.85rem;
+      padding: 0.8rem 1rem;
+      border-radius: 10px;
+      background: #f2f6fa;
+    }
+
+    .equations div + div {
+      margin-top: 0.35rem;
+    }
+
+    .interpretation {
+      margin-top: 0.8rem;
+      padding: 0.8rem 1rem;
+      border-left: 5px solid var(--orange);
+      border-radius: 7px;
+      background: var(--light-orange);
+    }
+
+    .notice {
+      border-left: 6px solid var(--green);
+    }
+
+    .notice ul {
+      margin: 0.6rem 0 0;
+      padding-left: 1.3rem;
+    }
+
+    .notice li + li {
+      margin-top: 0.35rem;
+    }
+
+    .speed-note {
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: #fff8d9;
+      border: 1px solid #e6d17d;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 850px) {
+      .dimension-grid,
+      .sim-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .dimension-grid {
+        gap: 0.8rem;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        width: min(100% - 1rem, 1120px);
+      }
+
+      header {
+        padding: 1.4rem 1rem;
+      }
+
+      .results {
+        grid-template-columns: 1fr;
+      }
+
+      .paired-input {
+        grid-template-columns: minmax(80px, 1fr) 82px 20px;
+      }
+
+      canvas {
+        height: 300px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>One-Dimensional Average Velocity</h1>
+    <p>Connect position, signed displacement, elapsed time, and the direction of average velocity.</p>
+  </header>
+
+  <main>
+    <section class="why" aria-labelledby="why-title">
+      <h2 id="why-title">Why do we need coordinates and vectors?</h2>
+      <p>
+        Saying “the object is 4 metres away” is incomplete unless everyone agrees on a reference point
+        and a positive direction. A <strong>coordinate system</strong> provides that shared reference.
+        It lets different observers describe positions, directions, and motion consistently.
+      </p>
+      <p>
+        Some physical quantities have only a magnitude. Others, such as position and velocity, also have
+        direction. A quantity with both <strong>magnitude and direction</strong> is a <strong>vector</strong>.
+      </p>
+      <div class="key-idea">
+        Coordinates answer “where and in which direction?” Vectors use those coordinates to describe directed physical quantities.
+      </div>
+    </section>
+
+    <section aria-labelledby="dimensions-title">
+      <h2 id="dimensions-title">From one dimension to three dimensions</h2>
+      <div class="dimension-grid">
+        <article class="dimension-card active">
+          <h3>1-D: motion along a line</h3>
+          <h4>Physical concept</h4>
+          <p class="small">One coordinate locates an object. Positive and negative signs indicate opposite directions.</p>
+
+          <h4>Visual diagram</h4>
+          <div class="mini-diagram one-d-axis" aria-label="A point on a horizontal x axis">
+            <span class="point"></span>
+          </div>
+
+          <h4>Mathematical representation</h4>
+          <div class="math-line">r = &lt;x&gt;</div>
+
+          <h4>Numerical example</h4>
+          <p class="small">If x = −3 m, then r = &lt;−3 m&gt;.</p>
+
+          <h4>Physical interpretation</h4>
+          <p class="small">The object is 3 m from the origin in the negative x direction.</p>
+        </article>
+
+        <article class="dimension-card">
+          <h3>2-D: motion on a surface</h3>
+          <h4>Physical concept</h4>
+          <p class="small">Two coordinates are needed to locate an object on a floor, map, or screen.</p>
+
+          <h4>Visual diagram</h4>
+          <div class="mini-diagram two-d-axis" aria-label="A point on perpendicular x and y axes">
+            <span class="point"></span>
+            <span class="axis-label-x">x</span>
+            <span class="axis-label-y">y</span>
+          </div>
+
+          <h4>Mathematical representation</h4>
+          <div class="math-line">r = &lt;x,y&gt; = x i + y j</div>
+
+          <h4>Numerical example</h4>
+          <p class="small">r = &lt;3 m, 4 m&gt;. Its magnitude is √(3² + 4²) = 5 m.</p>
+
+          <h4>Physical interpretation</h4>
+          <p class="small">Move 3 m in x and 4 m in y; the straight-line distance from the origin is 5 m.</p>
+        </article>
+
+        <article class="dimension-card">
+          <h3>3-D: motion in space</h3>
+          <h4>Physical concept</h4>
+          <p class="small">A third coordinate describes height or depth as well as length and width.</p>
+
+          <h4>Visual diagram</h4>
+          <div class="mini-diagram three-d-axis" aria-label="A point represented relative to three axes">
+            <span class="point"></span>
+            <span class="axis-label-x">x</span>
+            <span class="axis-label-y">y</span>
+            <span class="axis-label-z" style="left:25%; bottom:5%;">z</span>
+          </div>
+
+          <h4>Mathematical representation</h4>
+          <div class="math-line">r = &lt;x,y,z&gt; = x i + y j + z k</div>
+
+          <h4>Numerical example</h4>
+          <p class="small">r = &lt;2 m, 3 m, 6 m&gt;, with magnitude √(2² + 3² + 6²) = 7 m.</p>
+
+          <h4>Physical interpretation</h4>
+          <p class="small">The three components describe one position vector, not three separate objects.</p>
+        </article>
+      </div>
+
+      <div class="speed-note" style="margin-top: 1rem;">
+        A velocity vector may be written
+        <strong>v = &lt;v<sub>x</sub>,v<sub>y</sub>,v<sub>z</sub>&gt; = v<sub>x</sub> i + v<sub>y</sub> j + v<sub>z</sub> k</strong>.
+        The vector <strong>v</strong> includes direction; its magnitude <strong>|v|</strong> does not have a direction.
+        The magnitude of instantaneous velocity is speed. Velocity and speed are therefore not interchangeable words.
+      </div>
+    </section>
+
+    <section class="simulation" aria-labelledby="sim-title">
+      <div class="simulation-heading">
+        <h2 id="sim-title">Interactive focus: Position and Average Velocity in One Dimension</h2>
+        <p class="instructions">
+          Choose the initial and final positions and a positive elapsed time. Then play the illustrative trip or move through it in 10% steps.
+        </p>
+      </div>
+
+      <div class="sim-layout">
+        <div class="controls" aria-label="Simulation controls">
+          <div class="control-group">
+            <label for="xiRange">Initial position, x<sub>i</sub></label>
+            <div class="paired-input">
+              <input id="xiRange" type="range" min="-10" max="10" step="0.5" value="-4" aria-label="Initial position slider">
+              <input id="xiNumber" type="number" min="-10" max="10" step="0.5" value="-4" inputmode="decimal" aria-label="Initial position numeric input">
+              <span class="unit">m</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="xfRange">Final position, x<sub>f</sub></label>
+            <div class="paired-input">
+              <input id="xfRange" type="range" min="-10" max="10" step="0.5" value="6" aria-label="Final position slider">
+              <input id="xfNumber" type="number" min="-10" max="10" step="0.5" value="6" inputmode="decimal" aria-label="Final position numeric input">
+              <span class="unit">m</span>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label for="dtRange">Elapsed time, Δt</label>
+            <div class="paired-input">
+              <input id="dtRange" type="range" min="0.1" max="20" step="0.1" value="5" aria-label="Elapsed time slider">
+              <input id="dtNumber" type="number" min="0.1" max="20" step="0.1" value="5" inputmode="decimal" aria-label="Elapsed time numeric input">
+              <span class="unit">s</span>
+            </div>
+          </div>
+
+          <div class="button-row">
+            <button id="resetButton" type="button">Reset</button>
+            <button id="playButton" class="primary" type="button" aria-pressed="false">▶ Play</button>
+            <button id="backButton" type="button" aria-label="Step back by ten percent">◀ Step Back</button>
+            <button id="forwardButton" type="button" aria-label="Step forward by ten percent">Step Forward ▶</button>
+          </div>
+
+          <p class="small">
+            Touch, drag, use arrow keys on a slider, or type a value. Position limits are −10 m to +10 m.
+          </p>
+        </div>
+
+        <div class="visual-area">
+          <div class="canvas-wrap">
+            <canvas id="motionCanvas" role="img" aria-label="One-dimensional position axis showing initial position, final position, displacement, and velocity direction">
+              Your browser does not support canvas.
+            </canvas>
+            <div class="time-readout" id="timeReadout">Shown time: 0.00 s of 5.00 s</div>
+          </div>
+
+          <div class="legend" aria-label="Diagram legend">
+            <span><i class="swatch displacement"></i> signed displacement</span>
+            <span><i class="swatch velocity"></i> average-velocity direction</span>
+            <span><i class="swatch object"></i> animated object</span>
+          </div>
+
+          <div class="results" aria-live="polite">
+            <div class="result-card">
+              <span class="name">Signed displacement, Δx</span>
+              <output id="displacementOutput">+10.00 m</output>
+            </div>
+            <div class="result-card">
+              <span class="name">Average velocity, v<sub>avg</sub></span>
+              <output id="velocityOutput">+2.00 m/s</output>
+            </div>
+            <div class="result-card">
+              <span class="name">Magnitude, |v<sub>avg</sub>|</span>
+              <output id="magnitudeOutput">2.00 m/s</output>
+            </div>
+          </div>
+
+          <div class="equations" aria-label="Current calculation">
+            <div id="displacementEquation">Δx = x<sub>f</sub> − x<sub>i</sub> = 6.00 m − (−4.00 m) = +10.00 m</div>
+            <div id="velocityEquation">v<sub>avg</sub> = Δx / Δt = +10.00 m / 5.00 s = +2.00 m/s</div>
+          </div>
+
+          <div class="interpretation" id="interpretation">
+            The positive average velocity means the overall change in position is toward the positive x direction.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="notice" aria-labelledby="notice-title">
+      <h2 id="notice-title">What to notice</h2>
+      <ul>
+        <li><strong>Displacement is signed:</strong> Δx = x<sub>f</sub> − x<sub>i</sub>. It depends only on the endpoints.</li>
+        <li>A negative position does not automatically mean negative velocity. The sign of average velocity depends on how position changes.</li>
+        <li>Because elapsed time is positive, displacement and average velocity have the same sign.</li>
+        <li><strong>v<sub>avg</sub></strong> is a directed quantity. <strong>|v<sub>avg</sub>|</strong> is its nonnegative magnitude.</li>
+        <li>The animation shows one constant-rate trip consistent with the selected endpoints. Endpoints alone do not reveal every detail of the actual motion between them.</li>
+        <li>If an object reverses direction, the magnitude of average velocity is not generally the same as average speed.</li>
+      </ul>
+    </section>
+  </main>
+
+  <div id="status" class="sr-only" aria-live="polite"></div>
+
+  <script>
+    "use strict";
+
+    (function () {
+      const defaults = Object.freeze({ xi: -4, xf: 6, dt: 5 });
+
+      const elements = {
+        xiRange: document.getElementById("xiRange"),
+        xiNumber: document.getElementById("xiNumber"),
+        xfRange: document.getElementById("xfRange"),
+        xfNumber: document.getElementById("xfNumber"),
+        dtRange: document.getElementById("dtRange"),
+        dtNumber: document.getElementById("dtNumber"),
+        resetButton: document.getElementById("resetButton"),
+        playButton: document.getElementById("playButton"),
+        backButton: document.getElementById("backButton"),
+        forwardButton: document.getElementById("forwardButton"),
+        displacementOutput: document.getElementById("displacementOutput"),
+        velocityOutput: document.getElementById("velocityOutput"),
+        magnitudeOutput: document.getElementById("magnitudeOutput"),
+        displacementEquation: document.getElementById("displacementEquation"),
+        velocityEquation: document.getElementById("velocityEquation"),
+        interpretation: document.getElementById("interpretation"),
+        timeReadout: document.getElementById("timeReadout"),
+        status: document.getElementById("status"),
+        canvas: document.getElementById("motionCanvas")
+      };
+
+      const ctx = elements.canvas.getContext("2d");
+      let xi = defaults.xi;
+      let xf = defaults.xf;
+      let dt = defaults.dt;
+      let progress = 0;
+      let playing = false;
+      let previousFrameTime = 0;
+      let animationFrame = 0;
+      const visualTripDuration = 4000;
+
+      function clamp(value, minimum, maximum) {
+        return Math.min(maximum, Math.max(minimum, value));
+      }
+
+      function cleanZero(value) {
+        return Math.abs(value) < 1e-10 ? 0 : value;
+      }
+
+      function fixed(value, places) {
+        return cleanZero(value).toFixed(places);
+      }
+
+      function signed(value, places) {
+        const cleaned = cleanZero(value);
+        if (cleaned > 0) return "+" + cleaned.toFixed(places);
+        return cleaned.toFixed(places).replace("-", "−");
+      }
+
+      function equationNumber(value) {
+        const cleaned = cleanZero(value);
+        if (cleaned < 0) return "(−" + Math.abs(cleaned).toFixed(2) + " m)";
+        return cleaned.toFixed(2) + " m";
+      }
+
+      function setPlaying(value) {
+        playing = value;
+        elements.playButton.textContent = playing ? "❚❚ Pause" : "▶ Play";
+        elements.playButton.setAttribute("aria-pressed", String(playing));
+
+        if (playing) {
+          previousFrameTime = performance.now();
+          cancelAnimationFrame(animationFrame);
+          animationFrame = requestAnimationFrame(animate);
+        } else {
+          cancelAnimationFrame(animationFrame);
+        }
+      }
+
+      function readValidNumber(input, fallback) {
+        const value = Number(input.value);
+        return Number.isFinite(value) ? value : fallback;
+      }
+
+      function syncPair(range, number, value) {
+        range.value = String(value);
+        number.value = String(value);
+      }
+
+      function resetMotion() {
+        progress = 0;
+        setPlaying(false);
+      }
+
+      function updateModel(changedControl) {
+        if (changedControl === "xiRange") {
+          xi = Number(elements.xiRange.value);
+          elements.xiNumber.value = elements.xiRange.value;
+        } else if (changedControl === "xiNumber") {
+          xi = clamp(readValidNumber(elements.xiNumber, xi), -10, 10);
+          syncPair(elements.xiRange, elements.xiNumber, xi);
+        } else if (changedControl === "xfRange") {
+          xf = Number(elements.xfRange.value);
+          elements.xfNumber.value = elements.xfRange.value;
+        } else if (changedControl === "xfNumber") {
+          xf = clamp(readValidNumber(elements.xfNumber, xf), -10, 10);
+          syncPair(elements.xfRange, elements.xfNumber, xf);
+        } else if (changedControl === "dtRange") {
+          dt = Number(elements.dtRange.value);
+          elements.dtNumber.value = elements.dtRange.value;
+        } else if (changedControl === "dtNumber") {
+          dt = clamp(readValidNumber(elements.dtNumber, dt), 0.1, 20);
+          syncPair(elements.dtRange, elements.dtNumber, dt);
+        }
+
+        resetMotion();
+        updateDisplay();
+      }
+
+      function directionText(displacement) {
+        if (displacement > 0) return "positive x direction";
+        if (displacement < 0) return "negative x direction";
+        return "no direction, because the displacement is zero";
+      }
+
+      function updateDisplay() {
+        const displacement = cleanZero(xf - xi);
+        const velocity = cleanZero(displacement / dt);
+        const magnitude = Math.abs(velocity);
+        const shownTime = progress * dt;
+
+        elements.displacementOutput.textContent = signed(displacement, 2) + " m";
+        elements.velocityOutput.textContent = signed(velocity, 2) + " m/s";
+        elements.magnitudeOutput.textContent = fixed(magnitude, 2) + " m/s";
+
+        elements.displacementEquation.innerHTML =
+          "Δx = x<sub>f</sub> − x<sub>i</sub> = " +
+          equationNumber(xf) + " − " + equationNumber(xi) +
+          " = " + signed(displacement, 2) + " m";
+
+        elements.velocityEquation.innerHTML =
+          "v<sub>avg</sub> = Δx / Δt = " +
+          signed(displacement, 2) + " m / " + fixed(dt, 2) +
+          " s = " + signed(velocity, 2) + " m/s";
+
+        if (displacement === 0) {
+          elements.interpretation.innerHTML =
+            "The final and initial positions are the same, so the displacement and average velocity are zero. A zero average velocity does not prove that the object remained at rest; it could have moved and returned.";
+        } else {
+          elements.interpretation.innerHTML =
+            "The " + (velocity > 0 ? "positive" : "negative") +
+            " average velocity means the overall change in position is toward the <strong>" +
+            directionText(displacement) + "</strong>. Its magnitude is " +
+            fixed(magnitude, 2) + " m/s.";
+        }
+
+        elements.timeReadout.textContent =
+          "Shown time: " + fixed(shownTime, 2) + " s of " + fixed(dt, 2) + " s";
+
+        elements.canvas.setAttribute(
+          "aria-label",
+          "Position axis. Initial position " + fixed(xi, 2) +
+          " metres, final position " + fixed(xf, 2) +
+          " metres, signed displacement " + signed(displacement, 2) +
+          " metres, average velocity " + signed(velocity, 2) + " metres per second."
+        );
+
+        draw();
+      }
+
+      function resizeCanvas() {
+        const rect = elements.canvas.getBoundingClientRect();
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const width = Math.max(300, Math.round(rect.width));
+        const height = Math.max(280, Math.round(rect.height));
+
+        if (elements.canvas.width !== Math.round(width * dpr) ||
+            elements.canvas.height !== Math.round(height * dpr)) {
+          elements.canvas.width = Math.round(width * dpr);
+          elements.canvas.height = Math.round(height * dpr);
+        }
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        draw();
+      }
+
+      function drawArrow(context, x1, y1, x2, y2, color, lineWidth, headSize) {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.hypot(dx, dy);
+
+        if (length < 1) return;
+
+        const angle = Math.atan2(dy, dx);
+        context.save();
+        context.strokeStyle = color;
+        context.fillStyle = color;
+        context.lineWidth = lineWidth;
+        context.lineCap = "round";
+
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(x2, y2);
+        context.lineTo(
+          x2 - headSize * Math.cos(angle - Math.PI / 6),
+          y2 - headSize * Math.sin(angle - Math.PI / 6)
+        );
+        context.lineTo(
+          x2 - headSize * Math.cos(angle + Math.PI / 6),
+          y2 - headSize * Math.sin(angle + Math.PI / 6)
+        );
+        context.closePath();
+        context.fill();
+        context.restore();
+      }
+
+      function drawMarker(context, x, y, color, label, shape) {
+        context.save();
+        context.fillStyle = color;
+        context.strokeStyle = "#ffffff";
+        context.lineWidth = 2;
+
+        if (shape === "square") {
+          context.fillRect(x - 7, y - 7, 14, 14);
+          context.strokeRect(x - 7, y - 7, 14, 14);
+        } else {
+          context.beginPath();
+          context.moveTo(x, y - 9);
+          context.lineTo(x + 9, y);
+          context.lineTo(x, y + 9);
+          context.lineTo(x - 9, y);
+          context.closePath();
+          context.fill();
+          context.stroke();
+        }
+
+        context.fillStyle = "#16233a";
+        context.font = "600 13px system-ui, sans-serif";
+        context.textAlign = "center";
+        context.fillText(label, x, y + 32);
+        context.restore();
+      }
+
+      function draw() {
+        if (!ctx) return;
+
+        const rect = elements.canvas.getBoundingClientRect();
+        const width = Math.max(300, rect.width);
+        const height = Math.max(280, rect.height);
+        const left = Math.max(42, width * 0.07);
+        const right = width - Math.max(42, width * 0.07);
+        const axisY = height * 0.55;
+        const displacementY = height * 0.24;
+        const velocityY = height * 0.80;
+        const displacement = cleanZero(xf - xi);
+        const velocity = cleanZero(displacement / dt);
+        const currentXValue = xi + progress * displacement;
+
+        function mapX(value) {
+          return left + ((value + 10) / 20) * (right - left);
+        }
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#fbfdff";
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.strokeStyle = "#20344d";
+        ctx.fillStyle = "#20344d";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(left, axisY);
+        ctx.lineTo(right, axisY);
+        ctx.stroke();
+
+        drawArrow(ctx, right - 15, axisY, right, axisY, "#20344d", 2, 9);
+        drawArrow(ctx, left + 15, axisY, left, axisY, "#20344d", 2, 9);
+
+        ctx.font = "12px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+
+        for (let tick = -10; tick <= 10; tick += 2) {
+          const x = mapX(tick);
+          ctx.strokeStyle = tick === 0 ? "#173f6d" : "#8090a2";
+          ctx.lineWidth = tick === 0 ? 2.5 : 1.2;
+          ctx.beginPath();
+          ctx.moveTo(x, axisY - (tick === 0 ? 11 : 7));
+          ctx.lineTo(x, axisY + (tick === 0 ? 11 : 7));
+          ctx.stroke();
+          ctx.fillStyle = "#41546a";
+          ctx.fillText(String(tick), x, axisY + 13);
+        }
+
+        ctx.textAlign = "right";
+        ctx.font = "700 13px system-ui, sans-serif";
+        ctx.fillStyle = "#20344d";
+        ctx.fillText("x (m)", right, axisY + 35);
+        ctx.restore();
+
+        const xiX = mapX(xi);
+        const xfX = mapX(xf);
+        const currentX = mapX(currentXValue);
+
+        if (displacement !== 0) {
+          drawArrow(ctx, xiX, displacementY, xfX, displacementY, "#1769aa", 4, 12);
+          ctx.save();
+          ctx.fillStyle = "#1769aa";
+          ctx.font = "700 13px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("Δx = " + signed(displacement, 2) + " m", (xiX + xfX) / 2, displacementY - 14);
+          ctx.restore();
+        } else {
+          ctx.save();
+          ctx.fillStyle = "#1769aa";
+          ctx.font = "700 13px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("Δx = 0.00 m", xiX, displacementY);
+          ctx.restore();
+        }
+
+        drawMarker(ctx, xiX, axisY, "#4d6f91", "xᵢ = " + fixed(xi, 1) + " m", "square");
+
+        if (Math.abs(xfX - xiX) < 55) {
+          drawMarker(ctx, xfX, axisY - 35, "#8a4f9f", "x\u0066 = " + fixed(xf, 1) + " m", "diamond");
+        } else {
+          drawMarker(ctx, xfX, axisY, "#8a4f9f", "x\u0066 = " + fixed(xf, 1) + " m", "diamond");
+        }
+
+        ctx.save();
+        ctx.fillStyle = "#18774b";
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(currentX, axisY, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = "#135d3c";
+        ctx.font = "700 13px system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("object: x = " + fixed(currentXValue, 2) + " m", currentX, axisY - 19);
+        ctx.restore();
+
+        if (velocity !== 0) {
+          const direction = velocity > 0 ? 1 : -1;
+          const available = direction > 0 ? right - currentX : currentX - left;
+          const arrowLength = Math.max(32, Math.min(85, available));
+          drawArrow(
+            ctx,
+            currentX,
+            velocityY,
+            currentX + direction * arrowLength,
+            velocityY,
+            "#c45500",
+            4,
+            12
+          );
+
+          ctx.save();
+          ctx.fillStyle = "#a34500";
+          ctx.font = "700 13px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            "vavg points " + (direction > 0 ? "+x" : "−x"),
+            currentX + direction * arrowLength / 2,
+            velocityY - 13
+          );
+          ctx.restore();
+        } else {
+          ctx.save();
+          ctx.fillStyle = "#a34500";
+          ctx.font = "700 13px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText("vavg = 0: no velocity direction", currentX, velocityY);
+          ctx.restore();
+        }
+      }
+
+      function animate(timestamp) {
+        if (!playing) return;
+
+        const elapsedRealTime = timestamp - previousFrameTime;
+        previousFrameTime = timestamp;
+        progress = clamp(progress + elapsedRealTime / visualTripDuration, 0, 1);
+        updateDisplay();
+
+        if (progress >= 1) {
+          setPlaying(false);
+          elements.status.textContent = "Trip complete.";
+        } else {
+          animationFrame = requestAnimationFrame(animate);
+        }
+      }
+
+      function togglePlay() {
+        if (playing) {
+          setPlaying(false);
+          elements.status.textContent = "Animation paused.";
+        } else {
+          if (progress >= 1) progress = 0;
+          setPlaying(true);
+          elements.status.textContent = "Animation playing.";
+        }
+        updateDisplay();
+      }
+
+      function step(amount) {
+        setPlaying(false);
+        progress = clamp(Math.round((progress + amount) * 10) / 10, 0, 1);
+        updateDisplay();
+        elements.status.textContent =
+          "Shown time is now " + fixed(progress * dt, 2) + " seconds.";
+      }
+
+      elements.xiRange.addEventListener("input", function () { updateModel("xiRange"); });
+      elements.xfRange.addEventListener("input", function () { updateModel("xfRange"); });
+      elements.dtRange.addEventListener("input", function () { updateModel("dtRange"); });
+
+      elements.xiNumber.addEventListener("input", function () {
+        if (elements.xiNumber.value !== "") updateModel("xiNumber");
+      });
+      elements.xfNumber.addEventListener("input", function () {
+        if (elements.xfNumber.value !== "") updateModel("xfNumber");
+      });
+      elements.dtNumber.addEventListener("input", function () {
+        if (elements.dtNumber.value !== "") updateModel("dtNumber");
+      });
+
+      elements.xiNumber.addEventListener("change", function () { updateModel("xiNumber"); });
+      elements.xfNumber.addEventListener("change", function () { updateModel("xfNumber"); });
+      elements.dtNumber.addEventListener("change", function () { updateModel("dtNumber"); });
+
+      elements.playButton.addEventListener("click", togglePlay);
+      elements.backButton.addEventListener("click", function () { step(-0.1); });
+      elements.forwardButton.addEventListener("click", function () { step(0.1); });
+
+      elements.resetButton.addEventListener("click", function () {
+        xi = defaults.xi;
+        xf = defaults.xf;
+        dt = defaults.dt;
+        progress = 0;
+        setPlaying(false);
+
+        syncPair(elements.xiRange, elements.xiNumber, xi);
+        syncPair(elements.xfRange, elements.xfNumber, xf);
+        syncPair(elements.dtRange, elements.dtNumber, dt);
+
+        updateDisplay();
+        elements.status.textContent = "Simulation reset to the default values.";
+      });
+
+      window.addEventListener("resize", resizeCanvas);
+
+      if ("ResizeObserver" in window) {
+        const resizeObserver = new ResizeObserver(resizeCanvas);
+        resizeObserver.observe(elements.canvas);
+      }
+
+      syncPair(elements.xiRange, elements.xiNumber, xi);
+      syncPair(elements.xfRange, elements.xfNumber, xf);
+      syncPair(elements.dtRange, elements.dtNumber, dt);
+      resizeCanvas();
+      updateDisplay();
+    })();
+  </script>
+</body>
+</html>
