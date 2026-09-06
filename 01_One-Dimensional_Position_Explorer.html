@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One-Dimensional Position Explorer</title>
+  <style>
+    :root {
+      --navy: #12304a;
+      --blue: #1676d2;
+      --blue-dark: #0759a6;
+      --cyan: #dff4ff;
+      --orange: #f28c28;
+      --orange-dark: #bd5d00;
+      --green: #16845b;
+      --red: #bd3348;
+      --ink: #172633;
+      --muted: #536777;
+      --line: #cbd8e2;
+      --panel: #ffffff;
+      --background: #f4f8fb;
+      --shadow: 0 8px 24px rgba(18, 48, 74, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--background);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      color: white;
+      background: linear-gradient(125deg, #102f49, #1266a8);
+      padding: 2.2rem max(1rem, calc((100% - 1120px) / 2));
+    }
+
+    header h1 {
+      margin: 0 0 0.45rem;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      line-height: 1.15;
+    }
+
+    header p {
+      max-width: 850px;
+      margin: 0;
+      color: #e4f5ff;
+      font-size: 1.05rem;
+    }
+
+    main {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 1.5rem auto 3rem;
+    }
+
+    h2, h3, h4 {
+      color: var(--navy);
+      line-height: 1.25;
+    }
+
+    h2 {
+      margin-top: 0;
+    }
+
+    .intro,
+    .simulation,
+    .notice,
+    .lesson-card,
+    .velocity-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .intro {
+      padding: 1.3rem 1.5rem;
+      margin-bottom: 1.25rem;
+      border-left: 6px solid var(--orange);
+    }
+
+    .intro h2 {
+      margin-bottom: 0.45rem;
+    }
+
+    .intro p {
+      margin: 0.35rem 0;
+    }
+
+    .simulation {
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .sim-heading {
+      padding: 1.2rem 1.4rem 0.8rem;
+    }
+
+    .sim-heading h2 {
+      margin: 0 0 0.3rem;
+    }
+
+    .instructions {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .stage-wrap {
+      padding: 0.3rem 1rem 0.8rem;
+    }
+
+    #positionStage {
+      display: block;
+      width: 100%;
+      height: auto;
+      min-height: 265px;
+      border: 1px solid #b9d2e4;
+      border-radius: 14px;
+      background: linear-gradient(#f8fdff, #e8f6ff);
+      touch-action: none;
+      user-select: none;
+    }
+
+    .readouts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+      gap: 0.8rem;
+      padding: 0 1.2rem 1.1rem;
+    }
+
+    .readout {
+      min-height: 103px;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f9fcfe;
+    }
+
+    .readout-label {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: 0.025em;
+      text-transform: uppercase;
+    }
+
+    .value {
+      color: var(--navy);
+      font-size: clamp(1.25rem, 2.6vw, 1.7rem);
+      font-weight: 750;
+    }
+
+    .value.positive {
+      color: var(--blue-dark);
+    }
+
+    .value.negative {
+      color: var(--red);
+    }
+
+    .value.zero {
+      color: var(--green);
+    }
+
+    .small-line {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .interpretation {
+      margin: 0 1.2rem 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      background: #fff7e9;
+      border-left: 5px solid var(--orange);
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0 1.2rem 1.25rem;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 9px;
+      padding: 0.7rem 1.1rem;
+      color: white;
+      background: var(--blue-dark);
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #034983;
+    }
+
+    button:focus-visible {
+      outline: 3px solid #ffbd66;
+      outline-offset: 3px;
+    }
+
+    .control-note {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .notice {
+      margin-bottom: 1.5rem;
+      padding: 1rem 1.3rem;
+      background: #eefaf5;
+      border-left: 6px solid var(--green);
+    }
+
+    .notice h3 {
+      margin: 0 0 0.35rem;
+    }
+
+    .notice ul {
+      margin: 0.3rem 0 0;
+      padding-left: 1.25rem;
+    }
+
+    .section-title {
+      margin: 2rem 0 0.7rem;
+    }
+
+    .progression {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .lesson-card {
+      padding: 1.2rem 1.3rem;
+    }
+
+    .lesson-card h3 {
+      margin: 0 0 0.6rem;
+    }
+
+    .sequence {
+      display: grid;
+      grid-template-columns: 1.15fr 0.9fr;
+      gap: 1.2rem;
+      align-items: start;
+    }
+
+    .steps p {
+      margin: 0.5rem 0;
+    }
+
+    .step-label {
+      color: var(--blue-dark);
+      font-weight: 800;
+    }
+
+    .math {
+      display: inline-block;
+      padding: 0.08rem 0.35rem;
+      color: var(--navy);
+      background: #eaf5fc;
+      border-radius: 5px;
+      font-family: "Cambria Math", Georgia, serif;
+      font-size: 1.04em;
+      white-space: nowrap;
+    }
+
+    .mini-diagram {
+      display: block;
+      width: 100%;
+      min-height: 185px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #f9fcfe;
+    }
+
+    .velocity-box {
+      padding: 1.25rem 1.4rem;
+      margin-top: 1rem;
+      border-left: 6px solid var(--blue);
+    }
+
+    .velocity-box h3 {
+      margin-top: 0;
+    }
+
+    .equation-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin: 0.8rem 0;
+    }
+
+    .equation-chip {
+      padding: 0.55rem 0.75rem;
+      border: 1px solid #bfdaeb;
+      border-radius: 9px;
+      background: #f2f9fd;
+      font-family: "Cambria Math", Georgia, serif;
+    }
+
+    .important {
+      font-weight: 750;
+      color: var(--orange-dark);
+    }
+
+    footer {
+      margin-top: 1.5rem;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 760px) {
+      main {
+        width: min(100% - 1rem, 1120px);
+      }
+
+      .readouts,
+      .sequence {
+        grid-template-columns: 1fr;
+      }
+
+      .readouts {
+        padding-inline: 0.75rem;
+      }
+
+      .interpretation,
+      .controls {
+        margin-left: 0.75rem;
+        margin-right: 0.75rem;
+      }
+
+      .controls {
+        padding-left: 0;
+      }
+
+      #positionStage {
+        min-height: 230px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>One-Dimensional Position Explorer</h1>
+    <p>Position and average velocity in one dimension: use a shared coordinate system to describe where an object is and in which direction its position vector points.</p>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="why-heading">
+      <h2 id="why-heading">Why do we need a coordinate system?</h2>
+      <p>Saying “the object is over there” is not precise because different observers may use different reference points and directions. A coordinate system gives everyone the same <strong>origin</strong>, positive direction, and unit of measurement.</p>
+      <p>Position has directional information. A position to the right of the origin is different from an equally distant position to the left. A <strong>vector</strong> records both magnitude and direction.</p>
+    </section>
+
+    <section class="simulation" aria-labelledby="explorer-heading">
+      <div class="sim-heading">
+        <h2 id="explorer-heading">Explore position in one dimension</h2>
+        <p class="instructions">Drag the orange object along the x-axis. On a keyboard, focus the object and use the arrow keys. Each small movement is 0.1 m.</p>
+      </div>
+
+      <div class="stage-wrap">
+        <svg id="positionStage" viewBox="0 0 1000 300" role="img" aria-labelledby="stageTitle stageDescription">
+          <title id="stageTitle">Interactive horizontal position axis</title>
+          <desc id="stageDescription">A draggable object lies on an x-axis from negative five metres to positive five metres. A blue arrow extends from the origin to the object.</desc>
+
+          <defs>
+            <marker id="vectorArrow" viewBox="0 0 10 10" refX="8.2" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#1676d2"></path>
+            </marker>
+            <filter id="objectShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#12304a" flood-opacity="0.28"></feDropShadow>
+            </filter>
+          </defs>
+
+          <text x="500" y="30" text-anchor="middle" fill="#12304a" font-size="19" font-weight="700">
+            Shared reference: origin at x = 0 m
+          </text>
+
+          <text x="98" y="78" text-anchor="start" fill="#bd3348" font-size="18" font-weight="700">−x direction (left)</text>
+          <path d="M 235 72 L 112 72" stroke="#bd3348" stroke-width="4"></path>
+          <path d="M 112 72 L 127 63 M 112 72 L 127 81" stroke="#bd3348" stroke-width="4" fill="none"></path>
+
+          <text x="902" y="78" text-anchor="end" fill="#0759a6" font-size="18" font-weight="700">+x direction (right)</text>
+          <path d="M 765 72 L 888 72" stroke="#0759a6" stroke-width="4"></path>
+          <path d="M 888 72 L 873 63 M 888 72 L 873 81" stroke="#0759a6" stroke-width="4" fill="none"></path>
+
+          <line x1="92" y1="156" x2="908" y2="156" stroke="#12304a" stroke-width="4"></line>
+          <path d="M 92 156 L 109 146 M 92 156 L 109 166" stroke="#12304a" stroke-width="4" fill="none"></path>
+          <path d="M 908 156 L 891 146 M 908 156 L 891 166" stroke="#12304a" stroke-width="4" fill="none"></path>
+
+          <g id="ticks" aria-hidden="true"></g>
+
+          <line id="originLine" x1="500" y1="112" x2="500" y2="207" stroke="#16845b" stroke-width="4"></line>
+          <text x="500" y="226" text-anchor="middle" fill="#16845b" font-size="17" font-weight="800">origin</text>
+
+          <line id="guideLine" x1="660" y1="156" x2="660" y2="255" stroke="#f28c28" stroke-width="2" stroke-dasharray="5 5"></line>
+          <line id="vectorLine" x1="500" y1="156" x2="660" y2="156" stroke="#1676d2" stroke-width="8" marker-end="url(#vectorArrow)"></line>
+          <text id="vectorLabel" x="580" y="130" text-anchor="middle" fill="#0759a6" font-size="18" font-weight="800">position vector r</text>
+
+          <g id="objectControl" role="slider" tabindex="0" aria-label="Object position" aria-valuemin="-5" aria-valuemax="5" aria-valuenow="2" aria-valuetext="positive 2 metres" style="cursor: grab;">
+            <circle id="focusRing" cx="660" cy="156" r="34" fill="none" stroke="#ffbd66" stroke-width="5" opacity="0"></circle>
+            <circle cx="660" cy="156" r="35" fill="transparent"></circle>
+            <circle id="objectCircle" cx="660" cy="156" r="22" fill="#f28c28" stroke="#9a4900" stroke-width="4" filter="url(#objectShadow)"></circle>
+            <circle id="objectHighlight" cx="652" cy="148" r="6" fill="#ffd49f"></circle>
+          </g>
+
+          <text x="500" y="282" text-anchor="middle" fill="#536777" font-size="17">Position x, measured in metres (m)</text>
+        </svg>
+      </div>
+
+      <div class="readouts" aria-live="polite">
+        <div class="readout">
+          <span class="readout-label">Signed coordinate</span>
+          <span id="coordinateValue" class="value positive">x = +2.0 m</span>
+          <span class="small-line">The sign identifies a direction from the origin.</span>
+        </div>
+
+        <div class="readout">
+          <span class="readout-label">One-component position vector</span>
+          <span id="vectorValue" class="value positive">r = ⟨+2.0 m⟩</span>
+          <span class="small-line">General form: <strong>r = ⟨x⟩</strong></span>
+        </div>
+
+        <div class="readout">
+          <span class="readout-label">Magnitude of position</span>
+          <span id="magnitudeValue" class="value">|r| = 2.0 m</span>
+          <span class="small-line">Magnitude is nonnegative and has no direction.</span>
+        </div>
+      </div>
+
+      <div id="interpretation" class="interpretation">
+        The object is 2.0 m to the right of the origin, so its position vector points in the +x direction.
+      </div>
+
+      <div class="controls">
+        <button id="resetButton" type="button">Reset</button>
+        <span class="control-note">Reset returns the object to x = +2.0 m.</span>
+      </div>
+    </section>
+
+    <aside class="notice" aria-labelledby="notice-heading">
+      <h3 id="notice-heading">What to notice</h3>
+      <ul>
+        <li>The origin is the reference point; changing sides changes the sign of x.</li>
+        <li>The arrow begins at the origin and points toward the object.</li>
+        <li><strong>r</strong> is a vector, while <strong>|r|</strong> is its magnitude. Positions +3 m and −3 m have equal magnitudes but opposite directions.</li>
+        <li>At x = 0 m, the position-vector magnitude is zero, so it has no left or right direction.</li>
+      </ul>
+    </aside>
+
+    <h2 class="section-title">Building the vector idea: 1-D → 2-D → 3-D</h2>
+
+    <div class="progression">
+      <section class="lesson-card" aria-labelledby="one-d-heading">
+        <h3 id="one-d-heading">1-D: Motion along a line</h3>
+        <div class="sequence">
+          <div class="steps">
+            <p><span class="step-label">Physical concept:</span> One signed coordinate is enough when an object can move only left or right along a line.</p>
+            <p><span class="step-label">Visual diagram:</span> The explorer above shows the origin, the two possible directions, and the position-vector arrow.</p>
+            <p><span class="step-label">Mathematical representation:</span> <span class="math">r = ⟨x⟩</span></p>
+            <p><span class="step-label">Simple example:</span> If <span class="math">x = −3 m</span>, then <span class="math">r = ⟨−3 m⟩</span> and <span class="math">|r| = 3 m</span>.</p>
+            <p><span class="step-label">Physical interpretation:</span> The object is 3 m from the origin, and the negative sign says it is on the −x side.</p>
+          </div>
+
+          <svg class="mini-diagram" viewBox="0 0 420 185" role="img" aria-label="One-dimensional vector pointing left from the origin">
+            <defs>
+              <marker id="leftArrowMini" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#1676d2"></path>
+              </marker>
+            </defs>
+            <line x1="35" y1="95" x2="385" y2="95" stroke="#12304a" stroke-width="3"></line>
+            <line x1="250" y1="65" x2="250" y2="125" stroke="#16845b" stroke-width="4"></line>
+            <line x1="250" y1="95" x2="95" y2="95" stroke="#1676d2" stroke-width="7" marker-end="url(#leftArrowMini)"></line>
+            <circle cx="95" cy="95" r="13" fill="#f28c28" stroke="#9a4900" stroke-width="3"></circle>
+            <text x="250" y="148" text-anchor="middle" fill="#16845b" font-weight="700">x = 0</text>
+            <text x="95" y="62" text-anchor="middle" fill="#12304a" font-weight="700">x = −3 m</text>
+            <text x="173" y="82" text-anchor="middle" fill="#0759a6" font-weight="700">r</text>
+          </svg>
+        </div>
+      </section>
+
+      <section class="lesson-card" aria-labelledby="two-d-heading">
+        <h3 id="two-d-heading">2-D: Position on a flat surface</h3>
+        <div class="sequence">
+          <div class="steps">
+            <p><span class="step-label">Physical concept:</span> On a floor or map, left/right is not enough. We need two perpendicular directions, x and y.</p>
+            <p><span class="step-label">Visual diagram:</span> The vector can be understood as 3 m in +x and then 4 m in +y.</p>
+            <p><span class="step-label">Mathematical representation:</span> <span class="math">r = ⟨x, y⟩</span> or <span class="math">r = x i + y j</span>, where i and j indicate the unit x and y directions.</p>
+            <p><span class="step-label">Simple example:</span> <span class="math">r = ⟨3, 4⟩ m</span>. By the Pythagorean theorem, <span class="math">|r| = √(3² + 4²) = 5 m</span>.</p>
+            <p><span class="step-label">Physical interpretation:</span> The object is 3 m right and 4 m up from the origin; its straight-line distance from the origin is 5 m.</p>
+          </div>
+
+          <svg class="mini-diagram" viewBox="0 0 420 260" role="img" aria-label="Two-dimensional position vector with components three and four">
+            <defs>
+              <marker id="arrow2d" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#1676d2"></path>
+              </marker>
+            </defs>
+            <line x1="60" y1="215" x2="375" y2="215" stroke="#12304a" stroke-width="3"></line>
+            <line x1="60" y1="230" x2="60" y2="25" stroke="#12304a" stroke-width="3"></line>
+            <line x1="60" y1="215" x2="285" y2="215" stroke="#f28c28" stroke-width="5"></line>
+            <line x1="285" y1="215" x2="285" y2="65" stroke="#16845b" stroke-width="5"></line>
+            <line x1="60" y1="215" x2="285" y2="65" stroke="#1676d2" stroke-width="7" marker-end="url(#arrow2d)"></line>
+            <circle cx="285" cy="65" r="10" fill="#f28c28"></circle>
+            <text x="180" y="242" text-anchor="middle" fill="#9a4900" font-weight="700">x = 3 m</text>
+            <text x="303" y="145" fill="#16845b" font-weight="700">y = 4 m</text>
+            <text x="155" y="120" fill="#0759a6" font-weight="700">|r| = 5 m</text>
+            <text x="385" y="221" fill="#12304a" font-weight="700">x</text>
+            <text x="52" y="20" fill="#12304a" font-weight="700">y</text>
+          </svg>
+        </div>
+      </section>
+
+      <section class="lesson-card" aria-labelledby="three-d-heading">
+        <h3 id="three-d-heading">3-D: Position in space</h3>
+        <div class="sequence">
+          <div class="steps">
+            <p><span class="step-label">Physical concept:</span> For an aircraft, drone, or object in a room, a third coordinate describes the remaining direction.</p>
+            <p><span class="step-label">Visual diagram:</span> The x, y, and z axes share one origin. Three components locate one point in space.</p>
+            <p><span class="step-label">Mathematical representation:</span> <span class="math">r = ⟨x, y, z⟩</span> or <span class="math">r = x i + y j + z k</span>.</p>
+            <p><span class="step-label">Simple example:</span> For <span class="math">r = ⟨2, 3, 6⟩ m</span>, <span class="math">|r| = √(2² + 3² + 6²) = √49 = 7 m</span>.</p>
+            <p><span class="step-label">Physical interpretation:</span> The three components state how far to travel in each coordinate direction. The magnitude gives the straight-line distance from the origin.</p>
+          </div>
+
+          <svg class="mini-diagram" viewBox="0 0 420 280" role="img" aria-label="Three coordinate axes and a position vector in three dimensions">
+            <defs>
+              <marker id="arrow3d" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="#1676d2"></path>
+              </marker>
+            </defs>
+            <circle cx="175" cy="210" r="5" fill="#12304a"></circle>
+            <line x1="175" y1="210" x2="370" y2="210" stroke="#f28c28" stroke-width="4"></line>
+            <line x1="175" y1="210" x2="75" y2="255" stroke="#16845b" stroke-width="4"></line>
+            <line x1="175" y1="210" x2="175" y2="35" stroke="#bd3348" stroke-width="4"></line>
+            <line x1="175" y1="210" x2="300" y2="72" stroke="#1676d2" stroke-width="7" marker-end="url(#arrow3d)"></line>
+            <line x1="300" y1="72" x2="300" y2="210" stroke="#9db2c0" stroke-width="2" stroke-dasharray="6 5"></line>
+            <circle cx="300" cy="72" r="10" fill="#f28c28"></circle>
+            <text x="377" y="216" fill="#9a4900" font-weight="700">x</text>
+            <text x="58" y="268" fill="#16845b" font-weight="700">y</text>
+            <text x="165" y="27" fill="#bd3348" font-weight="700">z</text>
+            <text x="307" y="55" fill="#12304a" font-weight="700">r = ⟨2, 3, 6⟩ m</text>
+            <text x="230" y="125" fill="#0759a6" font-weight="700">|r| = 7 m</text>
+          </svg>
+        </div>
+      </section>
+    </div>
+
+    <section class="velocity-box" aria-labelledby="velocity-heading">
+      <h3 id="velocity-heading">Connection to average velocity</h3>
+      <p>Coordinates let us describe a change in position consistently. In one dimension, suppose an object moves from <span class="math">x<sub>i</sub> = −2 m</span> to <span class="math">x<sub>f</sub> = +4 m</span> in 3 s.</p>
+
+      <div class="equation-row">
+        <div class="equation-chip">change in position = +4 m − (−2 m) = +6 m</div>
+        <div class="equation-chip">average velocity = ⟨+6 m ÷ 3 s⟩ = ⟨+2 m/s⟩</div>
+      </div>
+
+      <p>The positive sign means the average velocity points in the +x direction. Velocity is a vector; speed is its magnitude. For this no-reversal example, <span class="math">v = ⟨+2 m/s⟩</span> and <span class="math">|v| = 2 m/s</span>.</p>
+
+      <p>In three dimensions, velocity may be written as:</p>
+      <div class="equation-row">
+        <div class="equation-chip">v = ⟨v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub>⟩</div>
+        <div class="equation-chip">v = v<sub>x</sub> i + v<sub>y</sub> j + v<sub>z</sub> k</div>
+      </div>
+      <p class="important">Do not confuse velocity with speed: v includes direction, while |v| is the nonnegative magnitude called speed.</p>
+    </section>
+
+    <footer>All quantities use SI units: metres (m) for position and metres per second (m/s) for velocity.</footer>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const svg = document.getElementById("positionStage");
+      const ticksGroup = document.getElementById("ticks");
+      const objectControl = document.getElementById("objectControl");
+      const objectCircle = document.getElementById("objectCircle");
+      const objectHighlight = document.getElementById("objectHighlight");
+      const focusRing = document.getElementById("focusRing");
+      const vectorLine = document.getElementById("vectorLine");
+      const vectorLabel = document.getElementById("vectorLabel");
+      const guideLine = document.getElementById("guideLine");
+      const coordinateValue = document.getElementById("coordinateValue");
+      const vectorValue = document.getElementById("vectorValue");
+      const magnitudeValue = document.getElementById("magnitudeValue");
+      const interpretation = document.getElementById("interpretation");
+      const resetButton = document.getElementById("resetButton");
+
+      const axisLeft = 100;
+      const axisRight = 900;
+      const originX = 500;
+      const axisY = 156;
+      const minPosition = -5;
+      const maxPosition = 5;
+      const initialPosition = 2;
+
+      let position = initialPosition;
+      let dragging = false;
+      let activePointerId = null;
+
+      function coordinateToPixel(value) {
+        return axisLeft + ((value - minPosition) / (maxPosition - minPosition)) * (axisRight - axisLeft);
+      }
+
+      function pixelToCoordinate(pixel) {
+        return minPosition + ((pixel - axisLeft) / (axisRight - axisLeft)) * (maxPosition - minPosition);
+      }
+
+      function clamp(value, minimum, maximum) {
+        return Math.max(minimum, Math.min(maximum, value));
+      }
+
+      function snap(value) {
+        const rounded = Math.round(value * 10) / 10;
+        return Math.abs(rounded) < 0.05 ? 0 : rounded;
+      }
+
+      function signedNumber(value) {
+        if (value > 0) return "+" + value.toFixed(1);
+        if (value < 0) return "−" + Math.abs(value).toFixed(1);
+        return "0.0";
+      }
+
+      function setReadoutClass(element, state) {
+        element.classList.remove("positive", "negative", "zero");
+        element.classList.add(state);
+      }
+
+      function updateDisplay() {
+        const objectX = coordinateToPixel(position);
+        const state = position > 0 ? "positive" : position < 0 ? "negative" : "zero";
+        const signed = signedNumber(position);
+        const magnitude = Math.abs(position).toFixed(1);
+
+        objectCircle.setAttribute("cx", objectX);
+        objectHighlight.setAttribute("cx", objectX - 8);
+        focusRing.setAttribute("cx", objectX);
+
+        guideLine.setAttribute("x1", objectX);
+        guideLine.setAttribute("x2", objectX);
+
+        vectorLine.setAttribute("x1", originX);
+        vectorLine.setAttribute("x2", objectX);
+
+        const midpoint = (originX + objectX) / 2;
+        vectorLabel.setAttribute("x", midpoint);
+
+        if (position === 0) {
+          vectorLine.setAttribute("visibility", "hidden");
+          vectorLabel.setAttribute("visibility", "hidden");
+          guideLine.setAttribute("visibility", "hidden");
+        } else {
+          vectorLine.setAttribute("visibility", "visible");
+          vectorLabel.setAttribute("visibility", "visible");
+          guideLine.setAttribute("visibility", "visible");
+        }
+
+        coordinateValue.textContent = "x = " + signed + " m";
+        vectorValue.textContent = "r = ⟨" + signed + " m⟩";
+        magnitudeValue.textContent = "|r| = " + magnitude + " m";
+
+        setReadoutClass(coordinateValue, state);
+        setReadoutClass(vectorValue, state);
+
+        if (position > 0) {
+          interpretation.textContent =
+            "The object is " + magnitude +
+            " m to the right of the origin, so its position vector points in the +x direction.";
+        } else if (position < 0) {
+          interpretation.textContent =
+            "The object is " + magnitude +
+            " m to the left of the origin, so its position vector points in the −x direction.";
+        } else {
+          interpretation.textContent =
+            "The object is at the origin. Its position is zero, so the position vector has zero magnitude and no left or right direction.";
+        }
+
+        let ariaText;
+        if (position > 0) {
+          ariaText = "positive " + magnitude + " metres";
+        } else if (position < 0) {
+          ariaText = "negative " + magnitude + " metres";
+        } else {
+          ariaText = "zero metres, at the origin";
+        }
+
+        objectControl.setAttribute("aria-valuenow", position.toFixed(1));
+        objectControl.setAttribute("aria-valuetext", ariaText);
+      }
+
+      function buildTicks() {
+        const svgNamespace = "http://www.w3.org/2000/svg";
+
+        for (let value = -5; value <= 5; value += 0.5) {
+          const x = coordinateToPixel(value);
+          const isWhole = Number.isInteger(value);
+          const tick = document.createElementNS(svgNamespace, "line");
+
+          tick.setAttribute("x1", x);
+          tick.setAttribute("x2", x);
+          tick.setAttribute("y1", isWhole ? 143 : 149);
+          tick.setAttribute("y2", isWhole ? 171 : 165);
+          tick.setAttribute("stroke", value === 0 ? "#16845b" : "#12304a");
+          tick.setAttribute("stroke-width", isWhole ? "3" : "1.5");
+          ticksGroup.appendChild(tick);
+
+          if (isWhole) {
+            const label = document.createElementNS(svgNamespace, "text");
+            label.setAttribute("x", x);
+            label.setAttribute("y", "196");
+            label.setAttribute("text-anchor", "middle");
+            label.setAttribute("fill", value === 0 ? "#16845b" : "#12304a");
+            label.setAttribute("font-size", "16");
+            label.setAttribute("font-weight", value === 0 ? "800" : "600");
+            label.textContent = value < 0 ? "−" + Math.abs(value) : String(value);
+            ticksGroup.appendChild(label);
+          }
+        }
+      }
+
+      function clientPointToSvgX(clientX, clientY) {
+        const point = svg.createSVGPoint();
+        point.x = clientX;
+        point.y = clientY;
+        const matrix = svg.getScreenCTM();
+        if (!matrix) return originX;
+        return point.matrixTransform(matrix.inverse()).x;
+      }
+
+      function updateFromPointer(event) {
+        const svgX = clientPointToSvgX(event.clientX, event.clientY);
+        const constrainedX = clamp(svgX, axisLeft, axisRight);
+        position = snap(pixelToCoordinate(constrainedX));
+        updateDisplay();
+      }
+
+      objectControl.addEventListener("pointerdown", function (event) {
+        dragging = true;
+        activePointerId = event.pointerId;
+        objectControl.setPointerCapture(event.pointerId);
+        objectControl.style.cursor = "grabbing";
+        updateFromPointer(event);
+        event.preventDefault();
+      });
+
+      objectControl.addEventListener("pointermove", function (event) {
+        if (!dragging || event.pointerId !== activePointerId) return;
+        updateFromPointer(event);
+        event.preventDefault();
+      });
+
+      function endDrag(event) {
+        if (event.pointerId !== activePointerId) return;
+        dragging = false;
+        activePointerId = null;
+        objectControl.style.cursor = "grab";
+      }
+
+      objectControl.addEventListener("pointerup", endDrag);
+      objectControl.addEventListener("pointercancel", endDrag);
+
+      objectControl.addEventListener("keydown", function (event) {
+        let change = 0;
+
+        if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+          change = -0.1;
+        } else if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+          change = 0.1;
+        } else if (event.key === "Home") {
+          position = minPosition;
+        } else if (event.key === "End") {
+          position = maxPosition;
+        } else {
+          return;
+        }
+
+        if (change !== 0) {
+          position = snap(clamp(position + change, minPosition, maxPosition));
+        }
+
+        updateDisplay();
+        event.preventDefault();
+      });
+
+      objectControl.addEventListener("focus", function () {
+        focusRing.setAttribute("opacity", "1");
+      });
+
+      objectControl.addEventListener("blur", function () {
+        focusRing.setAttribute("opacity", "0");
+      });
+
+      resetButton.addEventListener("click", function () {
+        position = initialPosition;
+        updateDisplay();
+        objectControl.focus();
+      });
+
+      buildTicks();
+      updateDisplay();
+    })();
+  </script>
+</body>
+</html>
