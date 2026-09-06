@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two-Dimensional Position Explorer</title>
+  <style>
+    :root {
+      --ink: #17253b;
+      --muted: #5c6b7e;
+      --paper: #ffffff;
+      --page: #eef3f8;
+      --line: #ced8e4;
+      --grid: #dfe7ef;
+      --axis: #35475e;
+      --x-color: #087e8b;
+      --y-color: #7656b5;
+      --vector: #e26328;
+      --point: #bf3d66;
+      --accent: #1769aa;
+      --soft-blue: #eaf4fc;
+      --soft-orange: #fff1e9;
+      --soft-green: #eaf7f2;
+      --shadow: 0 10px 28px rgba(28, 48, 74, 0.10);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      color-scheme: light;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, #ffffff 0, transparent 29rem),
+        var(--page);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.55;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    main {
+      width: min(1180px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 28px 0 48px;
+    }
+
+    .hero,
+    .section-card,
+    .explorer {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: clamp(22px, 5vw, 48px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -70px;
+      top: -80px;
+      border-radius: 50%;
+      background: rgba(23, 105, 170, 0.08);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      margin: 0 0 7px;
+      color: var(--accent);
+      font-size: 0.79rem;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 800px;
+      margin-bottom: 12px;
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+    }
+
+    h2 {
+      font-size: clamp(1.45rem, 3vw, 2rem);
+      line-height: 1.2;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+
+    .lead {
+      max-width: 850px;
+      margin-bottom: 20px;
+      color: var(--muted);
+      font-size: clamp(1rem, 2vw, 1.18rem);
+    }
+
+    .why-box {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 14px;
+      max-width: 850px;
+      padding: 15px 17px;
+      border-left: 5px solid var(--accent);
+      border-radius: 10px;
+      background: var(--soft-blue);
+    }
+
+    .why-icon {
+      font-size: 1.65rem;
+      line-height: 1.2;
+    }
+
+    .why-box p {
+      margin: 0;
+    }
+
+    .journey {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .journey span {
+      padding: 6px 11px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+    }
+
+    .journey .active {
+      color: #fff;
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .section-card,
+    .explorer {
+      margin-top: 22px;
+      padding: clamp(18px, 3vw, 30px);
+    }
+
+    .stage-heading {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      margin-bottom: 20px;
+    }
+
+    .stage-number {
+      display: grid;
+      flex: 0 0 38px;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      color: #fff;
+      border-radius: 50%;
+      background: var(--accent);
+      font-weight: 800;
+    }
+
+    .stage-heading h2,
+    .stage-heading p {
+      margin-bottom: 3px;
+    }
+
+    .subtle {
+      color: var(--muted);
+    }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 0.9fr) minmax(280px, 1.1fr);
+      gap: 22px;
+      align-items: center;
+    }
+
+    .sequence-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .sequence-item {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fbfcfe;
+    }
+
+    .sequence-item strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--accent);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .math {
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 1.08em;
+    }
+
+    .vector-symbol {
+      font-weight: 700;
+      font-style: italic;
+    }
+
+    .mini-diagram {
+      width: 100%;
+      min-height: 190px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: linear-gradient(#fff, #f7fafc);
+    }
+
+    svg text {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .explorer-intro {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-start;
+      margin-bottom: 18px;
+    }
+
+    .instruction {
+      max-width: 760px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .reset-button {
+      flex: none;
+      min-height: 44px;
+      padding: 9px 18px;
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      background: var(--accent);
+      cursor: pointer;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(23, 105, 170, 0.22);
+    }
+
+    .reset-button:hover {
+      background: #12598f;
+    }
+
+    .reset-button:focus-visible,
+    input:focus-visible,
+    canvas:focus-visible {
+      outline: 3px solid rgba(23, 105, 170, 0.35);
+      outline-offset: 2px;
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.65fr) minmax(270px, 0.85fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .canvas-panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      aspect-ratio: 3 / 2;
+      min-height: 300px;
+      touch-action: none;
+      cursor: crosshair;
+    }
+
+    .direction-labels {
+      position: absolute;
+      top: 9px;
+      right: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+      pointer-events: none;
+    }
+
+    .direction-labels span,
+    .legend span {
+      padding: 4px 8px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.91);
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--line);
+      background: #f8fafc;
+    }
+
+    .legend .vector-key {
+      color: var(--vector);
+    }
+
+    .legend .x-key {
+      color: var(--x-color);
+    }
+
+    .legend .y-key {
+      color: var(--y-color);
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .control-card,
+    .readout-card,
+    .interpretation {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfe;
+    }
+
+    .control-card label {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 7px;
+      font-weight: 800;
+    }
+
+    .control-card input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .number-row {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .number-row input {
+      width: 92px;
+      padding: 6px 8px;
+      color: var(--ink);
+      border: 1px solid #aebccb;
+      border-radius: 7px;
+      background: #fff;
+      font-weight: 700;
+    }
+
+    .readout-card {
+      display: grid;
+      gap: 8px;
+      background: var(--soft-blue);
+    }
+
+    .readout {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 7px;
+      border-bottom: 1px solid rgba(23, 105, 170, 0.14);
+    }
+
+    .readout:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .readout-label {
+      color: var(--muted);
+      font-size: 0.87rem;
+    }
+
+    .readout-value {
+      text-align: right;
+      font-weight: 800;
+    }
+
+    .equation-box {
+      margin-top: 15px;
+      padding: 15px;
+      overflow-wrap: anywhere;
+      border-left: 5px solid var(--vector);
+      border-radius: 10px;
+      background: var(--soft-orange);
+    }
+
+    .equation-box p {
+      margin: 4px 0;
+    }
+
+    .interpretation {
+      margin-top: 12px;
+      background: var(--soft-green);
+    }
+
+    .interpretation h3 {
+      margin-bottom: 4px;
+    }
+
+    .interpretation p {
+      margin: 0;
+    }
+
+    .notice {
+      margin-top: 20px;
+      padding: 17px 19px;
+      border: 1px solid #f0cc75;
+      border-radius: 13px;
+      background: #fff8df;
+    }
+
+    .notice h3 {
+      margin-bottom: 7px;
+    }
+
+    .notice ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .notice li + li {
+      margin-top: 5px;
+    }
+
+    .velocity-note {
+      margin-top: 20px;
+      padding: 17px;
+      border-left: 5px solid var(--point);
+      border-radius: 11px;
+      background: #fff0f5;
+    }
+
+    .velocity-note h3 {
+      margin-bottom: 6px;
+    }
+
+    .velocity-note p:last-child {
+      margin-bottom: 0;
+    }
+
+    .footer-note {
+      margin: 24px 4px 0;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.86rem;
+    }
+
+    @media (max-width: 860px) {
+      .lab-grid,
+      .concept-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .controls {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .readout-card,
+      .equation-box,
+      .interpretation {
+        grid-column: 1 / -1;
+      }
+    }
+
+    @media (max-width: 590px) {
+      main {
+        width: min(100% - 16px, 1180px);
+        padding-top: 8px;
+      }
+
+      .hero,
+      .section-card,
+      .explorer {
+        border-radius: 12px;
+      }
+
+      .explorer-intro {
+        display: block;
+      }
+
+      .reset-button {
+        width: 100%;
+        margin-top: 12px;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      .readout-card,
+      .equation-box,
+      .interpretation {
+        grid-column: auto;
+      }
+
+      canvas {
+        min-height: 275px;
+      }
+
+      .why-box {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="hero">
+      <p class="eyebrow">Vectors and coordinate systems</p>
+      <h1>Two-Dimensional Position Explorer</h1>
+      <p class="lead">
+        A position is not fully described by a distance alone. We also need a direction.
+        A coordinate system gives everyone the same origin and directions, so positions
+        and motion can be described consistently.
+      </p>
+
+      <div class="why-box">
+        <div class="why-icon" aria-hidden="true">📍</div>
+        <p>
+          Saying “the object is 5 metres away” does not tell us where it is.
+          Saying “4 metres to the right and 3 metres upward from the origin”
+          identifies one position. A <strong>vector</strong> combines this magnitude
+          and direction information.
+        </p>
+      </div>
+
+      <div class="journey" aria-label="Learning progression">
+        <span>1-D: one direction</span>
+        <span class="active">2-D: two components</span>
+        <span>3-D: three components</span>
+      </div>
+    </header>
+
+    <section class="section-card" aria-labelledby="one-d-title">
+      <div class="stage-heading">
+        <span class="stage-number">1</span>
+        <div>
+          <h2 id="one-d-title">Begin in one dimension</h2>
+          <p class="subtle">A number line introduces position, sign, and direction.</p>
+        </div>
+      </div>
+
+      <div class="concept-grid">
+        <div class="sequence-list">
+          <div class="sequence-item">
+            <strong>Physical concept</strong>
+            An object can be to the right or left of a chosen origin.
+          </div>
+          <div class="sequence-item">
+            <strong>Mathematical representation</strong>
+            <span class="math"><span class="vector-symbol">r</span> = &lang;x&rang;</span>.
+            The sign of <span class="math">x</span> specifies direction.
+          </div>
+          <div class="sequence-item">
+            <strong>Numerical example</strong>
+            <span class="math"><span class="vector-symbol">r</span> = &lang;&minus;3&rang; m</span>.
+          </div>
+          <div class="sequence-item">
+            <strong>Physical interpretation</strong>
+            The object is 3 m left of the origin. Its position magnitude is
+            <span class="math">|<span class="vector-symbol">r</span>| = 3 m</span>.
+          </div>
+        </div>
+
+        <svg class="mini-diagram" viewBox="0 0 560 190" role="img" aria-label="One-dimensional number line with a point at negative three metres">
+          <defs>
+            <marker id="axisArrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#35475e"></path>
+            </marker>
+            <marker id="vectorArrow1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#e26328"></path>
+            </marker>
+          </defs>
+          <line x1="55" y1="102" x2="510" y2="102" stroke="#35475e" stroke-width="3" marker-end="url(#axisArrow1)"></line>
+          <g fill="#5c6b7e" font-size="14" text-anchor="middle">
+            <text x="100" y="132">−4</text>
+            <text x="190" y="132">−2</text>
+            <text x="280" y="132">0</text>
+            <text x="370" y="132">2</text>
+            <text x="460" y="132">4</text>
+          </g>
+          <g stroke="#35475e" stroke-width="2">
+            <line x1="100" y1="94" x2="100" y2="110"></line>
+            <line x1="190" y1="94" x2="190" y2="110"></line>
+            <line x1="280" y1="91" x2="280" y2="113"></line>
+            <line x1="370" y1="94" x2="370" y2="110"></line>
+            <line x1="460" y1="94" x2="460" y2="110"></line>
+          </g>
+          <line x1="280" y1="75" x2="145" y2="75" stroke="#e26328" stroke-width="5" marker-end="url(#vectorArrow1)"></line>
+          <circle cx="145" cy="102" r="9" fill="#bf3d66"></circle>
+          <text x="145" y="45" fill="#17253b" font-size="15" text-anchor="middle">x = −3 m</text>
+          <text x="518" y="93" fill="#17253b" font-size="15">+x</text>
+          <text x="280" y="157" fill="#17253b" font-size="14" text-anchor="middle">origin</text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="explorer" aria-labelledby="two-d-title">
+      <div class="stage-heading">
+        <span class="stage-number">2</span>
+        <div>
+          <h2 id="two-d-title">Position and components in two dimensions</h2>
+          <p class="subtle">Two perpendicular directions locate a point on a plane.</p>
+        </div>
+      </div>
+
+      <div class="explorer-intro">
+        <p class="instruction">
+          Drag the point or tap anywhere on the graph. You can also use the sliders,
+          number fields, or arrow keys when the graph is focused. The point moves in
+          steps of 0.1 m.
+        </p>
+        <button id="resetButton" class="reset-button" type="button">Reset to &lang;4, 3&rang; m</button>
+      </div>
+
+      <div class="lab-grid">
+        <div>
+          <div class="canvas-panel">
+            <canvas id="plot" tabindex="0" aria-label="Interactive x-y coordinate graph. Drag or use arrow keys to move the position point.">
+              Your browser does not support the HTML canvas element.
+            </canvas>
+            <div class="direction-labels" aria-hidden="true">
+              <span>+x: right</span>
+              <span>+y: up</span>
+            </div>
+            <div class="legend" aria-label="Diagram legend">
+              <span class="vector-key">Solid orange: position vector</span>
+              <span class="x-key">Dashed teal: x projection</span>
+              <span class="y-key">Dashed purple: y projection</span>
+            </div>
+          </div>
+
+          <div class="equation-box" aria-live="polite">
+            <p><strong>Component notation:</strong> <span id="componentEquation" class="math"></span></p>
+            <p><strong>Unit-vector notation:</strong> <span id="unitEquation" class="math"></span></p>
+            <p><strong>Magnitude:</strong> <span id="magnitudeEquation" class="math"></span></p>
+          </div>
+
+          <div class="interpretation" aria-live="polite">
+            <h3>Physical interpretation</h3>
+            <p id="interpretationText"></p>
+          </div>
+        </div>
+
+        <aside class="controls" aria-label="Position controls and measurements">
+          <div class="control-card">
+            <label for="xSlider">
+              <span>Horizontal coordinate, x</span>
+              <span id="xShort">4.0 m</span>
+            </label>
+            <input id="xSlider" type="range" min="-6" max="6" step="0.1" value="4" aria-label="Horizontal position x in metres">
+            <div class="number-row">
+              <span>x =</span>
+              <input id="xNumber" type="number" min="-6" max="6" step="0.1" value="4.0" aria-label="Horizontal position x value">
+              <span>m</span>
+            </div>
+          </div>
+
+          <div class="control-card">
+            <label for="ySlider">
+              <span>Vertical coordinate, y</span>
+              <span id="yShort">3.0 m</span>
+            </label>
+            <input id="ySlider" type="range" min="-4" max="4" step="0.1" value="3" aria-label="Vertical position y in metres">
+            <div class="number-row">
+              <span>y =</span>
+              <input id="yNumber" type="number" min="-4" max="4" step="0.1" value="3.0" aria-label="Vertical position y value">
+              <span>m</span>
+            </div>
+          </div>
+
+          <div class="readout-card" aria-live="polite">
+            <div class="readout">
+              <div>
+                <div class="readout-label">Horizontal component</div>
+                <div>x coordinate</div>
+              </div>
+              <div id="xReadout" class="readout-value">4.0 m</div>
+            </div>
+            <div class="readout">
+              <div>
+                <div class="readout-label">Vertical component</div>
+                <div>y coordinate</div>
+              </div>
+              <div id="yReadout" class="readout-value">3.0 m</div>
+            </div>
+            <div class="readout">
+              <div>
+                <div class="readout-label">Position vector</div>
+                <div class="math"><span class="vector-symbol">r</span></div>
+              </div>
+              <div id="vectorReadout" class="readout-value math">&lang;4.0, 3.0&rang; m</div>
+            </div>
+            <div class="readout">
+              <div>
+                <div class="readout-label">Position magnitude</div>
+                <div class="math">|<span class="vector-symbol">r</span>|</div>
+              </div>
+              <div id="magnitudeReadout" class="readout-value">5.0 m</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <div class="notice">
+        <h3>What to notice</h3>
+        <ul>
+          <li>The coordinates <span class="math">x</span> and <span class="math">y</span> are the horizontal and vertical components of the position vector.</li>
+          <li>The dashed projections form a right triangle with the position vector.</li>
+          <li>The vector <span class="math"><span class="vector-symbol">r</span></span> includes direction; its magnitude <span class="math">|<span class="vector-symbol">r</span>|</span> is only the straight-line distance from the origin.</li>
+          <li>Changing a component can change both the magnitude and the direction of the vector.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section-card" aria-labelledby="three-d-title">
+      <div class="stage-heading">
+        <span class="stage-number">3</span>
+        <div>
+          <h2 id="three-d-title">Extend the idea to three dimensions</h2>
+          <p class="subtle">A third perpendicular direction describes height or depth.</p>
+        </div>
+      </div>
+
+      <div class="concept-grid">
+        <div class="sequence-list">
+          <div class="sequence-item">
+            <strong>Physical concept</strong>
+            A point in a room needs left–right, forward–back, and up–down information.
+          </div>
+          <div class="sequence-item">
+            <strong>Mathematical representation</strong>
+            <span class="math"><span class="vector-symbol">r</span> = &lang;x, y, z&rang; = x <b>i</b> + y <b>j</b> + z <b>k</b></span>.
+          </div>
+          <div class="sequence-item">
+            <strong>Numerical example</strong>
+            <span class="math"><span class="vector-symbol">r</span> = &lang;2, &minus;3, 6&rang; m</span> and
+            <span class="math">|<span class="vector-symbol">r</span>| = &radic;(2<sup>2</sup> + (&minus;3)<sup>2</sup> + 6<sup>2</sup>) = 7 m</span>.
+          </div>
+          <div class="sequence-item">
+            <strong>Physical interpretation</strong>
+            The point is 2 m along +x, 3 m along −y, and 6 m along +z. Its straight-line distance from the origin is 7 m.
+          </div>
+        </div>
+
+        <svg class="mini-diagram" viewBox="0 0 560 270" role="img" aria-label="Three-dimensional coordinate diagram showing x, y and z components">
+          <defs>
+            <marker id="axisArrow3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#35475e"></path>
+            </marker>
+            <marker id="vectorArrow3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 Z" fill="#e26328"></path>
+            </marker>
+          </defs>
+          <g stroke="#35475e" stroke-width="3" marker-end="url(#axisArrow3)">
+            <line x1="245" y1="205" x2="480" y2="205"></line>
+            <line x1="245" y1="205" x2="90" y2="250"></line>
+            <line x1="245" y1="205" x2="245" y2="35"></line>
+          </g>
+          <g fill="#17253b" font-size="17" font-weight="700">
+            <text x="490" y="211">+x</text>
+            <text x="60" y="260">+y</text>
+            <text x="255" y="35">+z</text>
+          </g>
+          <g stroke-dasharray="7 6" stroke-width="2">
+            <line x1="245" y1="205" x2="365" y2="205" stroke="#087e8b"></line>
+            <line x1="365" y1="205" x2="315" y2="220" stroke="#7656b5"></line>
+            <line x1="315" y1="220" x2="315" y2="88" stroke="#bf3d66"></line>
+          </g>
+          <line x1="245" y1="205" x2="315" y2="88" stroke="#e26328" stroke-width="5" marker-end="url(#vectorArrow3)"></line>
+          <circle cx="315" cy="88" r="9" fill="#bf3d66"></circle>
+          <text x="329" y="77" fill="#17253b" font-size="15">point (x, y, z)</text>
+          <text x="272" y="231" fill="#5c6b7e" font-size="14">origin</text>
+        </svg>
+      </div>
+
+      <div class="velocity-note">
+        <h3>The same language describes velocity</h3>
+        <p class="math">
+          <span class="vector-symbol">v</span> = &lang;v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub>&rang;
+          = v<sub>x</sub> <b>i</b> + v<sub>y</sub> <b>j</b> + v<sub>z</sub> <b>k</b>
+        </p>
+        <p>
+          Velocity is a <strong>vector</strong> because it has magnitude and direction.
+          The magnitude <span class="math">|<span class="vector-symbol">v</span>|</span>
+          is the <strong>speed</strong>. Velocity and speed are therefore not the same quantity.
+        </p>
+      </div>
+    </section>
+
+    <p class="footer-note">
+      Coordinate choices may change the component numbers, but they give observers a shared way to describe the same physical location.
+    </p>
+  </main>
+
+  <script>
+    "use strict";
+
+    (function () {
+      const canvas = document.getElementById("plot");
+      const ctx = canvas.getContext("2d");
+
+      const xSlider = document.getElementById("xSlider");
+      const ySlider = document.getElementById("ySlider");
+      const xNumber = document.getElementById("xNumber");
+      const yNumber = document.getElementById("yNumber");
+      const resetButton = document.getElementById("resetButton");
+
+      const xShort = document.getElementById("xShort");
+      const yShort = document.getElementById("yShort");
+      const xReadout = document.getElementById("xReadout");
+      const yReadout = document.getElementById("yReadout");
+      const vectorReadout = document.getElementById("vectorReadout");
+      const magnitudeReadout = document.getElementById("magnitudeReadout");
+      const componentEquation = document.getElementById("componentEquation");
+      const unitEquation = document.getElementById("unitEquation");
+      const magnitudeEquation = document.getElementById("magnitudeEquation");
+      const interpretationText = document.getElementById("interpretationText");
+
+      const limits = {
+        xMin: -6,
+        xMax: 6,
+        yMin: -4,
+        yMax: 4
+      };
+
+      let position = { x: 4, y: 3 };
+      let drawingMetrics = null;
+      let dragging = false;
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function snap(value) {
+        const rounded = Math.round(value * 10) / 10;
+        return Math.abs(rounded) < 0.05 ? 0 : rounded;
+      }
+
+      function format(value) {
+        const clean = Math.abs(value) < 0.05 ? 0 : value;
+        return clean.toFixed(1);
+      }
+
+      function coordinatePhrase(value, positiveDirection, negativeDirection) {
+        if (Math.abs(value) < 0.05) {
+          return "0.0 m in the " + positiveDirection + "–" + negativeDirection + " direction";
+        }
+        return format(Math.abs(value)) + " m " + (value > 0 ? positiveDirection : negativeDirection);
+      }
+
+      function updateAll() {
+        const x = position.x;
+        const y = position.y;
+        const magnitude = Math.sqrt(x * x + y * y);
+
+        xSlider.value = String(x);
+        ySlider.value = String(y);
+        xNumber.value = format(x);
+        yNumber.value = format(y);
+
+        xShort.textContent = format(x) + " m";
+        yShort.textContent = format(y) + " m";
+        xReadout.textContent = format(x) + " m";
+        yReadout.textContent = format(y) + " m";
+        vectorReadout.textContent = "⟨" + format(x) + ", " + format(y) + "⟩ m";
+        magnitudeReadout.textContent = format(magnitude) + " m";
+
+        componentEquation.innerHTML =
+          '<span class="vector-symbol">r</span> = &lang;' +
+          format(x) + ", " + format(y) + "&rang; m";
+
+        unitEquation.innerHTML =
+          '<span class="vector-symbol">r</span> = (' +
+          format(x) + " m) <b>i</b> + (" + format(y) + " m) <b>j</b>";
+
+        magnitudeEquation.innerHTML =
+          '|<span class="vector-symbol">r</span>| = &radic;[(' +
+          format(x) + " m)<sup>2</sup> + (" + format(y) +
+          " m)<sup>2</sup>] = " + format(magnitude) + " m";
+
+        if (magnitude < 0.05) {
+          interpretationText.textContent =
+            "The point is at the origin. The position vector has zero magnitude, so it does not point in a particular direction.";
+        } else {
+          interpretationText.textContent =
+            "From the origin, move " +
+            coordinatePhrase(x, "right", "left") + " and " +
+            coordinatePhrase(y, "up", "down") + ". The vector points to that location, while " +
+            format(magnitude) + " m is the straight-line distance from the origin.";
+        }
+
+        draw();
+      }
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        const dpr = Math.max(1, window.devicePixelRatio || 1);
+        const displayWidth = Math.max(300, rect.width);
+        const displayHeight = Math.max(260, rect.height);
+
+        canvas.width = Math.round(displayWidth * dpr);
+        canvas.height = Math.round(displayHeight * dpr);
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        draw(displayWidth, displayHeight);
+      }
+
+      function getMetrics(width, height) {
+        const pad = width < 500 ? 37 : 48;
+        const usableWidth = width - pad * 2;
+        const usableHeight = height - pad * 2;
+        const scale = Math.min(
+          usableWidth / (limits.xMax - limits.xMin),
+          usableHeight / (limits.yMax - limits.yMin)
+        );
+
+        return {
+          width: width,
+          height: height,
+          scale: scale,
+          originX: width / 2,
+          originY: height / 2
+        };
+      }
+
+      function worldToCanvas(x, y, metrics) {
+        return {
+          x: metrics.originX + x * metrics.scale,
+          y: metrics.originY - y * metrics.scale
+        };
+      }
+
+      function drawArrow(fromX, fromY, toX, toY, color, width) {
+        const angle = Math.atan2(toY - fromY, toX - fromX);
+        const headLength = 12;
+        const distance = Math.hypot(toX - fromX, toY - fromY);
+
+        if (distance < 2) {
+          return;
+        }
+
+        ctx.save();
+        ctx.strokeStyle = color;
+        ctx.fillStyle = color;
+        ctx.lineWidth = width;
+        ctx.lineCap = "round";
+
+        ctx.beginPath();
+        ctx.moveTo(fromX, fromY);
+        ctx.lineTo(toX, toY);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(toX, toY);
+        ctx.lineTo(
+          toX - headLength * Math.cos(angle - Math.PI / 6),
+          toY - headLength * Math.sin(angle - Math.PI / 6)
+        );
+        ctx.lineTo(
+          toX - headLength * Math.cos(angle + Math.PI / 6),
+          toY - headLength * Math.sin(angle + Math.PI / 6)
+        );
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawAxisArrow(x, y, angle) {
+        const size = 8;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.fillStyle = "#35475e";
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-size, -size / 2);
+        ctx.lineTo(-size, size / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function draw(forcedWidth, forcedHeight) {
+        const rect = canvas.getBoundingClientRect();
+        const width = forcedWidth || rect.width;
+        const height = forcedHeight || rect.height;
+
+        if (!width || !height) {
+          return;
+        }
+
+        const metrics = getMetrics(width, height);
+        drawingMetrics = metrics;
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.font = width < 500 ? "11px system-ui" : "12px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        for (let x = limits.xMin; x <= limits.xMax; x += 1) {
+          const a = worldToCanvas(x, limits.yMin, metrics);
+          const b = worldToCanvas(x, limits.yMax, metrics);
+
+          ctx.strokeStyle = x === 0 ? "#35475e" : "#dfe7ef";
+          ctx.lineWidth = x === 0 ? 2 : 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+
+          if (x !== 0) {
+            const tick = worldToCanvas(x, 0, metrics);
+            ctx.fillStyle = "#65758a";
+            ctx.fillText(String(x), tick.x, tick.y + 15);
+          }
+        }
+
+        for (let y = limits.yMin; y <= limits.yMax; y += 1) {
+          const a = worldToCanvas(limits.xMin, y, metrics);
+          const b = worldToCanvas(limits.xMax, y, metrics);
+
+          ctx.strokeStyle = y === 0 ? "#35475e" : "#dfe7ef";
+          ctx.lineWidth = y === 0 ? 2 : 1;
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+
+          if (y !== 0) {
+            const tick = worldToCanvas(0, y, metrics);
+            ctx.textAlign = "right";
+            ctx.fillStyle = "#65758a";
+            ctx.fillText(String(y), tick.x - 8, tick.y);
+            ctx.textAlign = "center";
+          }
+        }
+
+        const left = worldToCanvas(limits.xMin, 0, metrics);
+        const right = worldToCanvas(limits.xMax, 0, metrics);
+        const top = worldToCanvas(0, limits.yMax, metrics);
+        drawAxisArrow(right.x, right.y, 0);
+        drawAxisArrow(left.x, left.y, Math.PI);
+        drawAxisArrow(top.x, top.y, -Math.PI / 2);
+
+        ctx.fillStyle = "#17253b";
+        ctx.font = "bold 13px system-ui";
+        ctx.textAlign = "right";
+        ctx.fillText("x (m)", right.x, right.y + 30);
+        ctx.textAlign = "left";
+        ctx.fillText("y (m)", top.x + 10, top.y + 11);
+
+        const origin = worldToCanvas(0, 0, metrics);
+        const point = worldToCanvas(position.x, position.y, metrics);
+        const xProjection = worldToCanvas(position.x, 0, metrics);
+        const yProjection = worldToCanvas(0, position.y, metrics);
+
+        ctx.save();
+        ctx.setLineDash([7, 6]);
+        ctx.lineWidth = 2.5;
+
+        ctx.strokeStyle = "#087e8b";
+        ctx.beginPath();
+        ctx.moveTo(point.x, point.y);
+        ctx.lineTo(yProjection.x, yProjection.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = "#7656b5";
+        ctx.beginPath();
+        ctx.moveTo(point.x, point.y);
+        ctx.lineTo(xProjection.x, xProjection.y);
+        ctx.stroke();
+        ctx.restore();
+
+        drawArrow(origin.x, origin.y, point.x, point.y, "#e26328", 4);
+
+        if (Math.abs(position.x) > 0.05) {
+          ctx.fillStyle = "#087e8b";
+          ctx.font = "bold 12px system-ui";
+          ctx.textAlign = "center";
+          ctx.fillText("x = " + format(position.x) + " m", (origin.x + point.x) / 2, origin.y + 28);
+        }
+
+        if (Math.abs(position.y) > 0.05) {
+          ctx.save();
+          ctx.fillStyle = "#7656b5";
+          ctx.font = "bold 12px system-ui";
+          ctx.textAlign = "left";
+          ctx.fillText("y = " + format(position.y) + " m", point.x + 10, (origin.y + point.y) / 2);
+          ctx.restore();
+        }
+
+        ctx.beginPath();
+        ctx.arc(origin.x, origin.y, 4, 0, Math.PI * 2);
+        ctx.fillStyle = "#35475e";
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 11, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = "#bf3d66";
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 6, 0, Math.PI * 2);
+        ctx.fillStyle = "#bf3d66";
+        ctx.fill();
+
+        ctx.font = "bold 13px system-ui";
+        ctx.fillStyle = "#17253b";
+        ctx.textAlign = point.x > width - 150 ? "right" : "left";
+        const labelX = point.x > width - 150 ? point.x - 14 : point.x + 14;
+        const labelY = point.y < 45 ? point.y + 24 : point.y - 20;
+        ctx.fillText(
+          "P(" + format(position.x) + ", " + format(position.y) + ")",
+          labelX,
+          labelY
+        );
+
+        ctx.font = "12px system-ui";
+        ctx.fillStyle = "#5c6b7e";
+        ctx.textAlign = "left";
+        ctx.fillText("origin", origin.x + 7, origin.y - 11);
+      }
+
+      function setPosition(x, y) {
+        position.x = snap(clamp(Number(x), limits.xMin, limits.xMax));
+        position.y = snap(clamp(Number(y), limits.yMin, limits.yMax));
+        updateAll();
+      }
+
+      function pointerToPosition(event) {
+        if (!drawingMetrics) {
+          return;
+        }
+
+        const rect = canvas.getBoundingClientRect();
+        const canvasX = event.clientX - rect.left;
+        const canvasY = event.clientY - rect.top;
+
+        const x = (canvasX - drawingMetrics.originX) / drawingMetrics.scale;
+        const y = (drawingMetrics.originY - canvasY) / drawingMetrics.scale;
+
+        setPosition(x, y);
+      }
+
+      xSlider.addEventListener("input", function () {
+        setPosition(xSlider.value, position.y);
+      });
+
+      ySlider.addEventListener("input", function () {
+        setPosition(position.x, ySlider.value);
+      });
+
+      xNumber.addEventListener("input", function () {
+        if (xNumber.value !== "" && Number.isFinite(Number(xNumber.value))) {
+          setPosition(xNumber.value, position.y);
+        }
+      });
+
+      yNumber.addEventListener("input", function () {
+        if (yNumber.value !== "" && Number.isFinite(Number(yNumber.value))) {
+          setPosition(position.x, yNumber.value);
+        }
+      });
+
+      xNumber.addEventListener("change", updateAll);
+      yNumber.addEventListener("change", updateAll);
+
+      resetButton.addEventListener("click", function () {
+        setPosition(4, 3);
+        canvas.focus();
+      });
+
+      canvas.addEventListener("pointerdown", function (event) {
+        dragging = true;
+        canvas.setPointerCapture(event.pointerId);
+        pointerToPosition(event);
+        event.preventDefault();
+      });
+
+      canvas.addEventListener("pointermove", function (event) {
+        if (dragging) {
+          pointerToPosition(event);
+          event.preventDefault();
+        }
+      });
+
+      canvas.addEventListener("pointerup", function (event) {
+        dragging = false;
+        if (canvas.hasPointerCapture(event.pointerId)) {
+          canvas.releasePointerCapture(event.pointerId);
+        }
+      });
+
+      canvas.addEventListener("pointercancel", function () {
+        dragging = false;
+      });
+
+      canvas.addEventListener("keydown", function (event) {
+        const step = event.shiftKey ? 0.5 : 0.1;
+        let newX = position.x;
+        let newY = position.y;
+        let handled = true;
+
+        if (event.key === "ArrowLeft") {
+          newX -= step;
+        } else if (event.key === "ArrowRight") {
+          newX += step;
+        } else if (event.key === "ArrowUp") {
+          newY += step;
+        } else if (event.key === "ArrowDown") {
+          newY -= step;
+        } else {
+          handled = false;
+        }
+
+        if (handled) {
+          setPosition(newX, newY);
+          event.preventDefault();
+        }
+      });
+
+      if ("ResizeObserver" in window) {
+        const observer = new ResizeObserver(resizeCanvas);
+        observer.observe(canvas);
+      } else {
+        window.addEventListener("resize", resizeCanvas);
+      }
+
+      updateAll();
+      resizeCanvas();
+    }());
+  </script>
+</body>
+</html>
